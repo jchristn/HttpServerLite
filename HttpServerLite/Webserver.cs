@@ -122,8 +122,9 @@ namespace HttpServerLite
 
             #region Build-Context-and-Send-Event
 
-            HttpContext ctx = new HttpContext(ipPort, headerBytes, _TcpServer, Events);
+            HttpContext ctx = new HttpContext(ipPort, _TcpServer.GetStream(ipPort), headerBytes, Events);
             _DefaultRoute?.Invoke(ctx);
+            _TcpServer.DisconnectClient(ipPort);
 
             #endregion
         }

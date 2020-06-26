@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace HttpServerLite
@@ -71,6 +72,34 @@ namespace HttpServerLite
             Buffer.BlockCopy(orig, 0, ret, 0, orig.Length);
             Buffer.BlockCopy(append, 0, ret, orig.Length, append.Length);
             return ret;
+        }
+
+        internal static byte[] ReadStream(int bufferSize, long contentLength, Stream stream)
+        {
+            if (contentLength < 1) return null;
+
+            long bytesRemaining = contentLength;
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                while (bytesRemaining > 0)
+                {
+                    byte[] buffer = null;
+                    if (bytesRemaining >= bufferSize) buffer = new byte[bufferSize];
+                    else buffer = new byte[bytesRemaining];
+
+                    {
+                        int bytesRead = stream.Read(buffer, 0, buffer.Length);
+                        if (bytesRead > 0)
+                        {
+                            ms.Write(buffer, 0, bytesRead);
+                            bytesRemaining -= bytesRead;
+                        }
+                    }
+                }
+
+                return ms.ToArray();
+            }
         }
     }
 }

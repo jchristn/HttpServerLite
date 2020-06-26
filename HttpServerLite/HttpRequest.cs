@@ -22,6 +22,22 @@ namespace HttpServerLite
         #region Public-Members
 
         /// <summary>
+        /// Buffer size to use while writing the response from a supplied stream. 
+        /// </summary>
+        public int StreamBufferSize
+        {
+            get
+            {
+                return _StreamBufferSize;
+            }
+            set
+            {
+                if (value < 1) throw new ArgumentException("StreamBufferSize must be greater than zero bytes.");
+                _StreamBufferSize = value;
+            }
+        }
+
+        /// <summary>
         /// UTC timestamp from when the request was received.
         /// </summary>
         public DateTime TimestampUtc;
@@ -135,8 +151,9 @@ namespace HttpServerLite
 
         #region Private-Members
 
+        private int _StreamBufferSize = 65536;
         private string _IpPort;
-        private TcpServer _Tcp;
+        private Stream _Stream;
         private byte[] _HeaderBytes = null;
         private Uri _Uri; 
 
@@ -159,13 +176,14 @@ namespace HttpServerLite
         /// Create an HttpRequest object from a byte array.
         /// </summary>
         /// <param name="ipPort">IP:port of the requestor.</param>
+        /// <param name="stream">Client stream.</param>
         /// <param name="bytes">Bytes.</param>
         /// <returns>HttpRequest.</returns>
-        public HttpRequest(string ipPort, byte[] bytes, TcpServer server)
+        public HttpRequest(string ipPort, Stream stream, byte[] bytes)
         {
             _IpPort = ipPort ?? throw new ArgumentNullException(nameof(ipPort));
             _HeaderBytes = bytes ?? throw new ArgumentNullException(nameof(bytes));
-            _Tcp = server ?? throw new ArgumentNullException(nameof(server));
+            _Stream = stream ?? throw new ArgumentNullException(nameof(stream));
 
             Build();
         }
@@ -379,8 +397,8 @@ namespace HttpServerLite
 
             #region Payload
 
-            if (ContentLength > 0)
-                Data = _Tcp.ReadBytes(_IpPort, ContentLength);
+            if (ContentLength > 0 && _Stream != null && _Stream.CanRead) 
+                Data = Common.ReadStream(_StreamBufferSize, ContentLength, _Stream); 
 
             #endregion
         }
@@ -535,7 +553,7 @@ namespace HttpServerLite
                 }
             }
         }
-          
+           
         #endregion
     }
 }

@@ -1,4 +1,5 @@
-﻿using System; 
+﻿using System;
+using System.IO;
 using System.Net;
 using CavemanTcp;
 
@@ -50,14 +51,14 @@ namespace HttpServerLite
 
         }
 
-        internal HttpContext(string ipPort, byte[] headerBytes, TcpServer server, EventCallbacks events)
+        internal HttpContext(string ipPort, Stream stream, byte[] headerBytes, EventCallbacks events)
         { 
             _Events = events ?? throw new ArgumentNullException(nameof(events));
             if (headerBytes == null) throw new ArgumentNullException(nameof(headerBytes));
-            if (server == null) throw new ArgumentNullException(nameof(server));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
 
-            Request = new HttpRequest(ipPort, headerBytes, server);
-            Response = new HttpResponse(ipPort, Request, server, _Events, _StreamBufferSize);
+            Request = new HttpRequest(ipPort, stream, headerBytes);
+            Response = new HttpResponse(ipPort, stream, Request, _Events, _StreamBufferSize);
         }
     }
 }

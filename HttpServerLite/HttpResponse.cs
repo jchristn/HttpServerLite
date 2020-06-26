@@ -20,6 +20,22 @@ namespace HttpServerLite
         #region Public-Members
 
         /// <summary>
+        /// Buffer size to use while writing the response from a supplied stream. 
+        /// </summary>
+        public int StreamBufferSize
+        {
+            get
+            {
+                return _StreamBufferSize;
+            }
+            set
+            {
+                if (value < 1) throw new ArgumentException("StreamBufferSize must be greater than zero bytes.");
+                _StreamBufferSize = value;
+            }
+        }
+
+        /// <summary>
         /// The protocol and version.
         /// </summary>
         public string ProtocolVersion;
@@ -81,7 +97,7 @@ namespace HttpServerLite
         private string _IpPort;
         private int _StreamBufferSize = 65536;
         private Dictionary<string, string> _Headers = new Dictionary<string, string>();
-        private TcpServer _Tcp;
+        private Stream _Stream;
         private HttpRequest _Request; 
         private bool _ResponseSent = false; 
         private EventCallbacks _Events = new EventCallbacks();
@@ -98,16 +114,16 @@ namespace HttpServerLite
 
         }
 
-        internal HttpResponse(string ipPort, HttpRequest req, TcpServer server, EventCallbacks events, int bufferSize)
+        internal HttpResponse(string ipPort, Stream stream, HttpRequest req, EventCallbacks events, int bufferSize)
         {
             if (String.IsNullOrEmpty(ipPort)) throw new ArgumentNullException(nameof(ipPort));
             if (req == null) throw new ArgumentNullException(nameof(req));
-            if (server == null) throw new ArgumentNullException(nameof(server));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
             if (events == null) throw new ArgumentNullException(nameof(events));
 
             _IpPort = ipPort;
             _Request = req;
-            _Tcp = server;
+            _Stream = stream;
             _Events = events;
             _StreamBufferSize = bufferSize; 
         }
@@ -250,8 +266,7 @@ namespace HttpServerLite
         {
             if (HeadersSent) throw new IOException("Headers already sent."); 
             byte[] headers = GetHeaderBytes();
-            Console.WriteLine("SendHeaders: " + headers.Length + " bytes");
-            _Tcp.Send(_IpPort, headers); 
+            _Stream.Write(headers, 0, headers.Length);
             HeadersSent = true;
         }
 
@@ -314,13 +329,15 @@ namespace HttpServerLite
                 // Console.WriteLine("[SendInternal] sending " + resp.Length + " bytes: " + Environment.NewLine + Encoding.UTF8.GetString(resp));
                 if (resp != null && resp.Length > 0)
                 {
-                    _Tcp.Send(_IpPort, resp);
+                    _Stream.Write(resp, 0, resp.Length);
+                    _Stream.Flush();
                 }
 
                 if (close)
                 {
                     // Console.WriteLine("[SendInternal] closing");
-                    _Tcp.DisconnectClient(_IpPort);
+                    _Stream.Close();
+                    _Stream.Dispose();
                 }
             }
             catch (Exception e)
