@@ -37,6 +37,42 @@ namespace Test
                 resp = File.ReadAllBytes("./img/watson.jpg");
                 ctx.Response.ContentType = "image/jpeg";
             }
+            else if (ctx.Request.RawUrlWithoutQuery.Equals("/img-streamed/watson.jpg"))
+            {
+                byte[] buffer = new byte[1024];
+                long len = new FileInfo("./img/watson.jpg").Length;
+                long bytesRemaining = len;
+
+                ctx.Response.ProtocolVersion = "1.0";
+                ctx.Response.StatusCode = 200;
+                ctx.Response.ContentType = "image/jpeg";
+
+                using (FileStream fs = new FileStream("./img/watson.jpg", FileMode.Open))
+                {
+                    while (bytesRemaining > 0)
+                    {
+                        int bytesRead = fs.Read(buffer, 0, buffer.Length);
+                        if (bytesRead > 0)
+                        {
+                            bytesRemaining -= bytesRead;
+                            if (bytesRead == buffer.Length)
+                            {
+                                ctx.Response.SendWithoutClose(buffer);
+                            }
+                            else
+                            {
+                                byte[] tempBuffer = new byte[bytesRead];
+                                Buffer.BlockCopy(buffer, 0, tempBuffer, 0, bytesRead);
+                                ctx.Response.SendWithoutClose(tempBuffer);
+                            }
+
+                            Thread.Sleep(100);
+                        }
+                    }
+
+                    ctx.Response.Close();
+                }
+            }
             else
             {
                 resp = Encoding.UTF8.GetBytes(ctx.Request.ToString());

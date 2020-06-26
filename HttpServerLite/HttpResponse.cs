@@ -18,7 +18,12 @@ namespace HttpServerLite
     public class HttpResponse
     {
         #region Public-Members
-         
+
+        /// <summary>
+        /// The protocol and version.
+        /// </summary>
+        public string ProtocolVersion;
+
         /// <summary>
         /// The HTTP status code to return to the requestor (client).
         /// </summary>
@@ -143,7 +148,7 @@ namespace HttpServerLite
         /// <summary>
         /// Send headers and no data to the requestor and terminate the connection.
         /// </summary> 
-        public void Send()
+        public void Send(bool close)
         { 
             SendInternal(null, true); 
         }
@@ -152,7 +157,8 @@ namespace HttpServerLite
         /// Send headers with a specified content length and no data to the requestor and terminate the connection.  Useful for HEAD requests where the content length must be set.
         /// </summary> 
         public void Send(long contentLength)
-        {  
+        {
+            ContentLength = contentLength;
             SendInternal(null, true); 
         }
 
@@ -176,7 +182,46 @@ namespace HttpServerLite
             if (data == null) SendInternal(data, true); 
             SendInternal(data, true); 
         }
-          
+
+        /// <summary>
+        /// Send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param>
+        public void SendWithoutClose(long contentLength)
+        {
+            ContentLength = contentLength;
+            SendInternal(null, false);
+        }
+
+        /// <summary>
+        /// Send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        public void SendWithoutClose(string data)
+        {
+            if (String.IsNullOrEmpty(data)) SendInternal(null, false);
+            byte[] bytes = Encoding.UTF8.GetBytes(data);
+            SendInternal(bytes, false);
+        }
+
+        /// <summary>
+        /// Send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        public void SendWithoutClose(byte[] data)
+        {
+            if (data == null) SendInternal(data, false);
+            SendInternal(data, false);
+        }
+
+        /// <summary>
+        /// Close the connection.
+        /// </summary>
+        public void Close()
+        {
+            SendInternal(null, true);
+        }
+
         #endregion
 
         #region Private-Methods
@@ -185,7 +230,7 @@ namespace HttpServerLite
         {
             byte[] ret = new byte[0];
 
-            ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("HTTP/" + _Request.ProtocolVersion + " " + StatusCode + " " + StatusDescription + "\r\n"));
+            ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("HTTP/" + ProtocolVersion + " " + StatusCode + " " + StatusDescription + "\r\n"));
             ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("Access-Control-Allow-Origin: *\r\n"));
 
             if (!String.IsNullOrEmpty(ContentType))
@@ -255,23 +300,26 @@ namespace HttpServerLite
                 if (!HeadersSent)
                 {
                     byte[] headers = GetHeaderBytes();
-                    Console.WriteLine("[SendInternal] appending headers: " + headers.Length + " bytes");
+                    // Console.WriteLine("[SendInternal] appending headers: " + headers.Length + " bytes");
                     resp = Common.AppendBytes(resp, headers);
                     HeadersSent = true;
                 }
 
                 if (data != null && data.Length > 0)
                 {
-                    Console.WriteLine("[SendInternal] appending data: " + data.Length + " bytes");
+                    // Console.WriteLine("[SendInternal] appending data: " + data.Length + " bytes");
                     resp = Common.AppendBytes(resp, data);
                 }
 
-                Console.WriteLine("[SendInternal] sending " + resp.Length + " bytes: " + Environment.NewLine + Encoding.UTF8.GetString(resp));
-                _Tcp.Send(_IpPort, resp);
+                // Console.WriteLine("[SendInternal] sending " + resp.Length + " bytes: " + Environment.NewLine + Encoding.UTF8.GetString(resp));
+                if (resp != null && resp.Length > 0)
+                {
+                    _Tcp.Send(_IpPort, resp);
+                }
 
                 if (close)
                 {
-                    Console.WriteLine("[SendInternal] closing");
+                    // Console.WriteLine("[SendInternal] closing");
                     _Tcp.DisconnectClient(_IpPort);
                 }
             }
