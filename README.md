@@ -1,3 +1,5 @@
+![alt tag](https://github.com/jchristn/httpserverlite/blob/master/assets/icon.ico)
+
 # HttpServerLite
 
 TCP-based simple HTTP and HTTPS server, written in C#.

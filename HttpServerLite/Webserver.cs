@@ -99,7 +99,7 @@ namespace HttpServerLite
 
             while (retrievingHeaders)
             {
-                byte[] b = _TcpServer.Read(args.IpPort, 1);
+                byte[] b = _TcpServer.ReadBytes(args.IpPort, 1);
 
                 headerTest = Common.ByteArrayShiftLeft(headerTest);
                 headerTest[3] = b[0];

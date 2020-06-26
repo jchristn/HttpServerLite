@@ -380,7 +380,7 @@ namespace HttpServerLite
             #region Payload
 
             if (ContentLength > 0)
-                Data = _Tcp.Read(_IpPort, ContentLength);
+                Data = _Tcp.ReadBytes(_IpPort, ContentLength);
 
             #endregion
         }
