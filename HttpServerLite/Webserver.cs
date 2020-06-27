@@ -171,89 +171,105 @@ namespace HttpServerLite
 
             #endregion
 
-            #region Retrieve-Headers
-
-            bool retrievingHeaders = true;
-            byte[] headerTest = new byte[4];
-            for (int i = 0; i < 4; i++) headerTest[i] = 0x00;
-            byte[] headerBytes = new byte[0];
-
-            while (retrievingHeaders)
-            {
-                byte[] b = _TcpServer.ReadBytes(args.IpPort, 1);
-
-                headerTest = Common.ByteArrayShiftLeft(headerTest);
-                headerTest[3] = b[0];
-
-                if (((int)headerTest[3]) == 10
-                    && ((int)headerTest[2]) == 13
-                    && ((int)headerTest[1]) == 10
-                    && ((int)headerTest[0]) == 13)
-                {
-                    // end of headers detected
-                    retrievingHeaders = false;
-                }
-                else
-                {
-                    headerBytes = Common.AppendBytes(headerBytes, b);
-                }
-            }
-
-            #endregion
-
-            #region Build-Context
-
-            HttpContext ctx = new HttpContext(ipPort, _TcpServer.GetStream(ipPort), headerBytes, Events);
-
-            _Stats.IncrementRequestCounter(ctx.Request.Method);
-            _Stats.ReceivedPayloadBytes += ctx.Request.ContentLength;
-
-            Events.RequestReceived?.Invoke(
-                ctx.Request.SourceIp,
-                ctx.Request.SourcePort,
-                ctx.Request.Method.ToString(),
-                ctx.Request.RawUrlWithQuery);
-
-            #endregion
-
-            #region Routing
+            #region Process
 
             try
             {
-                #region Pre-Routing-Handler
+                #region Retrieve-Headers
 
-                bool terminate = false;
-                if (PreRoutingHandler != null)
+                bool retrievingHeaders = true;
+                byte[] headerTest = new byte[4];
+                for (int i = 0; i < 4; i++) headerTest[i] = 0x00;
+                byte[] headerBytes = new byte[0];
+
+                while (retrievingHeaders)
                 {
-                    terminate = await PreRoutingHandler(ctx);
-                    if (terminate) return;
+                    byte[] b = _TcpServer.ReadBytes(args.IpPort, 1);
+
+                    headerTest = Common.ByteArrayShiftLeft(headerTest);
+                    headerTest[3] = b[0];
+
+                    if (((int)headerTest[3]) == 10
+                        && ((int)headerTest[2]) == 13
+                        && ((int)headerTest[1]) == 10
+                        && ((int)headerTest[0]) == 13)
+                    {
+                        // end of headers detected
+                        retrievingHeaders = false;
+                    }
+                    else
+                    {
+                        headerBytes = Common.AppendBytes(headerBytes, b);
+                    }
                 }
 
                 #endregion
 
-                #region Default-Route
+                #region Build-Context
 
-                await _DefaultRoute?.Invoke(ctx);
+                HttpContext ctx = new HttpContext(ipPort, _TcpServer.GetStream(ipPort), headerBytes, Events);
 
-                #endregion
-            }
-            finally
-            {
-                Events.ResponseSent?.Invoke(
+                _Stats.IncrementRequestCounter(ctx.Request.Method);
+                _Stats.ReceivedPayloadBytes += ctx.Request.ContentLength;
+
+                Events.RequestReceived?.Invoke(
                     ctx.Request.SourceIp,
                     ctx.Request.SourcePort,
                     ctx.Request.Method.ToString(),
-                    ctx.Request.FullUrl,
-                    ctx.Response.StatusCode,
-                    Common.TotalMsFrom(startTime));
+                    ctx.Request.RawUrlWithQuery);
 
-                if (ctx.Response.ContentLength != null)
-                    _Stats.SentPayloadBytes += Convert.ToInt64(ctx.Response.ContentLength);
+                #endregion
 
-                _TcpServer.DisconnectClient(ipPort); 
+                #region Routing
+
+                try
+                {
+                    #region Pre-Routing-Handler
+
+                    bool terminate = false;
+                    if (PreRoutingHandler != null)
+                    {
+                        terminate = await PreRoutingHandler(ctx);
+                        if (terminate) return;
+                    }
+
+                    #endregion
+
+                    #region Default-Route
+
+                    await _DefaultRoute?.Invoke(ctx);
+
+                    #endregion
+                }
+                finally
+                {
+                    Events.ResponseSent?.Invoke(
+                        ctx.Request.SourceIp,
+                        ctx.Request.SourcePort,
+                        ctx.Request.Method.ToString(),
+                        ctx.Request.FullUrl,
+                        ctx.Response.StatusCode,
+                        Common.TotalMsFrom(startTime));
+
+                    if (ctx.Response.ContentLength != null)
+                        _Stats.SentPayloadBytes += Convert.ToInt64(ctx.Response.ContentLength);
+
+                    _TcpServer.DisconnectClient(ipPort);
+                }
+
+                #endregion
+            }
+            catch (ObjectDisposedException)
+            {
+                return;
+            }
+            catch (Exception e)
+            {
+                Events.ExceptionEncountered(ip, port, e);
+                return;
             }
 
-            #endregion 
+            #endregion
         }
 
         private void ClientDisconnected(object sender, ClientDisconnectedEventArgs args)
