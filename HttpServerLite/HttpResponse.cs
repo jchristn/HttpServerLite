@@ -85,8 +85,7 @@ namespace HttpServerLite
 
         #region Internal-Members
 
-        internal bool ResponseSent = false;
-
+        internal bool ResponseSent = false; 
         internal bool HeadersSent = false;
 
         #endregion
@@ -172,6 +171,7 @@ namespace HttpServerLite
         /// <summary>
         /// Send headers with a specified content length and no data to the requestor and terminate the connection.  Useful for HEAD requests where the content length must be set.
         /// </summary> 
+        /// <param name="contentLength">Value to set in Content-Length header.</param>
         public void Send(long contentLength)
         {
             ContentLength = contentLength;
@@ -283,7 +283,7 @@ namespace HttpServerLite
         /// <summary>
         /// Send headers and data to the requestor but do not terminate the connection.
         /// </summary>
-        /// <param name="data">Data.</param>
+        /// <param name="contentLength">Value to set in Content-Length header.</param>
         public void SendWithoutClose(long contentLength)
         {
             ContentLength = contentLength;

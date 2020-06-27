@@ -39,9 +39,15 @@ namespace HttpServerLite
         }
 
         #endregion
-         
+
+        #region Private-Members
+
         private int _StreamBufferSize = 65536; 
         private EventCallbacks _Events;
+
+        #endregion
+
+        #region Constructors-and-Factories
 
         /// <summary>
         /// Instantiate the object.
@@ -60,5 +66,7 @@ namespace HttpServerLite
             Request = new HttpRequest(ipPort, stream, headerBytes);
             Response = new HttpResponse(ipPort, stream, Request, _Events, _StreamBufferSize);
         }
+
+        #endregion
     }
 }

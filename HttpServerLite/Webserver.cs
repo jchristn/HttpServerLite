@@ -6,9 +6,21 @@ using CavemanTcp;
 
 namespace HttpServerLite
 {
+    /// <summary>
+    /// HttpServerLite web server.
+    /// </summary>
     public class Webserver
     {
+        #region Public-Members
+
+        /// <summary>
+        /// Method to invoke when sending log messages.
+        /// </summary>
         public Action<string> Logger = null;
+
+        /// <summary>
+        /// For SSL, accept or deny invalid or otherwise unverifiable SSL certificates.
+        /// </summary>
         public bool AcceptInvalidCertificates
         {
             get
@@ -20,6 +32,10 @@ namespace HttpServerLite
                 _TcpServer.AcceptInvalidCertificates = value;
             }
         }
+
+        /// <summary>
+        /// For SSL, enable to require mutual authentication.
+        /// </summary>
         public bool MutuallyAuthenticate
         {
             get
@@ -31,6 +47,10 @@ namespace HttpServerLite
                 _TcpServer.MutuallyAuthenticate = value;
             }
         }
+
+        /// <summary>
+        /// Buffer size to use when interacting with streams.
+        /// </summary>
         public int StreamReadBufferSize
         {
             get
@@ -49,6 +69,10 @@ namespace HttpServerLite
         /// </summary>
         public EventCallbacks Events = new EventCallbacks();
 
+        #endregion
+
+        #region Private-Members
+
         private string _Hostname = null;
         private int _Port = 0;
         private bool _Ssl = false;
@@ -58,6 +82,19 @@ namespace HttpServerLite
         private Action<HttpContext> _DefaultRoute = null;
         private int _StreamReadBufferSize = 65536;
 
+        #endregion
+
+        #region Constructors-and-Factories
+
+        /// <summary>
+        /// Instantiate the webserver.
+        /// </summary>
+        /// <param name="hostname">Hostname or IP address on which to listen.</param>
+        /// <param name="port">TCP port on which to listen.</param>
+        /// <param name="ssl">Enable or disable SSL.</param>
+        /// <param name="pfxCertFilename">For SSL, the PFX certificate filename.</param>
+        /// <param name="pfxCertPassword">For SSL, the PFX certificate password.</param>
+        /// <param name="defaultRoute">Default route.</param>
         public Webserver(string hostname, int port, bool ssl, string pfxCertFilename, string pfxCertPassword, Action<HttpContext> defaultRoute)
         {
             _Hostname = hostname ?? throw new ArgumentNullException(nameof(hostname));
@@ -73,10 +110,21 @@ namespace HttpServerLite
             _TcpServer.ClientDisconnected += ClientDisconnected;
         }
 
+        #endregion
+
+        #region Public-Methods
+
+        /// <summary>
+        /// Start the server.
+        /// </summary>
         public void Start()
         {
             _TcpServer.Start();
         }
+
+        #endregion
+
+        #region Private-Methods
 
         private void ClientConnected(object sender, ClientConnectedEventArgs args)
         {
@@ -139,6 +187,8 @@ namespace HttpServerLite
         private void ClientDisconnected(object sender, ClientDisconnectedEventArgs args)
         {
 
-        } 
+        }
+
+        #endregion
     }
 }
