@@ -14,6 +14,18 @@ namespace HttpServerLite
         #region Public-Members
 
         /// <summary>
+        /// Indicates if the server is listening for connections.
+        /// </summary>
+        public bool IsListening
+        {
+            get
+            {
+                if (_TcpServer != null) return _TcpServer.IsListening;
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Method to invoke when sending log messages.
         /// </summary>
         public Action<string> Logger = null;

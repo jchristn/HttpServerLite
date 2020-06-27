@@ -510,6 +510,11 @@
             HttpServerLite web server.
             </summary>
         </member>
+        <member name="P:HttpServerLite.Webserver.IsListening">
+            <summary>
+            Indicates if the server is listening for connections.
+            </summary>
+        </member>
         <member name="F:HttpServerLite.Webserver.Logger">
             <summary>
             Method to invoke when sending log messages.
