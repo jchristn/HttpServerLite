@@ -75,18 +75,12 @@ namespace HttpServerLite
         /// The length of the supplied response data.
         /// </summary>
         public long? ContentLength = null;
-         
+
         #endregion
 
         #region Internal-Members
 
-        internal bool ResponseSent
-        {
-            get
-            {
-                return _ResponseSent;
-            }
-        }
+        internal bool ResponseSent = false;
 
         internal bool HeadersSent = false;
 
@@ -98,8 +92,7 @@ namespace HttpServerLite
         private int _StreamBufferSize = 65536;
         private Dictionary<string, string> _Headers = new Dictionary<string, string>();
         private Stream _Stream;
-        private HttpRequest _Request; 
-        private bool _ResponseSent = false; 
+        private HttpRequest _Request;  
         private EventCallbacks _Events = new EventCallbacks();
 
         #endregion
@@ -168,7 +161,7 @@ namespace HttpServerLite
         /// </summary> 
         public void Send(bool close)
         { 
-            SendInternal(null, true); 
+            SendInternal(0, null, true); 
         }
 
         /// <summary>
@@ -177,7 +170,7 @@ namespace HttpServerLite
         public void Send(long contentLength)
         {
             ContentLength = contentLength;
-            SendInternal(null, true); 
+            SendInternal(0, null, true); 
         }
 
         /// <summary>
@@ -185,10 +178,17 @@ namespace HttpServerLite
         /// </summary>
         /// <param name="data">Data.</param> 
         public void Send(string data)
-        { 
-            if (String.IsNullOrEmpty(data)) SendInternal(null, true);
-            byte[] bytes = Encoding.UTF8.GetBytes(data); 
-            SendInternal(bytes, true); 
+        {
+            if (String.IsNullOrEmpty(data))
+            {
+                SendInternal(0, null, true);
+                return;
+            }
+            byte[] bytes = Encoding.UTF8.GetBytes(data);
+            MemoryStream ms = new MemoryStream();
+            ms.Write(bytes, 0, bytes.Length);
+            ms.Seek(0, SeekOrigin.Begin);
+            SendInternal(bytes.Length, ms, true);
         }
 
         /// <summary>
@@ -197,8 +197,82 @@ namespace HttpServerLite
         /// <param name="data">Data.</param> 
         public void Send(byte[] data)
         {
-            if (data == null) SendInternal(data, true); 
-            SendInternal(data, true); 
+            if (data == null)
+            {
+                SendInternal(0, null, true);
+                return;
+            }
+            MemoryStream ms = new MemoryStream();
+            ms.Write(data, 0, data.Length);
+            ms.Seek(0, SeekOrigin.Begin);
+            SendInternal(data.Length, ms, true);
+        }
+
+        /// <summary>
+        /// Send headers and data to the requestor and terminate the connection.
+        /// </summary>
+        /// <param name="contentLength">Number of bytes to read from the stream.</param>
+        /// <param name="stream">Stream containing response data.</param>
+        public void Send(long contentLength, Stream stream)
+        {
+            if (contentLength <= 0 || stream == null || !stream.CanRead)
+            {
+                SendInternal(0, null, true);
+                return;
+            }
+
+            SendInternal(contentLength, stream, true);
+        }
+
+        /// <summary>
+        /// Send headers and data to the requestor and terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        public async Task SendAsync(string data)
+        {
+            if (String.IsNullOrEmpty(data))
+            {
+                await SendInternalAsync(0, null, true);
+                return;
+            }
+            byte[] bytes = Encoding.UTF8.GetBytes(data);
+            MemoryStream ms = new MemoryStream();
+            await ms.WriteAsync(bytes, 0, bytes.Length);
+            ms.Seek(0, SeekOrigin.Begin);
+            await SendInternalAsync(bytes.Length, ms, true);
+        }
+
+        /// <summary>
+        /// Send headers and data to the requestor and terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        public async Task SendAsync(byte[] data)
+        {
+            if (data == null || data.Length < 1)
+            {
+                await SendInternalAsync(0, null, true);
+                return;
+            } 
+            MemoryStream ms = new MemoryStream();
+            await ms.WriteAsync(data, 0, data.Length);
+            ms.Seek(0, SeekOrigin.Begin);
+            await SendInternalAsync(data.Length, ms, true);
+        }
+
+        /// <summary>
+        /// Send headers and data to the requestor and terminate the connection.
+        /// </summary>
+        /// <param name="contentLength">Number of bytes to read from the stream.</param>
+        /// <param name="stream">Stream containing response data.</param>
+        public async Task SendAsync(long contentLength, Stream stream)
+        {
+            if (contentLength <= 0 || stream == null || !stream.CanRead)
+            {
+                await SendInternalAsync(0, null, true);
+                return;
+            }
+
+            await SendInternalAsync(contentLength, stream, true);
         }
 
         /// <summary>
@@ -208,7 +282,7 @@ namespace HttpServerLite
         public void SendWithoutClose(long contentLength)
         {
             ContentLength = contentLength;
-            SendInternal(null, false);
+            SendInternal(0, null, false);
         }
 
         /// <summary>
@@ -217,9 +291,16 @@ namespace HttpServerLite
         /// <param name="data">Data.</param> 
         public void SendWithoutClose(string data)
         {
-            if (String.IsNullOrEmpty(data)) SendInternal(null, false);
+            if (String.IsNullOrEmpty(data))
+            {
+                SendInternal(0, null, false);
+                return;
+            }
             byte[] bytes = Encoding.UTF8.GetBytes(data);
-            SendInternal(bytes, false);
+            MemoryStream ms = new MemoryStream();
+            ms.Write(bytes, 0, bytes.Length);
+            ms.Seek(0, SeekOrigin.Begin);
+            SendInternal(bytes.Length, ms, false);
         }
 
         /// <summary>
@@ -228,8 +309,82 @@ namespace HttpServerLite
         /// <param name="data">Data.</param> 
         public void SendWithoutClose(byte[] data)
         {
-            if (data == null) SendInternal(null, false);
-            SendInternal(data, false);
+            if (data == null)
+            {
+                SendInternal(0, null, false);
+                return;
+            }
+            MemoryStream ms = new MemoryStream();
+            ms.Write(data, 0, data.Length);
+            ms.Seek(0, SeekOrigin.Begin);
+            SendInternal(data.Length, ms, false);
+        }
+
+        /// <summary>
+        /// Send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="contentLength">Number of bytes to read from the stream.</param>
+        /// <param name="stream">Stream containing response data.</param>
+        public void SendWithoutClose(long contentLength, Stream stream)
+        {
+            if (contentLength <= 0 || stream == null || !stream.CanRead)
+            {
+                SendInternal(0, null, false);
+                return;
+            }
+
+            SendInternal(contentLength, stream, false);
+        }
+
+        /// <summary>
+        /// Send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        public async Task SendWithoutCloseAsync(string data)
+        {
+            if (String.IsNullOrEmpty(data))
+            {
+                await SendInternalAsync(0, null, false);
+                return;
+            }
+            byte[] bytes = Encoding.UTF8.GetBytes(data);
+            MemoryStream ms = new MemoryStream();
+            await ms.WriteAsync(bytes, 0, bytes.Length);
+            ms.Seek(0, SeekOrigin.Begin);
+            await SendInternalAsync(bytes.Length, ms, false);
+        }
+
+        /// <summary>
+        /// Send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        public async Task SendWithoutCloseAsync(byte[] data)
+        {
+            if (data == null)
+            {
+                await SendInternalAsync(0, null, false);
+                return;
+            }
+            MemoryStream ms = new MemoryStream();
+            await ms.WriteAsync(data, 0, data.Length);
+            ms.Seek(0, SeekOrigin.Begin);
+            await SendInternalAsync(data.Length, ms, false);
+        }
+
+        /// <summary>
+        /// Send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="contentLength">Number of bytes to read from the stream.</param>
+        /// <param name="stream">Stream containing response data.</param>
+        public async Task SendWithoutCloseAsync(long contentLength, Stream stream)
+        {
+            if (contentLength <= 0 || stream == null || !stream.CanRead)
+            {
+                await SendInternalAsync(0, null, false);
+                return;
+            }
+
+            await SendInternalAsync(contentLength, stream, false);
         }
 
         /// <summary>
@@ -237,7 +392,7 @@ namespace HttpServerLite
         /// </summary>
         public void Close()
         {
-            SendInternal(null, true);
+            SendInternal(0, null, true);
         }
 
         #endregion
@@ -311,40 +466,80 @@ namespace HttpServerLite
                     return "Unknown";
             }
         }
-         
-        private void SendInternal(byte[] data, bool close)
-        {
-            try
+          
+        private void SendInternal(long contentLength, Stream stream, bool close)
+        {   
+            byte[] resp = new byte[0];
+            if (!HeadersSent)
             {
-                byte[] resp = new byte[0];
-                if (!HeadersSent)
-                {
-                    byte[] headers = GetHeaderBytes(); 
-                    resp = Common.AppendBytes(resp, headers);
-                    HeadersSent = true;
-                }
-
-                if (data != null && data.Length > 0)
-                { 
-                    resp = Common.AppendBytes(resp, data);
-                }
-                 
-                if (resp != null && resp.Length > 0)
-                {
-                    _Stream.Write(resp, 0, resp.Length);
-                    _Stream.Flush();
-                }
-
-                if (close)
-                { 
-                    _Stream.Close();
-                    _Stream.Dispose();
-                }
+                byte[] headers = GetHeaderBytes();
+                _Stream.Write(headers, 0, headers.Length);
+                HeadersSent = true;
             }
-            catch (Exception e)
+
+            if (contentLength > 0 && stream != null && stream.CanRead)
             {
-                Console.WriteLine(SerializationHelper.SerializeJson(e, true));
-                throw;
+                long bytesRemaining = contentLength;
+
+                while (bytesRemaining > 0)
+                {
+                    byte[] buffer = null;
+                    if (bytesRemaining >= _StreamBufferSize) buffer = new byte[_StreamBufferSize];
+                    else buffer = new byte[contentLength];
+
+                    int bytesRead = stream.Read(buffer, 0, buffer.Length);
+                    if (bytesRead > 0)
+                    {
+                        _Stream.Write(buffer, 0, buffer.Length);
+                        bytesRemaining -= bytesRead;
+                    }
+                }
+
+                _Stream.Flush();
+            }
+
+            if (close)
+            {
+                _Stream.Close();
+                _Stream.Dispose();
+            }
+        }
+
+        private async Task SendInternalAsync(long contentLength, Stream stream, bool close)
+        {
+            byte[] resp = new byte[0];
+            if (!HeadersSent)
+            {
+                byte[] headers = GetHeaderBytes();
+                await _Stream.WriteAsync(headers, 0, headers.Length);
+                HeadersSent = true;
+            }
+
+            if (contentLength > 0 && stream != null && stream.CanRead)
+            {
+                long bytesRemaining = contentLength;
+
+                while (bytesRemaining > 0)
+                {
+                    byte[] buffer = null;
+                    if (bytesRemaining >= _StreamBufferSize) buffer = new byte[_StreamBufferSize];
+                    else buffer = new byte[contentLength];
+
+                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                    if (bytesRead > 0)
+                    {
+                        await _Stream.WriteAsync(buffer, 0, buffer.Length);
+                        bytesRemaining -= bytesRead;
+                    }
+                }
+
+                await _Stream.FlushAsync();
+            }
+
+            if (close)
+            {
+                _Stream.Close();
+                _Stream.Dispose();
             }
         }
 
