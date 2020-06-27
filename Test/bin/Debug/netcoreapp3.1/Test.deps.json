@@ -8,7 +8,7 @@
     ".NETCoreApp,Version=v3.1": {
       "Test/1.0.0": {
         "dependencies": {
-          "HttpServerLite": "1.0.0.1"
+          "HttpServerLite": "1.0.0.2"
         },
         "runtime": {
           "Test.dll": {}
@@ -30,7 +30,7 @@
           }
         }
       },
-      "HttpServerLite/1.0.0.1": {
+      "HttpServerLite/1.0.0.2": {
         "dependencies": {
           "CavemanTcp": "1.0.1",
           "Newtonsoft.Json": "12.0.3"
@@ -61,7 +61,7 @@
       "path": "newtonsoft.json/12.0.3",
       "hashPath": "newtonsoft.json.12.0.3.nupkg.sha512"
     },
-    "HttpServerLite/1.0.0.1": {
+    "HttpServerLite/1.0.0.2": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

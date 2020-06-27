@@ -76,6 +76,11 @@ namespace HttpServerLite
         /// </summary>
         public long? ContentLength = null;
 
+        /// <summary>
+        /// Access-Control-Allow-Origin header value.
+        /// </summary>
+        public string AccessControlAllowOriginHeader = "*";
+
         #endregion
 
         #region Internal-Members
@@ -406,7 +411,7 @@ namespace HttpServerLite
             byte[] ret = new byte[0];
 
             ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes(ProtocolVersion + " " + StatusCode + " " + StatusDescription + "\r\n"));
-            ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("Access-Control-Allow-Origin: *\r\n"));
+            ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("Access-Control-Allow-Origin: " + AccessControlAllowOriginHeader + "\r\n"));
 
             if (!String.IsNullOrEmpty(ContentType))
                 ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("Content-Type: " + ContentType + "\r\n"));
@@ -474,6 +479,7 @@ namespace HttpServerLite
             {
                 byte[] headers = GetHeaderBytes();
                 _Stream.Write(headers, 0, headers.Length);
+                _Stream.Flush();
                 HeadersSent = true;
             }
 
@@ -512,6 +518,7 @@ namespace HttpServerLite
             {
                 byte[] headers = GetHeaderBytes();
                 await _Stream.WriteAsync(headers, 0, headers.Length);
+                await _Stream.FlushAsync();
                 HeadersSent = true;
             }
 
