@@ -25,16 +25,19 @@ namespace Test
         {
             if (_Debug) Console.WriteLine(ctx.Request.ToString());
 
+            byte[] reqData = ctx.Request.Data;
             byte[] resp = null;
 
             if (ctx.Request.RawUrlWithoutQuery.Equals("/html/index.html"))
             {
                 resp = await File.ReadAllBytesAsync("./html/index.html");
+                ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "text/html";
             }
             else if (ctx.Request.RawUrlWithoutQuery.Equals("/img/watson.jpg"))
             {
                 resp = await File.ReadAllBytesAsync("./img/watson.jpg");
+                ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "image/jpeg";
             }
             else if (ctx.Request.RawUrlWithoutQuery.Equals("/img-streamed/watson.jpg"))
@@ -74,13 +77,14 @@ namespace Test
                 }
             }
             else
-            { 
-                resp = Encoding.UTF8.GetBytes(ctx.Request.ToString());
+            {
+                resp = Encoding.UTF8.GetBytes("Unknown URL");
+                ctx.Response.StatusCode = 404;
+                ctx.Response.ContentType = "text/plain";
             }
              
-            ctx.Response.StatusCode = 200;
-            ctx.Response.ContentLength = resp.Length; 
-            await ctx.Response.SendAsync(resp); 
+            ctx.Response.ContentLength = resp.Length;
+            await ctx.Response.SendAsync(resp);
         }
     }
 }

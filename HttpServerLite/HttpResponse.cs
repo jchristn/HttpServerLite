@@ -260,7 +260,7 @@ namespace HttpServerLite
             } 
             MemoryStream ms = new MemoryStream();
             await ms.WriteAsync(data, 0, data.Length);
-            ms.Seek(0, SeekOrigin.Begin);
+            ms.Seek(0, SeekOrigin.Begin); 
             await SendInternalAsync(data.Length, ms, true);
         }
 
@@ -512,11 +512,11 @@ namespace HttpServerLite
         }
 
         private async Task SendInternalAsync(long contentLength, Stream stream, bool close)
-        {
+        { 
             byte[] resp = new byte[0];
             if (!HeadersSent)
             {
-                byte[] headers = GetHeaderBytes();
+                byte[] headers = GetHeaderBytes(); 
                 await _Stream.WriteAsync(headers, 0, headers.Length);
                 await _Stream.FlushAsync();
                 HeadersSent = true;
@@ -534,19 +534,18 @@ namespace HttpServerLite
 
                     int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
                     if (bytesRead > 0)
-                    {
-                        await _Stream.WriteAsync(buffer, 0, buffer.Length);
+                    { 
+                        await _Stream.WriteAsync(buffer, 0, bytesRead);
                         bytesRemaining -= bytesRead;
                     }
                 }
-
+                 
                 await _Stream.FlushAsync();
             }
 
             if (close)
-            {
+            { 
                 _Stream.Close();
-                _Stream.Dispose();
             }
         }
 

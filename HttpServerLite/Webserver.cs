@@ -159,6 +159,7 @@ namespace HttpServerLite
 
         private async void ClientConnected(object sender, ClientConnectedEventArgs args)
         {
+            Console.WriteLine("Entering ClientConnected");
             DateTime startTime = DateTime.Now;
 
             #region Parse-IP-Port
@@ -194,7 +195,7 @@ namespace HttpServerLite
                     retrievingHeaders = false;
                 }
                 else
-                { 
+                {
                     headerBytes = Common.AppendBytes(headerBytes, b);
                 }
             }
@@ -209,9 +210,9 @@ namespace HttpServerLite
             _Stats.ReceivedPayloadBytes += ctx.Request.ContentLength;
 
             Events.RequestReceived?.Invoke(
-                ctx.Request.SourceIp, 
-                ctx.Request.SourcePort, 
-                ctx.Request.Method.ToString(), 
+                ctx.Request.SourceIp,
+                ctx.Request.SourcePort,
+                ctx.Request.Method.ToString(),
                 ctx.Request.RawUrlWithQuery);
 
             #endregion
@@ -251,9 +252,10 @@ namespace HttpServerLite
                     _Stats.SentPayloadBytes += Convert.ToInt64(ctx.Response.ContentLength);
             }
 
+            Console.WriteLine("Exiting ClientConnected");
             _TcpServer.DisconnectClient(ipPort);
 
-            #endregion
+            #endregion 
         }
 
         private void ClientDisconnected(object sender, ClientDisconnectedEventArgs args)
