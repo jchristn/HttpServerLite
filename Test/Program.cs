@@ -42,8 +42,7 @@ namespace Test
                 byte[] buffer = new byte[1024];
                 long len = new FileInfo("./img/watson.jpg").Length;
                 long bytesRemaining = len;
-
-                ctx.Response.ProtocolVersion = "1.0";
+                 
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "image/jpeg";
 

@@ -228,7 +228,7 @@ namespace HttpServerLite
         /// <param name="data">Data.</param> 
         public void SendWithoutClose(byte[] data)
         {
-            if (data == null) SendInternal(data, false);
+            if (data == null) SendInternal(null, false);
             SendInternal(data, false);
         }
 
@@ -319,19 +319,16 @@ namespace HttpServerLite
                 byte[] resp = new byte[0];
                 if (!HeadersSent)
                 {
-                    byte[] headers = GetHeaderBytes();
-                    // Console.WriteLine("[SendInternal] appending headers: " + headers.Length + " bytes");
+                    byte[] headers = GetHeaderBytes(); 
                     resp = Common.AppendBytes(resp, headers);
                     HeadersSent = true;
                 }
 
                 if (data != null && data.Length > 0)
-                {
-                    // Console.WriteLine("[SendInternal] appending data: " + data.Length + " bytes");
+                { 
                     resp = Common.AppendBytes(resp, data);
                 }
-
-                // Console.WriteLine("[SendInternal] sending " + resp.Length + " bytes: " + Environment.NewLine + Encoding.UTF8.GetString(resp));
+                 
                 if (resp != null && resp.Length > 0)
                 {
                     _Stream.Write(resp, 0, resp.Length);
@@ -339,8 +336,7 @@ namespace HttpServerLite
                 }
 
                 if (close)
-                {
-                    // Console.WriteLine("[SendInternal] closing");
+                { 
                     _Stream.Close();
                     _Stream.Dispose();
                 }
@@ -348,6 +344,7 @@ namespace HttpServerLite
             catch (Exception e)
             {
                 Console.WriteLine(SerializationHelper.SerializeJson(e, true));
+                throw;
             }
         }
 

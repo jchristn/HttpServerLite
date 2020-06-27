@@ -133,9 +133,42 @@ namespace HttpServerLite
         public Dictionary<string, string> Headers;
 
         /// <summary>
-        /// The stream from which to read the request body sent by the requestor (client).
+        /// Bytes from the DataStream property.  Using Data will fully read the DataStream property and thus it cannot be read again.
         /// </summary>
-        public byte[] Data = null;
+        public byte[] Data
+        {
+            get
+            {
+                if (_Data == null)
+                {
+                    if (_DataStream != null && _DataStream.CanRead && ContentLength > 0)
+                    {
+                        _Data = Common.ReadStream(_StreamBufferSize, ContentLength, _DataStream);
+                        return _Data;
+                    }
+                    else
+                    {
+                        return _Data;
+                    }
+                }
+                else
+                {
+                    return _Data;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The stream containing request data.
+        /// </summary>
+        [JsonIgnore]
+        public Stream DataStream
+        {
+            get
+            {
+                return _DataStream;
+            }
+        }
 
         #endregion
 
@@ -145,7 +178,9 @@ namespace HttpServerLite
         private string _IpPort;
         private Stream _Stream;
         private byte[] _HeaderBytes = null;
-        private Uri _Uri; 
+        private Uri _Uri;
+        private byte[] _Data = null;
+        private Stream _DataStream = null;
 
         #endregion
 
@@ -396,8 +431,7 @@ namespace HttpServerLite
 
             #region Payload
 
-            if (ContentLength > 0 && _Stream != null && _Stream.CanRead) 
-                Data = Common.ReadStream(_StreamBufferSize, ContentLength, _Stream); 
+            _DataStream = _Stream;
 
             #endregion
         }
