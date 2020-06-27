@@ -92,6 +92,13 @@ namespace HttpServerLite
             }
         }
 
+        /// <summary>
+        /// Function to call prior to routing.  
+        /// Return 'true' if the connection should be terminated.
+        /// Return 'false' to allow the connection to continue routing.
+        /// </summary>
+        public Func<HttpContext, Task<bool>> PreRoutingHandler = null;
+
         #endregion
 
         #region Private-Members
@@ -194,7 +201,7 @@ namespace HttpServerLite
 
             #endregion
 
-            #region Build-Context-and-Send-Event
+            #region Build-Context
 
             HttpContext ctx = new HttpContext(ipPort, _TcpServer.GetStream(ipPort), headerBytes, Events);
 
@@ -207,9 +214,28 @@ namespace HttpServerLite
                 ctx.Request.Method.ToString(), 
                 ctx.Request.RawUrlWithQuery);
 
+            #endregion
+
+            #region Routing
+
             try
             {
+                #region Pre-Routing-Handler
+
+                bool terminate = false;
+                if (PreRoutingHandler != null)
+                {
+                    terminate = await PreRoutingHandler(ctx);
+                    if (terminate) return;
+                }
+
+                #endregion
+
+                #region Default-Route
+
                 await _DefaultRoute?.Invoke(ctx);
+
+                #endregion
             }
             finally
             {

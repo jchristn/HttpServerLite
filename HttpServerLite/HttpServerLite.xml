@@ -593,6 +593,13 @@
             Webserver statistics.
             </summary>
         </member>
+        <member name="F:HttpServerLite.Webserver.PreRoutingHandler">
+            <summary>
+            Function to call prior to routing.  
+            Return 'true' if the connection should be terminated.
+            Return 'false' to allow the connection to continue routing.
+            </summary>
+        </member>
         <member name="M:HttpServerLite.Webserver.#ctor(System.String,System.Int32,System.Boolean,System.String,System.String,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
             <summary>
             Instantiate the webserver.
