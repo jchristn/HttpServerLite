@@ -506,8 +506,7 @@ namespace HttpServerLite
 
             if (close)
             {
-                _Stream.Close();
-                _Stream.Dispose();
+                _Stream.Close(); 
             }
         }
 

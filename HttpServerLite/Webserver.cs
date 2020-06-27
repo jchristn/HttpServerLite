@@ -158,8 +158,7 @@ namespace HttpServerLite
         #region Private-Methods
 
         private async void ClientConnected(object sender, ClientConnectedEventArgs args)
-        {
-            Console.WriteLine("Entering ClientConnected");
+        { 
             DateTime startTime = DateTime.Now;
 
             #region Parse-IP-Port
@@ -250,10 +249,9 @@ namespace HttpServerLite
 
                 if (ctx.Response.ContentLength != null)
                     _Stats.SentPayloadBytes += Convert.ToInt64(ctx.Response.ContentLength);
-            }
 
-            Console.WriteLine("Exiting ClientConnected");
-            _TcpServer.DisconnectClient(ipPort);
+                _TcpServer.DisconnectClient(ipPort); 
+            }
 
             #endregion 
         }
