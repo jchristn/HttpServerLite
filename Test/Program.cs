@@ -71,16 +71,17 @@ namespace Test
                     }
 
                     ctx.Response.Close();
+                    return;
                 }
             }
             else
-            {
+            { 
                 resp = Encoding.UTF8.GetBytes(ctx.Request.ToString());
             }
-
+             
             ctx.Response.StatusCode = 200;
-            ctx.Response.ContentLength = resp.Length;
-            ctx.Response.Send(resp);
+            ctx.Response.ContentLength = resp.Length; 
+            ctx.Response.Send(resp); 
         }
     }
 }

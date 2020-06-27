@@ -61,17 +61,7 @@ namespace HttpServerLite
         /// TCP port from which the request originated on the requestor (client).
         /// </summary>
         public int SourcePort;
-
-        /// <summary>
-        /// IP address of the recipient (server).
-        /// </summary>
-        public string DestIp;
-
-        /// <summary>
-        /// TCP port on which the request was received by the recipient (server).
-        /// </summary>
-        public int DestPort;
-
+         
         /// <summary>
         /// The destination hostname as found in the request line, if present.
         /// </summary>
@@ -201,11 +191,22 @@ namespace HttpServerLite
             string ret = "";
 
             ret += "--- HTTP Request ---" + Environment.NewLine;
-            ret += TimestampUtc.ToString("MM/dd/yyyy HH:mm:ss") + " " + SourceIp + ":" + SourcePort + " to " + DestIp + ":" + DestPort + Environment.NewLine;
-            ret += "  " + Method + " " + RawUrlWithoutQuery + " " + ProtocolVersion + Environment.NewLine;
+            ret += "  Protocol    : " + ProtocolVersion + Environment.NewLine;
+            ret += "  Timestamp   : " + TimestampUtc.ToString("MM/dd/yyyy HH:mm:ss") + Environment.NewLine;
+            ret += "  Requestor   : " + SourceIp + ":" + SourcePort + Environment.NewLine;
+            ret += "  Method/URL  : " + Method + " " + RawUrlWithoutQuery + " " + ProtocolVersion + Environment.NewLine;
             ret += "  Full URL    : " + FullUrl + Environment.NewLine;
             ret += "  Raw URL     : " + RawUrlWithoutQuery + Environment.NewLine;
             ret += "  Querystring : " + Querystring + Environment.NewLine;
+
+            if (QuerystringEntries != null && QuerystringEntries.Count > 0)
+            {
+                foreach (KeyValuePair<string, string> curr in QuerystringEntries)
+                {
+                    ret += "    " + curr.Key + ": " + curr.Value + Environment.NewLine;
+                }
+            }
+
             ret += "  Useragent   : " + Useragent + " (Keepalive " + Keepalive + ")" + Environment.NewLine;
             ret += "  Content     : " + ContentType + " (" + ContentLength + " bytes)" + Environment.NewLine;
             ret += "  Destination : " + DestHostname + ":" + DestHostPort + Environment.NewLine;
@@ -292,9 +293,7 @@ namespace HttpServerLite
             SourcePort = 0;
             Common.ParseIpPort(_IpPort, out SourceIp, out SourcePort);
 
-            ThreadId = Thread.CurrentThread.ManagedThreadId;
-            DestIp = "unknown";
-            DestPort = 0;
+            ThreadId = Thread.CurrentThread.ManagedThreadId; 
             Headers = new Dictionary<string, string>();
 
             #endregion
@@ -403,14 +402,14 @@ namespace HttpServerLite
             #endregion
         }
 
-        private static string ExtractRawUrlWithoutQuery(string rawUrlWithQuery)
+        private string ExtractRawUrlWithoutQuery(string rawUrlWithQuery)
         {
             if (String.IsNullOrEmpty(rawUrlWithQuery)) return null;
             if (!rawUrlWithQuery.Contains("?")) return rawUrlWithQuery;
             return rawUrlWithQuery.Substring(0, rawUrlWithQuery.IndexOf("?"));
         }
 
-        private static List<string> ExtractRawUrlEntries(string rawUrlWithoutQuery)
+        private List<string> ExtractRawUrlEntries(string rawUrlWithoutQuery)
         {
             if (String.IsNullOrEmpty(rawUrlWithoutQuery)) return null;
 
@@ -455,7 +454,7 @@ namespace HttpServerLite
             return ret;
         }
 
-        private static string ExtractQuerystring(string rawUrlWithQuery)
+        private string ExtractQuerystring(string rawUrlWithQuery)
         {
             if (String.IsNullOrEmpty(rawUrlWithQuery)) return null;
             if (!rawUrlWithQuery.Contains("?")) return null;
@@ -465,66 +464,39 @@ namespace HttpServerLite
             return rawUrlWithQuery.Substring(qsStartPos + 1);
         }
 
-        private static Dictionary<string, string> ExtractQuerystringEntries(string query)
+        private Dictionary<string, string> ExtractQuerystringEntries(string query)
         {
-            if (String.IsNullOrEmpty(query)) return null;
+            if (String.IsNullOrEmpty(query)) return new Dictionary<string, string>();
 
             Dictionary<string, string> ret = new Dictionary<string, string>();
 
-            int inKey = 1;
-            int inVal = 0;
-            int position = 0;
-            string tempKey = "";
-            string tempVal = "";
+            string[] entries = query.Split('&');
 
-            foreach (char c in query)
+            if (entries != null && entries.Length > 0)
             {
-                if (inKey == 1)
+                foreach (string entry in entries)
                 {
-                    if (c != '=')
-                    {
-                        tempKey += c;
-                    }
-                    else
-                    {
-                        inKey = 0;
-                        inVal = 1;
-                        continue;
-                    }
-                }
+                    string[] entryParts = entry.Split(new[] { '=' }, 2);
 
-                if (inVal == 1)
-                {
-                    if (c != '&')
+                    if (entryParts != null && entryParts.Length > 0)
                     {
-                        tempVal += c;
+                        string key = entryParts[0];
+                        string val = null;
+
+                        if (entryParts.Length == 2)
+                        {
+                            val = entryParts[1];
+                        }
+
+                        ret = AddToDict(key, val, ret);
                     }
-                    else
-                    {
-                        inKey = 1;
-                        inVal = 0;
-
-                        if (!String.IsNullOrEmpty(tempVal)) tempVal = WebUtility.UrlEncode(tempVal);
-                        ret = AddToDict(tempKey, tempVal, ret);
-
-                        tempKey = "";
-                        tempVal = "";
-                        position++;
-                        continue;
-                    }
-                }
-
-                if (inVal == 1)
-                {
-                    if (!String.IsNullOrEmpty(tempVal)) tempVal = WebUtility.UrlEncode(tempVal);
-                    ret = AddToDict(tempKey, tempVal, ret);
                 }
             }
 
             return ret;
         }
 
-        private static Dictionary<string, string> AddToDict(string key, string val, Dictionary<string, string> existing)
+        private Dictionary<string, string> AddToDict(string key, string val, Dictionary<string, string> existing)
         {
             if (String.IsNullOrEmpty(key)) return existing;
 

@@ -121,6 +121,8 @@ namespace HttpServerLite
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             if (events == null) throw new ArgumentNullException(nameof(events));
 
+            ProtocolVersion = req.ProtocolVersion;
+
             _IpPort = ipPort;
             _Request = req;
             _Stream = stream;
@@ -244,9 +246,11 @@ namespace HttpServerLite
 
         private byte[] GetHeaderBytes()
         {
+            StatusDescription = GetStatusDescription();
+
             byte[] ret = new byte[0];
 
-            ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("HTTP/" + ProtocolVersion + " " + StatusCode + " " + StatusDescription + "\r\n"));
+            ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes(ProtocolVersion + " " + StatusCode + " " + StatusDescription + "\r\n"));
             ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("Access-Control-Allow-Origin: *\r\n"));
 
             if (!String.IsNullOrEmpty(ContentType))
@@ -264,15 +268,16 @@ namespace HttpServerLite
 
         private void SendHeaders()
         {
-            if (HeadersSent) throw new IOException("Headers already sent."); 
+            if (HeadersSent) throw new IOException("Headers already sent.");
+            StatusDescription = GetStatusDescription();
             byte[] headers = GetHeaderBytes();
             _Stream.Write(headers, 0, headers.Length);
             HeadersSent = true;
         }
 
-        private string GetStatusDescription(int statusCode)
+        private string GetStatusDescription()
         {
-            switch (statusCode)
+            switch (StatusCode)
             {
                 case 200:
                     return "OK";
@@ -303,7 +308,7 @@ namespace HttpServerLite
                 case 503:
                     return "Service Unavailable";
                 default:
-                    return "Unknown Status";
+                    return "Unknown";
             }
         }
          

@@ -123,6 +123,13 @@ namespace HttpServerLite
             #region Build-Context-and-Send-Event
 
             HttpContext ctx = new HttpContext(ipPort, _TcpServer.GetStream(ipPort), headerBytes, Events);
+
+            Events.RequestReceived?.Invoke(
+                ctx.Request.SourceIp, 
+                ctx.Request.SourcePort, 
+                ctx.Request.Method.ToString(), 
+                ctx.Request.RawUrlWithQuery);
+
             _DefaultRoute?.Invoke(ctx);
             _TcpServer.DisconnectClient(ipPort);
 
