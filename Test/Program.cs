@@ -21,7 +21,7 @@ namespace Test
             Console.ReadLine();
         }
 
-        static void DefaultRoute(HttpContext ctx)
+        static async Task DefaultRoute(HttpContext ctx)
         {
             if (_Debug) Console.WriteLine(ctx.Request.ToString());
 
@@ -29,17 +29,17 @@ namespace Test
 
             if (ctx.Request.RawUrlWithoutQuery.Equals("/html/index.html"))
             {
-                resp = File.ReadAllBytes("./html/index.html");
+                resp = await File.ReadAllBytesAsync("./html/index.html");
                 ctx.Response.ContentType = "text/html";
             }
             else if (ctx.Request.RawUrlWithoutQuery.Equals("/img/watson.jpg"))
             {
-                resp = File.ReadAllBytes("./img/watson.jpg");
+                resp = await File.ReadAllBytesAsync("./img/watson.jpg");
                 ctx.Response.ContentType = "image/jpeg";
             }
             else if (ctx.Request.RawUrlWithoutQuery.Equals("/img-streamed/watson.jpg"))
             {
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[8192];
                 long len = new FileInfo("./img/watson.jpg").Length;
                 long bytesRemaining = len;
                  
@@ -50,19 +50,19 @@ namespace Test
                 {
                     while (bytesRemaining > 0)
                     {
-                        int bytesRead = fs.Read(buffer, 0, buffer.Length);
+                        int bytesRead = await fs.ReadAsync(buffer, 0, buffer.Length);
                         if (bytesRead > 0)
                         {
                             bytesRemaining -= bytesRead;
                             if (bytesRead == buffer.Length)
                             {
-                                ctx.Response.SendWithoutClose(buffer);
+                                await ctx.Response.SendWithoutCloseAsync(buffer);
                             }
                             else
                             {
                                 byte[] tempBuffer = new byte[bytesRead];
                                 Buffer.BlockCopy(buffer, 0, tempBuffer, 0, bytesRead);
-                                ctx.Response.SendWithoutClose(tempBuffer);
+                                await ctx.Response.SendWithoutCloseAsync(tempBuffer);
                             }
 
                             Thread.Sleep(100);
@@ -80,7 +80,7 @@ namespace Test
              
             ctx.Response.StatusCode = 200;
             ctx.Response.ContentLength = resp.Length; 
-            ctx.Response.Send(resp); 
+            await ctx.Response.SendAsync(resp); 
         }
     }
 }

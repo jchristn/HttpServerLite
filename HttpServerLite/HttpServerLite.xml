@@ -505,6 +505,54 @@
             <param name="extension">File extension.</param>
             <returns>String containing MIME type.</returns>
         </member>
+        <member name="T:HttpServerLite.Statistics">
+            <summary>
+            Webserver statistics.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.Statistics.StartTime">
+            <summary>
+            The time at which the client or server was started.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.Statistics.UpTime">
+            <summary>
+            The amount of time which the client or server has been up.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.Statistics.ReceivedPayloadBytes">
+            <summary>
+            The number of payload bytes received (incoming request body).
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.Statistics.SentPayloadBytes">
+            <summary>
+            The number of payload bytes sent (outgoing request body).
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.Statistics.#ctor">
+            <summary>
+            Initialize the statistics object.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.Statistics.ToString">
+            <summary>
+            Human-readable version of the object.
+            </summary>
+            <returns>String.</returns>
+        </member>
+        <member name="M:HttpServerLite.Statistics.Reset">
+            <summary>
+            Reset statistics other than StartTime and UpTime.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.Statistics.RequestCountByMethod(HttpServerLite.HttpMethod)">
+            <summary>
+            Retrieve the number of requests received using a specific HTTP method.
+            </summary>
+            <param name="method">HTTP method.</param>
+            <returns>Number of requests received using this method.</returns>
+        </member>
         <member name="T:HttpServerLite.Webserver">
             <summary>
             HttpServerLite web server.
@@ -540,7 +588,12 @@
             Set specific actions/callbacks to use when events are raised.
             </summary>
         </member>
-        <member name="M:HttpServerLite.Webserver.#ctor(System.String,System.Int32,System.Boolean,System.String,System.String,System.Action{HttpServerLite.HttpContext})">
+        <member name="P:HttpServerLite.Webserver.Stats">
+            <summary>
+            Webserver statistics.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.Webserver.#ctor(System.String,System.Int32,System.Boolean,System.String,System.String,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
             <summary>
             Instantiate the webserver.
             </summary>

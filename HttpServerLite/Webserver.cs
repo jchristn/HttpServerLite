@@ -81,6 +81,17 @@ namespace HttpServerLite
         /// </summary>
         public EventCallbacks Events = new EventCallbacks();
 
+        /// <summary>
+        /// Webserver statistics.
+        /// </summary>
+        public Statistics Stats
+        {
+            get
+            {
+                return _Stats;
+            }
+        }
+
         #endregion
 
         #region Private-Members
@@ -91,8 +102,9 @@ namespace HttpServerLite
         private string _PfxCertFilename = null;
         private string _PfxCertPassword = null;
         private TcpServer _TcpServer = null;
-        private Action<HttpContext> _DefaultRoute = null;
+        private Func<HttpContext, Task> _DefaultRoute = null;
         private int _StreamReadBufferSize = 65536;
+        private Statistics _Stats = new Statistics();
 
         #endregion
 
@@ -107,7 +119,7 @@ namespace HttpServerLite
         /// <param name="pfxCertFilename">For SSL, the PFX certificate filename.</param>
         /// <param name="pfxCertPassword">For SSL, the PFX certificate password.</param>
         /// <param name="defaultRoute">Default route.</param>
-        public Webserver(string hostname, int port, bool ssl, string pfxCertFilename, string pfxCertPassword, Action<HttpContext> defaultRoute)
+        public Webserver(string hostname, int port, bool ssl, string pfxCertFilename, string pfxCertPassword, Func<HttpContext, Task> defaultRoute)
         {
             _Hostname = hostname ?? throw new ArgumentNullException(nameof(hostname));
             _DefaultRoute = defaultRoute ?? throw new ArgumentNullException(nameof(defaultRoute));
@@ -138,8 +150,10 @@ namespace HttpServerLite
 
         #region Private-Methods
 
-        private void ClientConnected(object sender, ClientConnectedEventArgs args)
+        private async void ClientConnected(object sender, ClientConnectedEventArgs args)
         {
+            DateTime startTime = DateTime.Now;
+
             #region Parse-IP-Port
 
             string ipPort = args.IpPort;
@@ -184,13 +198,33 @@ namespace HttpServerLite
 
             HttpContext ctx = new HttpContext(ipPort, _TcpServer.GetStream(ipPort), headerBytes, Events);
 
+            _Stats.IncrementRequestCounter(ctx.Request.Method);
+            _Stats.ReceivedPayloadBytes += ctx.Request.ContentLength;
+
             Events.RequestReceived?.Invoke(
                 ctx.Request.SourceIp, 
                 ctx.Request.SourcePort, 
                 ctx.Request.Method.ToString(), 
                 ctx.Request.RawUrlWithQuery);
 
-            _DefaultRoute?.Invoke(ctx);
+            try
+            {
+                await _DefaultRoute?.Invoke(ctx);
+            }
+            finally
+            {
+                Events.ResponseSent?.Invoke(
+                    ctx.Request.SourceIp,
+                    ctx.Request.SourcePort,
+                    ctx.Request.Method.ToString(),
+                    ctx.Request.FullUrl,
+                    ctx.Response.StatusCode,
+                    Common.TotalMsFrom(startTime));
+
+                if (ctx.Response.ContentLength != null)
+                    _Stats.SentPayloadBytes += Convert.ToInt64(ctx.Response.ContentLength);
+            }
+
             _TcpServer.DisconnectClient(ipPort);
 
             #endregion

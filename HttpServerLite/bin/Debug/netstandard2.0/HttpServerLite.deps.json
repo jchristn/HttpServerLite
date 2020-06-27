@@ -7,7 +7,7 @@
   "targets": {
     ".NETStandard,Version=v2.0": {},
     ".NETStandard,Version=v2.0/": {
-      "HttpServerLite/1.0.0.4": {
+      "HttpServerLite/1.0.0.5": {
         "dependencies": {
           "CavemanTcp": "1.0.2",
           "NETStandard.Library": "2.0.3",
@@ -42,7 +42,7 @@
     }
   },
   "libraries": {
-    "HttpServerLite/1.0.0.4": {
+    "HttpServerLite/1.0.0.5": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

@@ -101,5 +101,19 @@ namespace HttpServerLite
                 return ms.ToArray();
             }
         }
+
+        internal static double TotalMsFrom(DateTime startTime)
+        {
+            try
+            {
+                DateTime endTime = DateTime.Now;
+                TimeSpan totalTime = (endTime - startTime);
+                return totalTime.TotalMilliseconds;
+            }
+            catch (Exception)
+            {
+                return -1;
+            }
+        } 
     }
 }
