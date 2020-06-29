@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -93,11 +94,41 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Access-Control-Allow-Origin header value.
+        /// </summary>
+        public string AccessControlAllowOriginHeader = "*";
+
+        /// <summary>
+        /// Access control manager, i.e. default mode of operation, permit list, and deny list.
+        /// </summary>
+        public AccessControlManager AccessControl = new AccessControlManager(AccessControlMode.DefaultPermit);
+
+        /// <summary>
         /// Function to call prior to routing.  
         /// Return 'true' if the connection should be terminated.
         /// Return 'false' to allow the connection to continue routing.
         /// </summary>
         public Func<HttpContext, Task<bool>> PreRoutingHandler = null;
+
+        /// <summary>
+        /// Function to call when an OPTIONS request is received.  Often used to handle CORS.  Leave as 'null' to use the default OPTIONS handler.
+        /// </summary>
+        public Func<HttpContext, Task> OptionsRoute = null;
+
+        /// <summary>
+        /// Content routes; i.e. routes to specific files or folders for GET and HEAD requests.
+        /// </summary>
+        public ContentRouteManager ContentRoutes = new ContentRouteManager();
+
+        /// <summary>
+        /// Static routes; i.e. routes with explicit matching and any HTTP method.
+        /// </summary>
+        public StaticRouteManager StaticRoutes = new StaticRouteManager();
+
+        /// <summary>
+        /// Dynamic routes; i.e. routes with regex matching and any HTTP method.
+        /// </summary>
+        public DynamicRouteManager DynamicRoutes = new DynamicRouteManager();
 
         #endregion
 
@@ -110,8 +141,13 @@ namespace HttpServerLite
         private string _PfxCertPassword = null;
         private TcpServer _TcpServer = null;
         private Func<HttpContext, Task> _DefaultRoute = null;
+        private ContentRouteProcessor _ContentRouteProcessor;
+
         private int _StreamReadBufferSize = 65536;
         private Statistics _Stats = new Statistics();
+         
+        private CancellationTokenSource _TokenSource = new CancellationTokenSource();
+        private CancellationToken _Token;
 
         #endregion
 
@@ -135,6 +171,8 @@ namespace HttpServerLite
             _Ssl = ssl;
             _PfxCertFilename = pfxCertFilename;
             _PfxCertPassword = pfxCertPassword;
+
+            _ContentRouteProcessor = new ContentRouteProcessor(ContentRoutes);
 
             _TcpServer = new TcpServer(_Hostname, _Port, _Ssl, _PfxCertFilename, _PfxCertPassword);
             _TcpServer.ClientConnected += ClientConnected;
@@ -226,10 +264,42 @@ namespace HttpServerLite
 
                 #endregion
 
-                #region Routing
+                #region Process
 
                 try
                 {
+                    #region Check-Access-Control
+
+                    if (!AccessControl.Permit(ctx.Request.SourceIp))
+                    {
+                        Events.AccessControlDenied?.Invoke(
+                            ctx.Request.SourceIp,
+                            ctx.Request.SourcePort,
+                            ctx.Request.Method.ToString(),
+                            ctx.Request.FullUrl);
+                        return;
+                    }
+
+                    #endregion
+
+                    #region Process-Preflight-Requests
+
+                    if (ctx.Request.Method == HttpMethod.OPTIONS)
+                    {
+                        if (OptionsRoute != null)
+                        {
+                            await OptionsRoute?.Invoke(ctx);
+                            return;
+                        }
+                        else
+                        {
+                            await OptionsProcessor(ctx);
+                            return;
+                        }
+                    }
+
+                    #endregion
+
                     #region Pre-Routing-Handler
 
                     bool terminate = false;
@@ -237,6 +307,41 @@ namespace HttpServerLite
                     {
                         terminate = await PreRoutingHandler(ctx);
                         if (terminate) return;
+                    }
+
+                    #endregion
+
+                    #region Content-Routes
+
+                    if (ctx.Request.Method == HttpMethod.GET || ctx.Request.Method == HttpMethod.HEAD)
+                    {
+                        if (ContentRoutes.Exists(ctx.Request.RawUrlWithoutQuery))
+                        {
+                            await _ContentRouteProcessor.Process(ctx);
+                            return;
+                        }
+                    }
+
+                    #endregion
+
+                    #region Static-Routes
+
+                    Func<HttpContext, Task> handler = StaticRoutes.Match(ctx.Request.Method, ctx.Request.RawUrlWithoutQuery);
+                    if (handler != null)
+                    {
+                        await handler(ctx);
+                        return;
+                    }
+
+                    #endregion
+
+                    #region Dynamic-Routes
+
+                    handler = DynamicRoutes.Match(ctx.Request.Method, ctx.Request.RawUrlWithoutQuery);
+                    if (handler != null)
+                    {
+                        await handler(ctx);
+                        return;
                     }
 
                     #endregion
@@ -281,6 +386,60 @@ namespace HttpServerLite
         private void ClientDisconnected(object sender, ClientDisconnectedEventArgs args)
         {
 
+        }
+
+        private async Task OptionsProcessor(HttpContext ctx)
+        {
+            ctx.Response.StatusCode = 200;
+
+            string[] requestedHeaders = null;
+            if (ctx.Request.Headers != null)
+            {
+                foreach (KeyValuePair<string, string> curr in ctx.Request.Headers)
+                {
+                    if (String.IsNullOrEmpty(curr.Key)) continue;
+                    if (String.IsNullOrEmpty(curr.Value)) continue;
+                    if (String.Compare(curr.Key.ToLower(), "access-control-request-headers") == 0)
+                    {
+                        requestedHeaders = curr.Value.Split(',');
+                        break;
+                    }
+                }
+            }
+
+            string headers = "";
+
+            if (requestedHeaders != null)
+            {
+                int addedCount = 0;
+                foreach (string curr in requestedHeaders)
+                {
+                    if (String.IsNullOrEmpty(curr)) continue;
+                    if (addedCount > 0) headers += ", ";
+                    headers += ", " + curr;
+                    addedCount++;
+                }
+            }
+
+            string listenerPrefix = null;
+            if (_Ssl) listenerPrefix = "https://" + ctx.Request.DestHostname + ":" + _Port + "/";
+            else listenerPrefix = "http://" + ctx.Request.DestHostname + ":" + _Port + "/";
+
+            ctx.Response.Headers.Add("Access-Control-Allow-Methods", "OPTIONS, HEAD, GET, PUT, POST, DELETE");
+            ctx.Response.Headers.Add("Access-Control-Allow-Headers", "*, Content-Type, X-Requested-With, " + headers);
+            ctx.Response.Headers.Add("Access-Control-Expose-Headers", "Content-Type, X-Requested-With, " + headers);
+
+            if (!String.IsNullOrEmpty(AccessControlAllowOriginHeader))
+                ctx.Response.Headers.Add("Access-Control-Allow-Origin", AccessControlAllowOriginHeader);
+
+            ctx.Response.Headers.Add("Accept", "*/*");
+            ctx.Response.Headers.Add("Accept-Language", "en-US, en");
+            ctx.Response.Headers.Add("Accept-Charset", "ISO-8859-1, utf-8");
+            ctx.Response.Headers.Add("Connection", "keep-alive");
+            ctx.Response.Headers.Add("Host", listenerPrefix);
+
+            ctx.Response.ContentLength = 0;
+            await ctx.Response.SendAsync(0);
         }
 
         #endregion

@@ -4,6 +4,58 @@
         <name>HttpServerLite</name>
     </assembly>
     <members>
+        <member name="T:HttpServerLite.AccessControlManager">
+            <summary>
+            Access control manager.  Dictates which connections are permitted or denied.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.AccessControlManager.DenyList">
+            <summary>
+            Matcher to match denied addresses.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.AccessControlManager.PermitList">
+            <summary>
+            Matcher to match permitted addresses.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.AccessControlManager.Mode">
+            <summary>
+            Access control mode, either DefaultPermit or DefaultDeny.
+            DefaultPermit: allow everything, except for those explicitly denied.
+            DefaultDeny: deny everything, except for those explicitly permitted.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.AccessControlManager.#ctor(HttpServerLite.AccessControlMode)">
+            <summary>
+            Instantiate the object.
+            </summary> 
+            <param name="mode">Access control mode.</param>
+        </member>
+        <member name="M:HttpServerLite.AccessControlManager.Permit(System.String)">
+            <summary>
+            Permit or deny a request based on IP address.  
+            When operating in 'default deny', only white listed entries are permitted. 
+            When operating in 'default permit', everything is allowed unless explicitly denied.
+            </summary>
+            <param name="ip">The IP address to evaluate.</param>
+            <returns>True if permitted.</returns>
+        </member>
+        <member name="T:HttpServerLite.AccessControlMode">
+            <summary>
+            Access control mode of operation.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.AccessControlMode.DefaultPermit">
+            <summary>
+            Permit requests from any endpoint by default.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.AccessControlMode.DefaultDeny">
+            <summary>
+            Deny requests from any endpoint by default.
+            </summary>
+        </member>
         <member name="T:HttpServerLite.Chunk">
             <summary>
             A chunk of data, used when reading from a request where the Transfer-Encoding header includes 'chunked'.
@@ -28,6 +80,159 @@
             <summary>
             Indicates whether or not this is the final chunk, i.e. the chunk length received was zero.
             </summary>
+        </member>
+        <member name="T:HttpServerLite.ContentRoute">
+            <summary>
+            Assign a method handler for when requests are received matching the supplied method and path.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.ContentRoute.Path">
+            <summary>
+            The pattern against which the raw URL should be matched.  
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.ContentRoute.IsDirectory">
+            <summary>
+            Indicates whether or not the path specifies a directory.  If so, any matching URL will be handled by the specified handler.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.ContentRoute.#ctor(System.String,System.Boolean)">
+            <summary>
+            Create a new route object.
+            </summary> 
+            <param name="path">The pattern against which the raw URL should be matched.</param>
+            <param name="isDirectory">Indicates whether or not the path specifies a directory.  If so, any matching URL will be handled by the specified handler.</param> 
+        </member>
+        <member name="T:HttpServerLite.ContentRouteManager">
+            <summary>
+            Content route manager.  Content routes are used for GET and HEAD requests to specific files or entire directories.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ContentRouteManager.BaseDirectory">
+            <summary>
+            Base directory for files and directories accessible via content routes.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.ContentRouteManager.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary> 
+        </member>
+        <member name="M:HttpServerLite.ContentRouteManager.Add(System.String,System.Boolean)">
+            <summary>
+            Add a route.
+            </summary>
+            <param name="path">URL path, i.e. /path/to/resource.</param>
+            <param name="isDirectory">True if the path represents a directory.</param>
+        </member>
+        <member name="M:HttpServerLite.ContentRouteManager.Remove(System.String)">
+            <summary>
+            Remove a route.
+            </summary>
+            <param name="path">URL path.</param>
+        </member>
+        <member name="M:HttpServerLite.ContentRouteManager.Get(System.String)">
+            <summary>
+            Retrieve a content route.
+            </summary>
+            <param name="path">URL path.</param>
+            <returns>ContentRoute if the route exists, otherwise null.</returns>
+        </member>
+        <member name="M:HttpServerLite.ContentRouteManager.Exists(System.String)">
+            <summary>
+            Check if a content route exists.
+            </summary>
+            <param name="path">URL path.</param>
+            <returns>True if exists.</returns>
+        </member>
+        <member name="T:HttpServerLite.ContentRouteProcessor">
+            <summary>
+            Content route processor.  Handles GET and HEAD requests to content routes for files and directories. 
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.ContentRouteProcessor.ContentFileMode">
+            <summary>
+            The FileMode value to use when accessing files within a content route via a FileStream.  Default is FileMode.Open.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.ContentRouteProcessor.ContentFileAccess">
+            <summary>
+            The FileAccess value to use when accessing files within a content route via a FileStream.  Default is FileAccess.Read.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.ContentRouteProcessor.ContentFileShare">
+            <summary>
+            The FileShare value to use when accessing files within a content route via a FileStream.  Default is FileShare.Read.
+            </summary>
+        </member>
+        <member name="T:HttpServerLite.DynamicRoute">
+            <summary>
+            Assign a method handler for when requests are received matching the supplied method and path regex.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.DynamicRoute.Method">
+            <summary>
+            The HTTP method, i.e. GET, PUT, POST, DELETE, etc.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.DynamicRoute.Path">
+            <summary>
+            The pattern against which the raw URL should be matched.  
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.DynamicRoute.Handler">
+            <summary>
+            The handler for the dynamic route.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.DynamicRoute.#ctor(HttpServerLite.HttpMethod,System.Text.RegularExpressions.Regex,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
+            <summary>
+            Create a new route object.
+            </summary>
+            <param name="method">The HTTP method, i.e. GET, PUT, POST, DELETE, etc.</param>
+            <param name="path">The pattern against which the raw URL should be matched.</param>
+            <param name="handler">The method that should be called to handle the request.</param>
+        </member>
+        <member name="T:HttpServerLite.DynamicRouteManager">
+            <summary>
+            Dynamic route manager.  Dynamic routes are used for requests using any HTTP method to any path that can be matched by regular expression.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.DynamicRouteManager.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary> 
+        </member>
+        <member name="M:HttpServerLite.DynamicRouteManager.Add(HttpServerLite.HttpMethod,System.Text.RegularExpressions.Regex,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
+            <summary>
+            Add a route.
+            </summary>
+            <param name="method">The HTTP method.</param>
+            <param name="path">URL path, i.e. /path/to/resource.</param>
+            <param name="handler">Method to invoke.</param>
+        </member>
+        <member name="M:HttpServerLite.DynamicRouteManager.Remove(HttpServerLite.HttpMethod,System.Text.RegularExpressions.Regex)">
+            <summary>
+            Remove a route.
+            </summary>
+            <param name="method">The HTTP method.</param>
+            <param name="path">URL path.</param>
+        </member>
+        <member name="M:HttpServerLite.DynamicRouteManager.Exists(HttpServerLite.HttpMethod,System.Text.RegularExpressions.Regex)">
+            <summary>
+            Check if a content route exists.
+            </summary>
+            <param name="method">The HTTP method.</param>
+            <param name="path">URL path.</param>
+            <returns>True if exists.</returns>
+        </member>
+        <member name="M:HttpServerLite.DynamicRouteManager.Match(HttpServerLite.HttpMethod,System.String)">
+            <summary>
+            Match a request method and URL to a handler method.
+            </summary>
+            <param name="method">The HTTP method.</param>
+            <param name="rawUrl">URL path.</param>
+            <returns>Method to invoke.</returns>
         </member>
         <member name="T:HttpServerLite.EventCallbacks">
             <summary>
@@ -420,6 +625,12 @@
             <param name="contentLength">Number of bytes to read from the stream.</param>
             <param name="stream">Stream containing response data.</param>
         </member>
+        <member name="M:HttpServerLite.HttpResponse.SendAsync(System.Int64)">
+            <summary>
+            Send headers with a specified content length and no data to the requestor and terminate the connection.  Useful for HEAD requests where the content length must be set.
+            </summary> 
+            <param name="contentLength">Value to set in Content-Length header.</param>
+        </member>
         <member name="M:HttpServerLite.HttpResponse.SendAsync(System.String)">
             <summary>
             Send headers and data to the requestor and terminate the connection.
@@ -504,6 +715,83 @@
             </summary>
             <param name="extension">File extension.</param>
             <returns>String containing MIME type.</returns>
+        </member>
+        <member name="T:HttpServerLite.StaticRoute">
+            <summary>
+            Assign a method handler for when requests are received matching the supplied method and path.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.StaticRoute.Method">
+            <summary>
+            The HTTP method, i.e. GET, PUT, POST, DELETE, etc.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.StaticRoute.Path">
+            <summary>
+            The raw URL, i.e. /foo/bar/.  Be sure this begins and ends with '/'.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.StaticRoute.Handler">
+            <summary>
+            The 
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.StaticRoute.#ctor(HttpServerLite.HttpMethod,System.String,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
+            <summary>
+            Create a new route object.
+            </summary>
+            <param name="method">The HTTP method, i.e. GET, PUT, POST, DELETE, etc.</param>
+            <param name="path">The raw URL, i.e. /foo/bar/.  Be sure this begins and ends with '/'.</param>
+            <param name="handler">The method that should be called to handle the request.</param>
+        </member>
+        <member name="T:HttpServerLite.StaticRouteManager">
+            <summary>
+            Static route manager.  Static routes are used for requests using any HTTP method to a specific path.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.StaticRouteManager.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary> 
+        </member>
+        <member name="M:HttpServerLite.StaticRouteManager.Add(HttpServerLite.HttpMethod,System.String,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
+            <summary>
+            Add a route.
+            </summary>
+            <param name="method">The HTTP method.</param>
+            <param name="path">URL path, i.e. /path/to/resource.</param>
+            <param name="handler">Method to invoke.</param>
+        </member>
+        <member name="M:HttpServerLite.StaticRouteManager.Remove(HttpServerLite.HttpMethod,System.String)">
+            <summary>
+            Remove a route.
+            </summary>
+            <param name="method">The HTTP method.</param>
+            <param name="path">URL path.</param>
+        </member>
+        <member name="M:HttpServerLite.StaticRouteManager.Get(HttpServerLite.HttpMethod,System.String)">
+            <summary>
+            Retrieve a static route.
+            </summary>
+            <param name="method">The HTTP method.</param>
+            <param name="path">URL path.</param>
+            <returns>StaticRoute if the route exists, otherwise null.</returns>
+        </member>
+        <member name="M:HttpServerLite.StaticRouteManager.Exists(HttpServerLite.HttpMethod,System.String)">
+            <summary>
+            Check if a static route exists.
+            </summary>
+            <param name="method">The HTTP method.</param>
+            <param name="path">URL path.</param>
+            <returns>True if exists.</returns>
+        </member>
+        <member name="M:HttpServerLite.StaticRouteManager.Match(HttpServerLite.HttpMethod,System.String)">
+            <summary>
+            Match a request method and URL to a handler method.
+            </summary>
+            <param name="method">The HTTP method.</param>
+            <param name="path">URL path.</param>
+            <returns>Method to invoke.</returns>
         </member>
         <member name="T:HttpServerLite.Statistics">
             <summary>
@@ -593,11 +881,41 @@
             Webserver statistics.
             </summary>
         </member>
+        <member name="F:HttpServerLite.Webserver.AccessControlAllowOriginHeader">
+            <summary>
+            Access-Control-Allow-Origin header value.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.Webserver.AccessControl">
+            <summary>
+            Access control manager, i.e. default mode of operation, permit list, and deny list.
+            </summary>
+        </member>
         <member name="F:HttpServerLite.Webserver.PreRoutingHandler">
             <summary>
             Function to call prior to routing.  
             Return 'true' if the connection should be terminated.
             Return 'false' to allow the connection to continue routing.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.Webserver.OptionsRoute">
+            <summary>
+            Function to call when an OPTIONS request is received.  Often used to handle CORS.  Leave as 'null' to use the default OPTIONS handler.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.Webserver.ContentRoutes">
+            <summary>
+            Content routes; i.e. routes to specific files or folders for GET and HEAD requests.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.Webserver.StaticRoutes">
+            <summary>
+            Static routes; i.e. routes with explicit matching and any HTTP method.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.Webserver.DynamicRoutes">
+            <summary>
+            Dynamic routes; i.e. routes with regex matching and any HTTP method.
             </summary>
         </member>
         <member name="M:HttpServerLite.Webserver.#ctor(System.String,System.Int32,System.Boolean,System.String,System.String,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
