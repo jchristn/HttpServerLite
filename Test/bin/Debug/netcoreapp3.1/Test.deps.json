@@ -8,17 +8,17 @@
     ".NETCoreApp,Version=v3.1": {
       "Test/1.0.0": {
         "dependencies": {
-          "HttpServerLite": "1.0.0.10"
+          "HttpServerLite": "1.0.0.12"
         },
         "runtime": {
           "Test.dll": {}
         }
       },
-      "CavemanTcp/1.1.0": {
+      "CavemanTcp/1.1.1": {
         "runtime": {
           "lib/netstandard2.0/CavemanTcp.dll": {
-            "assemblyVersion": "1.1.0.0",
-            "fileVersion": "1.1.0.0"
+            "assemblyVersion": "1.1.1.0",
+            "fileVersion": "1.1.1.0"
           }
         }
       },
@@ -46,9 +46,9 @@
           }
         }
       },
-      "HttpServerLite/1.0.0.10": {
+      "HttpServerLite/1.0.0.12": {
         "dependencies": {
-          "CavemanTcp": "1.1.0",
+          "CavemanTcp": "1.1.1",
           "IpMatcher": "1.0.3",
           "Newtonsoft.Json": "12.0.3",
           "RegexMatcher": "1.0.3"
@@ -65,12 +65,12 @@
       "serviceable": false,
       "sha512": ""
     },
-    "CavemanTcp/1.1.0": {
+    "CavemanTcp/1.1.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ezaKby4csp6yv4bi8icyxsp/4T/41kgNs5ActsfxuTBzkJQuIE8jDm8f29bZkE45S3UKWH5aWc96NfPK/+haaQ==",
-      "path": "cavemantcp/1.1.0",
-      "hashPath": "cavemantcp.1.1.0.nupkg.sha512"
+      "sha512": "sha512-pjAjWWKbv1BjI2+Qfpag+AVgdycX5OYnY7hFKamuUPZMTh9bMBnVCV4a8blQiASP0p2X0aPeuGEi3bneqx8/dQ==",
+      "path": "cavemantcp/1.1.1",
+      "hashPath": "cavemantcp.1.1.1.nupkg.sha512"
     },
     "IpMatcher/1.0.3": {
       "type": "package",
@@ -93,7 +93,7 @@
       "path": "regexmatcher/1.0.3",
       "hashPath": "regexmatcher.1.0.3.nupkg.sha512"
     },
-    "HttpServerLite/1.0.0.10": {
+    "HttpServerLite/1.0.0.12": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

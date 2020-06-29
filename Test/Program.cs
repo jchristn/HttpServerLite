@@ -16,10 +16,16 @@ namespace Test
         {
             _Server = new Webserver("localhost", 9000, false, null, null, DefaultRoute);
             _Server.DefaultHeaders.Host = "http://localhost:9000";
+            _Server.Events.ConnectionReceived = ConnectionReceived;
             _Server.Start();
             Console.WriteLine("http://localhost:9000");
             Console.WriteLine("ENTER to exit");
             Console.ReadLine();
+        }
+
+        static void ConnectionReceived(string ip, int port)
+        {
+            Console.WriteLine("Connection received from " + ip + ":" + port);
         }
 
         static async Task DefaultRoute(HttpContext ctx)

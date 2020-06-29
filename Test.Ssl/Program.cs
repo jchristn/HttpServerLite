@@ -15,11 +15,17 @@ namespace Test.Ssl
         static void Main(string[] args)
         {
             _Server = new Webserver("localhost", 9000, true, "cavemantcp.pfx", "simpletcp", DefaultRoute);
-            _Server.DefaultHeaders.Host = "https://localhost:9000";
+            _Server.DefaultHeaders.Host = "https://localhost:9000"; 
+            _Server.Events.ConnectionReceived = ConnectionReceived;
             _Server.Start();
             Console.WriteLine("https://localhost:9000");
             Console.WriteLine("ENTER to exit");
             Console.ReadLine();
+        }
+
+        static void ConnectionReceived(string ip, int port)
+        {
+            Console.WriteLine("Connection received from " + ip + ":" + port);
         }
 
         static async Task DefaultRoute(HttpContext ctx)
