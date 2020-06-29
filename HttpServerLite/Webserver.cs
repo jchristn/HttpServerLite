@@ -184,24 +184,30 @@ namespace HttpServerLite
 
                 while (retrievingHeaders)
                 {
-                    byte[] b = _TcpServer.ReadBytes(args.IpPort, 1);
-
-                    headerTest = Common.ByteArrayShiftLeft(headerTest);
-                    headerTest[3] = b[0];
-
-                    if (((int)headerTest[3]) == 10
-                        && ((int)headerTest[2]) == 13
-                        && ((int)headerTest[1]) == 10
-                        && ((int)headerTest[0]) == 13)
+                    ReadResult rr = _TcpServer.Read(args.IpPort, 1);
+                    if (rr.Status == ReadResultStatus.Success)
                     {
-                        // end of headers detected
-                        retrievingHeaders = false;
+                        headerTest = Common.ByteArrayShiftLeft(headerTest);
+                        headerTest[3] = rr.Data[0];
+
+                        if (((int)headerTest[3]) == 10
+                            && ((int)headerTest[2]) == 13
+                            && ((int)headerTest[1]) == 10
+                            && ((int)headerTest[0]) == 13)
+                        {
+                            // end of headers detected
+                            retrievingHeaders = false;
+                        }
+                        else
+                        {
+                            headerBytes = Common.AppendBytes(headerBytes, rr.Data);
+                        }
                     }
                     else
                     {
-                        headerBytes = Common.AppendBytes(headerBytes, b);
+                        return;
                     }
-                }
+                } 
 
                 #endregion
 
