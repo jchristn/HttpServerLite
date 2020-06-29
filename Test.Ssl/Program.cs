@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HttpServerLite;
 
-namespace Test
+namespace Test.Ssl
 {
     class Program
     {
@@ -14,10 +14,10 @@ namespace Test
 
         static void Main(string[] args)
         {
-            _Server = new Webserver("localhost", 9000, false, null, null, DefaultRoute);
-            _Server.DefaultHeaders.Host = "http://localhost:9000";
+            _Server = new Webserver("localhost", 9000, true, "cavemantcp.pfx", "simpletcp", DefaultRoute);
+            _Server.DefaultHeaders.Host = "https://localhost:9000";
             _Server.Start();
-            Console.WriteLine("http://localhost:9000");
+            Console.WriteLine("https://localhost:9000");
             Console.WriteLine("ENTER to exit");
             Console.ReadLine();
         }

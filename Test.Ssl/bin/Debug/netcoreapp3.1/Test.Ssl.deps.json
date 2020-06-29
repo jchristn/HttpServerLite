@@ -1,0 +1,102 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v3.1",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "Test.Ssl/1.0.0": {
+        "dependencies": {
+          "HttpServerLite": "1.0.0.10"
+        },
+        "runtime": {
+          "Test.Ssl.dll": {}
+        }
+      },
+      "CavemanTcp/1.1.0": {
+        "runtime": {
+          "lib/netstandard2.0/CavemanTcp.dll": {
+            "assemblyVersion": "1.1.0.0",
+            "fileVersion": "1.1.0.0"
+          }
+        }
+      },
+      "IpMatcher/1.0.3": {
+        "runtime": {
+          "lib/netstandard2.0/IpMatcher.dll": {
+            "assemblyVersion": "1.0.3.0",
+            "fileVersion": "1.0.3.0"
+          }
+        }
+      },
+      "Newtonsoft.Json/12.0.3": {
+        "runtime": {
+          "lib/netstandard2.0/Newtonsoft.Json.dll": {
+            "assemblyVersion": "12.0.0.0",
+            "fileVersion": "12.0.3.23909"
+          }
+        }
+      },
+      "RegexMatcher/1.0.3": {
+        "runtime": {
+          "lib/netstandard2.0/RegexMatcher.dll": {
+            "assemblyVersion": "1.0.3.0",
+            "fileVersion": "1.0.3.0"
+          }
+        }
+      },
+      "HttpServerLite/1.0.0.10": {
+        "dependencies": {
+          "CavemanTcp": "1.1.0",
+          "IpMatcher": "1.0.3",
+          "Newtonsoft.Json": "12.0.3",
+          "RegexMatcher": "1.0.3"
+        },
+        "runtime": {
+          "HttpServerLite.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Test.Ssl/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "CavemanTcp/1.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ezaKby4csp6yv4bi8icyxsp/4T/41kgNs5ActsfxuTBzkJQuIE8jDm8f29bZkE45S3UKWH5aWc96NfPK/+haaQ==",
+      "path": "cavemantcp/1.1.0",
+      "hashPath": "cavemantcp.1.1.0.nupkg.sha512"
+    },
+    "IpMatcher/1.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ioBq6C/wBaDIXQRNACa8sXf5RNV/+X2etYTSACf/0FP9e7RBc79aszeXjCbkX5QyVTnwW/JmPz661AyENjckqQ==",
+      "path": "ipmatcher/1.0.3",
+      "hashPath": "ipmatcher.1.0.3.nupkg.sha512"
+    },
+    "Newtonsoft.Json/12.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-6mgjfnRB4jKMlzHSl+VD+oUc1IebOZabkbyWj2RiTgWwYPPuaK1H97G1sHqGwPlS5npiF5Q0OrxN1wni2n5QWg==",
+      "path": "newtonsoft.json/12.0.3",
+      "hashPath": "newtonsoft.json.12.0.3.nupkg.sha512"
+    },
+    "RegexMatcher/1.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-IVAOj4g0F+zOF7xzcod1b8eKFflFwFIsErk3EDAsIahKt9GhtaH00WFz+cgccVYbbPR0B24friycx7WfvQnZHQ==",
+      "path": "regexmatcher/1.0.3",
+      "hashPath": "regexmatcher.1.0.3.nupkg.sha512"
+    },
+    "HttpServerLite/1.0.0.10": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

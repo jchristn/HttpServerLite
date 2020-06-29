@@ -1,0 +1,7 @@
+TcpWrapper Certificate Details
+Created using OpenSSL.  This is a self-signed certificate and should NOT be used in production.
+
+openssl req -x509 -newkey rsa:4096 -keyout cavemantcp.key -out cavemantcp.crt -days 36500
+openssl pkcs12 -export -out cavemantcp.pfx -inkey cavemantcp.key -in cavemantcp.crt
+
+Export password is simpletcp
