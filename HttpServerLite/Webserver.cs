@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using CavemanTcp;
@@ -94,9 +95,20 @@ namespace HttpServerLite
         }
 
         /// <summary>
-        /// Access-Control-Allow-Origin header value.
+        /// Headers that will be added to every response unless previously set.
         /// </summary>
-        public string AccessControlAllowOriginHeader = "*";
+        public DefaultHeaderValues DefaultHeaders
+        {
+            get
+            {
+                return _DefaultHeaders;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(DefaultHeaders));
+                _DefaultHeaders = value;
+            }
+        }
 
         /// <summary>
         /// Access control manager, i.e. default mode of operation, permit list, and deny list.
@@ -139,7 +151,8 @@ namespace HttpServerLite
         private bool _Ssl = false;
         private string _PfxCertFilename = null;
         private string _PfxCertPassword = null;
-        private TcpServer _TcpServer = null;
+        private TcpServer _TcpServer = null; 
+        private DefaultHeaderValues _DefaultHeaders = new DefaultHeaderValues();
         private Func<HttpContext, Task> _DefaultRoute = null;
         private ContentRouteProcessor _ContentRouteProcessor;
 
@@ -171,12 +184,14 @@ namespace HttpServerLite
             _Ssl = ssl;
             _PfxCertFilename = pfxCertFilename;
             _PfxCertPassword = pfxCertPassword;
-
+             
             _ContentRouteProcessor = new ContentRouteProcessor(ContentRoutes);
 
             _TcpServer = new TcpServer(_Hostname, _Port, _Ssl, _PfxCertFilename, _PfxCertPassword);
             _TcpServer.ClientConnected += ClientConnected;
             _TcpServer.ClientDisconnected += ClientDisconnected;
+
+            _Token = _TokenSource.Token;
         }
 
         #endregion
@@ -251,7 +266,12 @@ namespace HttpServerLite
 
                 #region Build-Context
 
-                HttpContext ctx = new HttpContext(ipPort, _TcpServer.GetStream(ipPort), headerBytes, Events);
+                HttpContext ctx = new HttpContext(
+                    ipPort, 
+                    _TcpServer.GetStream(ipPort), 
+                    headerBytes, 
+                    Events, 
+                    _DefaultHeaders);
 
                 _Stats.IncrementRequestCounter(ctx.Request.Method);
                 _Stats.ReceivedPayloadBytes += ctx.Request.ContentLength;
@@ -420,24 +440,7 @@ namespace HttpServerLite
                     addedCount++;
                 }
             }
-
-            string listenerPrefix = null;
-            if (_Ssl) listenerPrefix = "https://" + ctx.Request.DestHostname + ":" + _Port + "/";
-            else listenerPrefix = "http://" + ctx.Request.DestHostname + ":" + _Port + "/";
-
-            ctx.Response.Headers.Add("Access-Control-Allow-Methods", "OPTIONS, HEAD, GET, PUT, POST, DELETE");
-            ctx.Response.Headers.Add("Access-Control-Allow-Headers", "*, Content-Type, X-Requested-With, " + headers);
-            ctx.Response.Headers.Add("Access-Control-Expose-Headers", "Content-Type, X-Requested-With, " + headers);
-
-            if (!String.IsNullOrEmpty(AccessControlAllowOriginHeader))
-                ctx.Response.Headers.Add("Access-Control-Allow-Origin", AccessControlAllowOriginHeader);
-
-            ctx.Response.Headers.Add("Accept", "*/*");
-            ctx.Response.Headers.Add("Accept-Language", "en-US, en");
-            ctx.Response.Headers.Add("Accept-Charset", "ISO-8859-1, utf-8");
-            ctx.Response.Headers.Add("Connection", "keep-alive");
-            ctx.Response.Headers.Add("Host", listenerPrefix);
-
+             
             ctx.Response.ContentLength = 0;
             await ctx.Response.SendAsync(0);
         }

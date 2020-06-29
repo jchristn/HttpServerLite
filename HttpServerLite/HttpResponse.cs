@@ -93,6 +93,7 @@ namespace HttpServerLite
         #region Private-Members
 
         private string _IpPort;
+        private DefaultHeaderValues _DefaultHeaders = null;
         private int _StreamBufferSize = 65536;
         private Dictionary<string, string> _Headers = new Dictionary<string, string>();
         private Stream _Stream;
@@ -111,9 +112,10 @@ namespace HttpServerLite
 
         }
 
-        internal HttpResponse(string ipPort, Stream stream, HttpRequest req, EventCallbacks events, int bufferSize)
+        internal HttpResponse(string ipPort, DefaultHeaderValues headers, Stream stream, HttpRequest req, EventCallbacks events, int bufferSize)
         {
             if (String.IsNullOrEmpty(ipPort)) throw new ArgumentNullException(nameof(ipPort));
+            if (headers == null) throw new ArgumentNullException(nameof(headers));
             if (req == null) throw new ArgumentNullException(nameof(req));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             if (events == null) throw new ArgumentNullException(nameof(events));
@@ -121,6 +123,7 @@ namespace HttpServerLite
             ProtocolVersion = req.ProtocolVersion;
 
             _IpPort = ipPort;
+            _DefaultHeaders = headers;
             _Request = req;
             _Stream = stream;
             _Events = events;
@@ -297,7 +300,7 @@ namespace HttpServerLite
         public void SendWithoutClose(long contentLength)
         {
             ContentLength = contentLength;
-            SendInternal(0, null, false);
+            SendInternal(contentLength, null, false);
         }
 
         /// <summary>
@@ -349,6 +352,16 @@ namespace HttpServerLite
             }
 
             SendInternal(contentLength, stream, false);
+        }
+
+        /// <summary>
+        /// Send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="contentLength">Value to set in Content-Length header.</param>
+        public async Task SendWithoutCloseAsync(long contentLength)
+        {
+            ContentLength = contentLength;
+            await SendInternalAsync(contentLength, null, false);
         }
 
         /// <summary>
@@ -421,7 +434,6 @@ namespace HttpServerLite
             byte[] ret = new byte[0];
 
             ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes(ProtocolVersion + " " + StatusCode + " " + StatusDescription + "\r\n"));
-            ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("Access-Control-Allow-Origin: " + AccessControlAllowOriginHeader + "\r\n"));
 
             if (!String.IsNullOrEmpty(ContentType))
                 ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("Content-Type: " + ContentType + "\r\n"));
@@ -439,6 +451,7 @@ namespace HttpServerLite
         private void SendHeaders()
         {
             if (HeadersSent) throw new IOException("Headers already sent.");
+            SetDefaultHeaders();
             StatusDescription = GetStatusDescription();
             byte[] headers = GetHeaderBytes();
             _Stream.Write(headers, 0, headers.Length);
@@ -481,12 +494,181 @@ namespace HttpServerLite
                     return "Unknown";
             }
         }
-          
+
+        private void SetDefaultHeaders()
+        {
+            if (_DefaultHeaders != null && _Headers != null)
+            {
+                if (!String.IsNullOrEmpty(_DefaultHeaders.AccessControlAllowOrigin))
+                {
+                    bool set = true;
+                    foreach (KeyValuePair<string, string> curr in _Headers)
+                    {
+                        if (curr.Key.ToLower().Equals("access-control-allow-origin"))
+                        {
+                            set = false;
+                            break;
+                        }
+                    }
+
+                    if (set)
+                    {
+                        _Headers.Add("Access-Control-Allow-Origin", _DefaultHeaders.AccessControlAllowOrigin);
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(_DefaultHeaders.AccessControlAllowMethods))
+                {
+                    bool set = true;
+                    foreach (KeyValuePair<string, string> curr in _Headers)
+                    {
+                        if (curr.Key.ToLower().Equals("access-control-allow-methods"))
+                        {
+                            set = false;
+                            break;
+                        }
+                    }
+
+                    if (set)
+                    {
+                        _Headers.Add("Access-Control-Allow-Methods", _DefaultHeaders.AccessControlAllowMethods);
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(_DefaultHeaders.AccessControlAllowHeaders))
+                {
+                    bool set = true;
+                    foreach (KeyValuePair<string, string> curr in _Headers)
+                    {
+                        if (curr.Key.ToLower().Equals("access-control-allow-headers"))
+                        {
+                            set = false;
+                            break;
+                        }
+                    }
+
+                    if (set)
+                    {
+                        _Headers.Add("Access-Control-Allow-Headers", _DefaultHeaders.AccessControlAllowHeaders);
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(_DefaultHeaders.AccessControlExposeHeaders))
+                {
+                    bool set = true;
+                    foreach (KeyValuePair<string, string> curr in _Headers)
+                    {
+                        if (curr.Key.ToLower().Equals("access-control-expose-headers"))
+                        {
+                            set = false;
+                            break;
+                        }
+                    }
+
+                    if (set)
+                    {
+                        _Headers.Add("Access-Control-Expose-Headers", _DefaultHeaders.AccessControlExposeHeaders);
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(_DefaultHeaders.Accept))
+                {
+                    bool set = true;
+                    foreach (KeyValuePair<string, string> curr in _Headers)
+                    {
+                        if (curr.Key.ToLower().Equals("accept"))
+                        {
+                            set = false;
+                            break;
+                        }
+                    }
+
+                    if (set)
+                    {
+                        _Headers.Add("Accept", _DefaultHeaders.Accept);
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(_DefaultHeaders.AcceptLanguage))
+                {
+                    bool set = true;
+                    foreach (KeyValuePair<string, string> curr in _Headers)
+                    {
+                        if (curr.Key.ToLower().Equals("accept-language"))
+                        {
+                            set = false;
+                            break;
+                        }
+                    }
+
+                    if (set)
+                    {
+                        _Headers.Add("Accept-Language", _DefaultHeaders.AcceptLanguage);
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(_DefaultHeaders.AcceptCharset))
+                {
+                    bool set = true;
+                    foreach (KeyValuePair<string, string> curr in _Headers)
+                    {
+                        if (curr.Key.ToLower().Equals("accept-charset"))
+                        {
+                            set = false;
+                            break;
+                        }
+                    }
+
+                    if (set)
+                    {
+                        _Headers.Add("Accept-Charset", _DefaultHeaders.AcceptCharset);
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(_DefaultHeaders.Connection))
+                {
+                    bool set = true;
+                    foreach (KeyValuePair<string, string> curr in _Headers)
+                    {
+                        if (curr.Key.ToLower().Equals("connection"))
+                        {
+                            set = false;
+                            break;
+                        }
+                    }
+
+                    if (set)
+                    {
+                        _Headers.Add("Connection", _DefaultHeaders.Connection);
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(_DefaultHeaders.Host))
+                {
+                    bool set = true;
+                    foreach (KeyValuePair<string, string> curr in _Headers)
+                    {
+                        if (curr.Key.ToLower().Equals("host"))
+                        {
+                            set = false;
+                            break;
+                        }
+                    }
+
+                    if (set)
+                    {
+                        _Headers.Add("Host", _DefaultHeaders.Host);
+                    }
+                }
+            }
+        }
+
         private void SendInternal(long contentLength, Stream stream, bool close)
         {   
             byte[] resp = new byte[0];
             if (!HeadersSent)
             {
+                SetDefaultHeaders();
                 byte[] headers = GetHeaderBytes();
                 _Stream.Write(headers, 0, headers.Length);
                 _Stream.Flush();
@@ -525,6 +707,7 @@ namespace HttpServerLite
             byte[] resp = new byte[0];
             if (!HeadersSent)
             {
+                SetDefaultHeaders(); 
                 byte[] headers = GetHeaderBytes(); 
                 await _Stream.WriteAsync(headers, 0, headers.Length);
                 await _Stream.FlushAsync();

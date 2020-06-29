@@ -57,14 +57,15 @@ namespace HttpServerLite
 
         }
 
-        internal HttpContext(string ipPort, Stream stream, byte[] headerBytes, EventCallbacks events)
+        internal HttpContext(string ipPort, Stream stream, byte[] headerBytes, EventCallbacks events, DefaultHeaderValues headers)
         { 
             _Events = events ?? throw new ArgumentNullException(nameof(events));
             if (headerBytes == null) throw new ArgumentNullException(nameof(headerBytes));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (headers == null) throw new ArgumentNullException(nameof(headers));
 
             Request = new HttpRequest(ipPort, stream, headerBytes);
-            Response = new HttpResponse(ipPort, stream, Request, _Events, _StreamBufferSize);
+            Response = new HttpResponse(ipPort, headers, stream, Request, _Events, _StreamBufferSize);
         }
 
         #endregion

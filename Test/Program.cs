@@ -15,6 +15,7 @@ namespace Test
         static void Main(string[] args)
         {
             _Server = new Webserver("localhost", 9000, false, null, null, DefaultRoute);
+            _Server.DefaultHeaders.Host = "http://localhost:9000";
             _Server.Start();
             Console.WriteLine("http://localhost:9000");
             Console.WriteLine("ENTER to exit");
