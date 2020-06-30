@@ -2,6 +2,8 @@
 
 # HttpServerLite
 
+[![NuGet Version](https://img.shields.io/nuget/v/HttpServerLite.svg?style=flat)](https://www.nuget.org/packages/HttpServerLite/) [![NuGet](https://img.shields.io/nuget/dt/HttpServerLite.svg)](https://www.nuget.org/packages/HttpServerLite) 
+
 TCP-based user-space HTTP and HTTPS server, written in C#.
 
 ## New in v1.0.0
