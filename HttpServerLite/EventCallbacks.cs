@@ -24,7 +24,8 @@ namespace HttpServerLite
             }
             set
             {
-                _ConnectionReceived = value ?? throw new ArgumentNullException(nameof(ConnectionReceived));
+                if (value == null) _ConnectionReceived = ConnectionReceivedInternal;
+                else _ConnectionReceived = value;
             }
         }
 
@@ -43,7 +44,8 @@ namespace HttpServerLite
             }
             set
             {
-                _RequestReceived = value ?? throw new ArgumentNullException(nameof(RequestReceived));
+                if (value == null) _RequestReceived = RequestReceivedInternal;
+                else _RequestReceived = value;
             }
         }
 
@@ -62,7 +64,8 @@ namespace HttpServerLite
             }
             set
             {
-                _AccessControlDenied = value ?? throw new ArgumentNullException(nameof(AccessControlDenied));
+                if (value == null) _AccessControlDenied = AccessControlDeniedInternal;
+                else _AccessControlDenied = value;
             }
         }
          
@@ -83,7 +86,8 @@ namespace HttpServerLite
             }
             set
             {
-                _ResponseSent = value ?? throw new ArgumentNullException(nameof(ResponseSent));
+                if (value == null) _ResponseSent = ResponseSentInternal;
+                else _ResponseSent = value; 
             }
         }
 
@@ -101,7 +105,8 @@ namespace HttpServerLite
             }
             set
             {
-                _ExceptionEncountered = value ?? throw new ArgumentNullException(nameof(ExceptionEncountered));
+                if (value == null) _ExceptionEncountered = ExceptionEncounteredInternal;
+                else _ExceptionEncountered = value;
             }
         }
 
@@ -116,7 +121,8 @@ namespace HttpServerLite
             }
             set
             {
-                _ServerStarted = value ?? throw new ArgumentNullException(nameof(ServerStarted));
+                if (value == null) _ServerStarted = ServerStartedInternal;
+                else _ServerStarted = value;
             }
         }
          
@@ -131,7 +137,8 @@ namespace HttpServerLite
             }
             set
             {
-                _ServerDisposed = value ?? throw new ArgumentNullException(nameof(ServerDisposed));
+                if (value == null) _ServerDisposed = ServerDisposedInternal;
+                else _ServerDisposed = value;
             }
         }
 
@@ -141,12 +148,10 @@ namespace HttpServerLite
 
         private Action<string, int> _ConnectionReceived = null;
         private Action<string, int, string, string> _RequestReceived = null;
-        private Action<string, int, string, string> _AccessControlDenied = null;
-        private Action<string, int, string, string> _RequestorDisconnected = null;
+        private Action<string, int, string, string> _AccessControlDenied = null; 
         private Action<string, int, string, string, int, double> _ResponseSent = null;
         private Action<string, int, Exception> _ExceptionEncountered = null;
-        private Action _ServerStarted = null;
-        private Action _ServerStopped = null;
+        private Action _ServerStarted = null; 
         private Action _ServerDisposed = null;
 
         #endregion
@@ -163,7 +168,7 @@ namespace HttpServerLite
             _AccessControlDenied = AccessControlDeniedInternal;
             _ResponseSent = ResponseSentInternal;
             _ExceptionEncountered = ExceptionEncounteredInternal;
-            _ServerStopped = ServerStoppedInternal;
+            _ServerStarted = ServerStartedInternal;
             _ServerDisposed = ServerDisposedInternal;
         }
 
@@ -195,10 +200,10 @@ namespace HttpServerLite
         {
         }
 
-        private void ServerStoppedInternal()
+        private void ServerStartedInternal()
         {
         }
-
+         
         private void ServerDisposedInternal()
         {
         }

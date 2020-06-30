@@ -27,9 +27,10 @@ Refer to the ```Test``` project for a working example.
 It is important to under that that HttpServerLite is minimalistic and leaves control to you on which headers are set.  Thus it is important to understand the following:
 
 - ```server.DefaultHeaders``` contains default values for a series of HTTP headers
-  - These will be included **in every response**
-  - The values in ```server.DefaultHeaders``` can be written, or
+  - These will be included **in every response** if they have a value assigned
+  - The values in ```server.DefaultHeaders``` can be written directly, or
   - You can modify per-response values by using ```ctx.Response.Headers.Add("[header]", "[value]")```
+    - Values set in ```ctx.Response.Headers``` will override any value in ```server.DefaultHeaders``` for that response only
   - The headers automatically set if a value is supplied include
     - Access-Control-Allow-[Origin|Methods|Headers]
     - Access-Control-Expose-Headers
@@ -37,11 +38,11 @@ It is important to under that that HttpServerLite is minimalistic and leaves con
     - Accept-[Language|Charset]
     - Connection
     - Host
-  - ```Connection``` is an example of one of these headers.  By default it is set to ```keep-alive```, therefore you should:
+  - ```Connection``` is an example of one of these headers.  By default it is set to ```close```, therefore you should:
     - Leave it as is
     - Explicitly set it prior to sending a response using ```ctx.Response.Headers.Add("connection", "value")```, or
     - Set the default value in ```server.DefaultHeaders.Connection```
-- ```ContentLength``` is not set unless you set it in ```ctx.Response.ContentLength```
+- ```ctx.Response.ContentLength``` should be set if you want the ```Content-Length``` header to be sent
 - ```server.DefaultHeaders.Host``` should be set when instantiating the server though it is not required
 
 ### Simple Server

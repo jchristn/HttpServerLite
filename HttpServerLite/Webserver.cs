@@ -225,7 +225,7 @@ namespace HttpServerLite
         public void Start()
         {
             _TcpServer.Start();
-            Task.Run(() => Events.ServerStarted?.Invoke(), _Token);
+            Task.Run(() => Events.ServerStarted(), _Token);
         }
 
         #endregion
@@ -260,7 +260,7 @@ namespace HttpServerLite
                 StaticRoutes = null;
                 DynamicRoutes = null;
                  
-                Task dispTask = Task.Run(() => Events.ServerDisposed?.Invoke());
+                Task dispTask = Task.Run(() => Events.ServerDisposed());
             }
         }
 
@@ -274,7 +274,7 @@ namespace HttpServerLite
             string ip = null;
             int port = 0;
             Common.ParseIpPort(ipPort, out ip, out port);
-            Task connRecvTask = Task.Run(() => Events.ConnectionReceived?.Invoke(ip, port), _Token);
+            Task connRecvTask = Task.Run(() => Events.ConnectionReceived(ip, port), _Token);
 
             #endregion
 
@@ -330,7 +330,7 @@ namespace HttpServerLite
                 _Stats.IncrementRequestCounter(ctx.Request.Method);
                 _Stats.ReceivedPayloadBytes += ctx.Request.ContentLength;
 
-                Task reqRecvTask = Task.Run(() => Events.RequestReceived?.Invoke(
+                Task reqRecvTask = Task.Run(() => Events.RequestReceived(
                     ctx.Request.SourceIp,
                     ctx.Request.SourcePort,
                     ctx.Request.Method.ToString(),
@@ -347,7 +347,7 @@ namespace HttpServerLite
 
                     if (!AccessControl.Permit(ctx.Request.SourceIp))
                     {
-                        Task aclDenied = Task.Run(() => Events.AccessControlDenied?.Invoke(
+                        Task aclDenied = Task.Run(() => Events.AccessControlDenied(
                             ctx.Request.SourceIp,
                             ctx.Request.SourcePort,
                             ctx.Request.Method.ToString(),
@@ -430,13 +430,14 @@ namespace HttpServerLite
                 }
                 finally
                 {
-                    Events.ResponseSent?.Invoke(
+                    Task respSentTask = Task.Run(() => Events.ResponseSent(
                         ctx.Request.SourceIp,
                         ctx.Request.SourcePort,
                         ctx.Request.Method.ToString(),
                         ctx.Request.FullUrl,
                         ctx.Response.StatusCode,
-                        Common.TotalMsFrom(startTime));
+                        Common.TotalMsFrom(startTime)),
+                        _Token);
 
                     if (ctx.Response.ContentLength != null)
                         _Stats.SentPayloadBytes += Convert.ToInt64(ctx.Response.ContentLength);

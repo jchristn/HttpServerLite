@@ -47,7 +47,7 @@ namespace HttpServerLite
         /// <summary>
         /// Connection header.
         /// </summary>
-        public string Connection = "keep-alive";
+        public string Connection = "close";
 
         /// <summary>
         /// Host header.
