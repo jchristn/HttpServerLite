@@ -20,9 +20,29 @@ HttpServerLite is quite fast, however, it's in user-space and is much slower tha
 
 Therefore, use of HttpServerLite is primarily recommended for those that need to satisfy specific use cases where the utmost control over HTTP is required and simply not allowed by webservers that are built on top of ```http.sys```.
 
-## Test App
+## Getting Started
 
 Refer to the ```Test``` project for a working example.
+
+It is important to under that that HttpServerLite is minimalistic and leaves control to you on which headers are set.  Thus it is important to understand the following:
+
+- ```server.DefaultHeaders``` contains default values for a series of HTTP headers
+  - These will be included **in every response**
+  - The values in ```server.DefaultHeaders``` can be written, or
+  - You can modify per-response values by using ```ctx.Response.Headers.Add("[header]", "[value]")```
+  - The headers automatically set if a value is supplied include
+    - Access-Control-Allow-[Origin|Methods|Headers]
+    - Access-Control-Expose-Headers
+    - Accept
+    - Accept-[Language|Charset]
+    - Connection
+    - Host
+  - ```Connection``` is an example of one of these headers.  By default it is set to ```keep-alive```, therefore you should:
+    - Leave it as is
+    - Explicitly set it prior to sending a response using ```ctx.Response.Headers.Add("connection", "value")```, or
+    - Set the default value in ```server.DefaultHeaders.Connection```
+- ```ContentLength``` is not set unless you set it in ```ctx.Response.ContentLength```
+- ```server.DefaultHeaders.Host``` should be set when instantiating the server though it is not required
 
 ### Simple Server
 ```
@@ -39,6 +59,8 @@ namespace Test
     static void Main(string[] args)
     {
       Webserver server = new Webserver("localhost", 9000, false, null, null, DefaultRoute); 
+      server.DefaultHeaders.Host = "https://localhost:9000";
+      server.DefaultHeaders.Connection = "close";
       server.Start();
       Console.WriteLine("HttpServerLite listening on http://localhost:9000");
       Console.WriteLine("ENTER to exit");
@@ -50,6 +72,7 @@ namespace Test
       string resp = "Hello from HttpServerLite!";
       ctx.Response.StatusCode = 200; 
       ctx.Response.ContentLength = resp.Length;
+      ctx.Response.ContentType = "text/plain";
       await ctx.Response.SendAsync(resp);
     }
   }
@@ -58,7 +81,24 @@ namespace Test
 
 ## Routing
 
-Placeholder, to be added.
+HttpServerLite includes the following routing capabilities.  These are listed in the other in which they are processed within HttpServerLite:
+
+- ```server.AccessControl``` - access control based on IP address
+  - You can specify the ```Mode``` to either be ```DefaultPermit``` or ```DefaultDeny```
+    - ```DefaultPermit``` will allow everything unless explicitly blocked through ```DenyList```
+    - ```DefaultDeny``` will deny everything unless explicitly permitted through ```PermitList```
+    - The default value is ```DefaultPermit```
+- ```server.OptionsRoute``` - a default route to use when the HTTP verb is ```OPTIONS```
+  - When set, the connection is terminated after being handled by ```server.OptionsRoute```
+- ```server.PreRoutingHandler``` - a route through which **all** requests will pass, useful for authentication, logging, and other functions
+  - If defined, return ```true``` from this task if you wish to terminate the connection
+  - Otherwise return ```false``` to allow routing to continue
+- ```server.ContentRoutes``` - serve GET and HEAD requests for static content based on URL path
+  - Content will be read from the ```server.ContentRoutes.BaseDirectory``` plus the URL path
+  - An entire directory can be listed as a content route when adding the route
+- ```server.StaticRoutes``` - invoke functions based on specific HTTP method and URL combinations
+- ```server.DynamicRoutes``` - invoke functions based on specific HTTP method and a regular expression for the URL
+- ```server.DefaultRoute``` - any request that did not match a content route, static route, or dynamic route, is routed here
 
 ## Accessing from Outside Localhost
 

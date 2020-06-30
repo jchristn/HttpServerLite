@@ -15,7 +15,8 @@ namespace Test.Ssl
         static void Main(string[] args)
         {
             _Server = new Webserver("localhost", 9000, true, "cavemantcp.pfx", "simpletcp", DefaultRoute);
-            _Server.DefaultHeaders.Host = "https://localhost:9000"; 
+            _Server.DefaultHeaders.Host = "https://localhost:9000";
+            _Server.DefaultHeaders.Connection = "close";
             _Server.Events.ConnectionReceived = ConnectionReceived;
             _Server.Start();
             Console.WriteLine("https://localhost:9000");

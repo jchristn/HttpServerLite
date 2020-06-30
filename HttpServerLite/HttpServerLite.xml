@@ -319,15 +319,6 @@
             string: Full URL.
             </summary>
         </member>
-        <member name="P:HttpServerLite.EventCallbacks.RequestorDisconnected">
-            <summary>
-            Callback/action to call when a requestor disconnected unexpectedly.
-            string: IP address of the client.
-            int: Source TCP port of the client.
-            string: HTTP method.
-            string Full URL.
-            </summary>
-        </member>
         <member name="P:HttpServerLite.EventCallbacks.ResponseSent">
             <summary>
             Callback/action to call when a response is sent.
@@ -347,9 +338,9 @@
             Exception: Exception encountered.
             </summary>
         </member>
-        <member name="P:HttpServerLite.EventCallbacks.ServerStopped">
+        <member name="P:HttpServerLite.EventCallbacks.ServerStarted">
             <summary>
-            Callback/action to call when the server is stopped.
+            Callback/action to call when the server is started.
             </summary>
         </member>
         <member name="P:HttpServerLite.EventCallbacks.ServerDisposed">
@@ -912,11 +903,6 @@
             Indicates if the server is listening for connections.
             </summary>
         </member>
-        <member name="F:HttpServerLite.Webserver.Logger">
-            <summary>
-            Method to invoke when sending log messages.
-            </summary>
-        </member>
         <member name="P:HttpServerLite.Webserver.AcceptInvalidCertificates">
             <summary>
             For SSL, accept or deny invalid or otherwise unverifiable SSL certificates.
@@ -995,10 +981,21 @@
             <param name="pfxCertPassword">For SSL, the PFX certificate password.</param>
             <param name="defaultRoute">Default route.</param>
         </member>
+        <member name="M:HttpServerLite.Webserver.Dispose">
+            <summary>
+            Dispose of the object.
+            </summary>
+        </member>
         <member name="M:HttpServerLite.Webserver.Start">
             <summary>
             Start the server.
             </summary>
+        </member>
+        <member name="M:HttpServerLite.Webserver.Dispose(System.Boolean)">
+            <summary>
+            Tear down the server and dispose of background workers.
+            </summary>
+            <param name="disposing">Indicate if resources should be disposed.</param>
         </member>
     </members>
 </doc>

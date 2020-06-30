@@ -65,26 +65,7 @@ namespace HttpServerLite
                 _AccessControlDenied = value ?? throw new ArgumentNullException(nameof(AccessControlDenied));
             }
         }
-
-        /// <summary>
-        /// Callback/action to call when a requestor disconnected unexpectedly.
-        /// string: IP address of the client.
-        /// int: Source TCP port of the client.
-        /// string: HTTP method.
-        /// string Full URL.
-        /// </summary>
-        public Action<string, int, string, string> RequestorDisconnected
-        {
-            get
-            {
-                return _RequestorDisconnected;
-            }
-            set
-            {
-                _RequestorDisconnected = value ?? throw new ArgumentNullException(nameof(RequestorDisconnected));
-            }
-        }
-
+         
         /// <summary>
         /// Callback/action to call when a response is sent.
         /// string: IP address of the client.
@@ -125,20 +106,20 @@ namespace HttpServerLite
         }
 
         /// <summary>
-        /// Callback/action to call when the server is stopped.
+        /// Callback/action to call when the server is started.
         /// </summary>
-        public Action ServerStopped
+        public Action ServerStarted
         {
             get
             {
-                return _ServerStopped;
+                return _ServerStarted;
             }
             set
             {
-                _ServerStopped = value ?? throw new ArgumentNullException(nameof(ServerStopped));
+                _ServerStarted = value ?? throw new ArgumentNullException(nameof(ServerStarted));
             }
         }
-
+         
         /// <summary>
         /// Callback/action to call when the server is disposed.
         /// </summary>
@@ -164,6 +145,7 @@ namespace HttpServerLite
         private Action<string, int, string, string> _RequestorDisconnected = null;
         private Action<string, int, string, string, int, double> _ResponseSent = null;
         private Action<string, int, Exception> _ExceptionEncountered = null;
+        private Action _ServerStarted = null;
         private Action _ServerStopped = null;
         private Action _ServerDisposed = null;
 

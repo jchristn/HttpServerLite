@@ -11,7 +11,7 @@ namespace HttpServerLite
     /// <summary>
     /// HttpServerLite web server.
     /// </summary>
-    public class Webserver
+    public class Webserver : IDisposable
     {
         #region Public-Members
 
@@ -26,12 +26,7 @@ namespace HttpServerLite
                 return false;
             }
         }
-
-        /// <summary>
-        /// Method to invoke when sending log messages.
-        /// </summary>
-        public Action<string> Logger = null;
-
+         
         /// <summary>
         /// For SSL, accept or deny invalid or otherwise unverifiable SSL certificates.
         /// </summary>
@@ -211,6 +206,15 @@ namespace HttpServerLite
             _Token = _TokenSource.Token;
         }
 
+        /// <summary>
+        /// Dispose of the object.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         #endregion
 
         #region Public-Methods
@@ -221,11 +225,44 @@ namespace HttpServerLite
         public void Start()
         {
             _TcpServer.Start();
+            Task.Run(() => Events.ServerStarted?.Invoke(), _Token);
         }
 
         #endregion
 
         #region Private-Methods
+        
+        /// <summary>
+        /// Tear down the server and dispose of background workers.
+        /// </summary>
+        /// <param name="disposing">Indicate if resources should be disposed.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_TcpServer != null)
+                {
+                    _TcpServer.Dispose();
+                }
+
+                if (_TokenSource != null && _Token != null)
+                {
+                    _TokenSource.Cancel();
+                }
+
+                _Stats = null;
+                _DefaultHeaders = null;
+                _DefaultRoute = null;
+
+                AccessControl = null;
+                OptionsRoute = null;
+                ContentRoutes = null;
+                StaticRoutes = null;
+                DynamicRoutes = null;
+                 
+                Task dispTask = Task.Run(() => Events.ServerDisposed?.Invoke());
+            }
+        }
 
         private async void ClientConnected(object sender, ClientConnectedEventArgs args)
         { 
@@ -237,7 +274,7 @@ namespace HttpServerLite
             string ip = null;
             int port = 0;
             Common.ParseIpPort(ipPort, out ip, out port);
-            Events.ConnectionReceived?.Invoke(ip, port);
+            Task connRecvTask = Task.Run(() => Events.ConnectionReceived?.Invoke(ip, port), _Token);
 
             #endregion
 
@@ -293,11 +330,12 @@ namespace HttpServerLite
                 _Stats.IncrementRequestCounter(ctx.Request.Method);
                 _Stats.ReceivedPayloadBytes += ctx.Request.ContentLength;
 
-                Events.RequestReceived?.Invoke(
+                Task reqRecvTask = Task.Run(() => Events.RequestReceived?.Invoke(
                     ctx.Request.SourceIp,
                     ctx.Request.SourcePort,
                     ctx.Request.Method.ToString(),
-                    ctx.Request.RawUrlWithQuery);
+                    ctx.Request.RawUrlWithQuery),
+                    _Token);
 
                 #endregion
 
@@ -309,11 +347,12 @@ namespace HttpServerLite
 
                     if (!AccessControl.Permit(ctx.Request.SourceIp))
                     {
-                        Events.AccessControlDenied?.Invoke(
+                        Task aclDenied = Task.Run(() => Events.AccessControlDenied?.Invoke(
                             ctx.Request.SourceIp,
                             ctx.Request.SourcePort,
                             ctx.Request.Method.ToString(),
-                            ctx.Request.FullUrl);
+                            ctx.Request.FullUrl),
+                            _Token);
                         return;
                     }
 
@@ -413,7 +452,7 @@ namespace HttpServerLite
             }
             catch (Exception e)
             {
-                Events.ExceptionEncountered(ip, port, e);
+                Task excTask = Task.Run(() => Events.ExceptionEncountered(ip, port, e), _Token);
                 return;
             }
 
