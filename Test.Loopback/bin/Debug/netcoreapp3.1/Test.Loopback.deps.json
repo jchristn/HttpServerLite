@@ -6,12 +6,12 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v3.1": {
-      "Test/1.0.0": {
+      "Test.Loopback/1.0.0": {
         "dependencies": {
           "HttpServerLite": "1.0.0.15"
         },
         "runtime": {
-          "Test.dll": {}
+          "Test.Loopback.dll": {}
         }
       },
       "CavemanTcp/1.2.1.2": {
@@ -60,7 +60,7 @@
     }
   },
   "libraries": {
-    "Test/1.0.0": {
+    "Test.Loopback/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

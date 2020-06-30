@@ -927,6 +927,11 @@
             For SSL, enable to require mutual authentication.
             </summary>
         </member>
+        <member name="P:HttpServerLite.Webserver.MonitorClientConnections">
+            <summary>
+            Enable or disable TCP-level connection monitoring.  Default is disabled.
+            </summary>
+        </member>
         <member name="P:HttpServerLite.Webserver.StreamReadBufferSize">
             <summary>
             Buffer size to use when interacting with streams.

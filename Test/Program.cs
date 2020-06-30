@@ -10,13 +10,13 @@ namespace Test
     class Program
     {
         static Webserver _Server;
-        static bool _Debug = true;
+        static bool _Debug = false;
 
         static void Main(string[] args)
         {
             _Server = new Webserver("localhost", 9000, false, null, null, DefaultRoute);
             _Server.DefaultHeaders.Host = "http://localhost:9000";
-            _Server.Events.ConnectionReceived = ConnectionReceived;
+            // _Server.Events.ConnectionReceived = ConnectionReceived;
             _Server.Start();
             Console.WriteLine("http://localhost:9000");
             Console.WriteLine("ENTER to exit");
@@ -36,29 +36,25 @@ namespace Test
             byte[] resp = null;
 
             if (ctx.Request.RawUrlWithoutQuery.Equals("/"))
-            {
-                Console.WriteLine("Root route");
+            { 
                 resp = Encoding.UTF8.GetBytes("Hello from HttpServerLite\r\n");
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "text/html";
             }
             else if (ctx.Request.RawUrlWithoutQuery.Equals("/favicon.ico"))
-            {
-                Console.WriteLine("Favicon route");
+            { 
                 resp = new byte[0];
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "text/html";
-            }
+            } 
             else if (ctx.Request.RawUrlWithoutQuery.Equals("/html/index.html"))
-            {
-                Console.WriteLine("Index route");
+            { 
                 resp = await File.ReadAllBytesAsync("./html/index.html");
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "text/html";
             }
             else if (ctx.Request.RawUrlWithoutQuery.Equals("/img/watson.jpg"))
-            {
-                Console.WriteLine("Watson route");
+            { 
                 resp = await File.ReadAllBytesAsync("./img/watson.jpg");
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "image/jpeg";
@@ -101,9 +97,7 @@ namespace Test
                 }
             }
             else
-            {
-                Console.WriteLine("Unknown route");
-                resp = Encoding.UTF8.GetBytes("Unknown URL");
+            {  
                 ctx.Response.StatusCode = 404;
                 ctx.Response.ContentType = "text/plain";
             }

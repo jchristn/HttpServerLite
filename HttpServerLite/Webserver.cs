@@ -63,6 +63,22 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Enable or disable TCP-level connection monitoring.  Default is disabled.
+        /// </summary>
+        public bool MonitorClientConnections
+        {
+            get
+            {
+                if (_TcpServer != null) return _TcpServer.MonitorClientConnections;
+                return false;
+            }
+            set
+            {
+                if (_TcpServer != null) _TcpServer.MonitorClientConnections = value;
+            }
+        }
+
+        /// <summary>
         /// Buffer size to use when interacting with streams.
         /// </summary>
         public int StreamReadBufferSize
@@ -188,6 +204,7 @@ namespace HttpServerLite
             _ContentRouteProcessor = new ContentRouteProcessor(ContentRoutes);
 
             _TcpServer = new TcpServer(_Hostname, _Port, _Ssl, _PfxCertFilename, _PfxCertPassword);
+            _TcpServer.MonitorClientConnections = false;
             _TcpServer.ClientConnected += ClientConnected;
             _TcpServer.ClientDisconnected += ClientDisconnected;
 
