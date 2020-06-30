@@ -1,4 +1,4 @@
-![alt tag](https://github.com/jchristn/httpserverlite/blob/master/assets/icon.ico)
+![alt tag](https://raw.githubusercontent.com/jchristn/HttpServerLite/master/Assets/icon.ico)
 
 # HttpServerLite
 
