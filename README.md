@@ -32,27 +32,27 @@ using HttpServerLite;
 
 namespace Test
 {
-    class Program
-    {
-        static Webserver _Server;
+  class Program
+  {
+    static Webserver _Server;
 
-        static void Main(string[] args)
-        {
-            Webserver server = new Webserver("localhost", 9000, false, null, null, DefaultRoute); 
-            server.Start();
-            Console.WriteLine("HttpServerLite listening on http://localhost:9000");
-            Console.WriteLine("ENTER to exit");
-            Console.ReadLine();
-        }
-         
-        static async Task DefaultRoute(HttpContext ctx)
-        {
-        	string resp = "Hello from HttpServerLite!";
-            ctx.Response.StatusCode = 200; 
-            ctx.Response.ContentLength = resp.Length;
-            await ctx.Response.SendAsync(resp);
-        }
+    static void Main(string[] args)
+    {
+      Webserver server = new Webserver("localhost", 9000, false, null, null, DefaultRoute); 
+      server.Start();
+      Console.WriteLine("HttpServerLite listening on http://localhost:9000");
+      Console.WriteLine("ENTER to exit");
+      Console.ReadLine();
     }
+         
+    static async Task DefaultRoute(HttpContext ctx)
+    {
+      string resp = "Hello from HttpServerLite!";
+      ctx.Response.StatusCode = 200; 
+      ctx.Response.ContentLength = resp.Length;
+      await ctx.Response.SendAsync(resp);
+    }
+  }
 } 
 ```
 
