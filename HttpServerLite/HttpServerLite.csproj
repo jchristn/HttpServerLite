@@ -13,7 +13,7 @@
     <RepositoryType>Github</RepositoryType>
     <PackageTags>http https server rest restful api async</PackageTags>
     <PackageReleaseNotes>IDisposable</PackageReleaseNotes>
-    <PackageIconUrl>https://github.com/jchristn/httpserverlite/blob/master/assets/icon.ico</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/jchristn/HttpServerLite/master/Assets/icon.ico</PackageIconUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
