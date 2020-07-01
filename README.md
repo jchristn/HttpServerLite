@@ -31,7 +31,7 @@ It is important to under that that HttpServerLite is minimalistic and leaves con
 - ```server.DefaultHeaders``` contains default values for a series of HTTP headers
   - These will be included **in every response** if they have a value assigned
   - The values in ```server.DefaultHeaders``` can be written directly, or
-  - You can modify per-response values by using ```ctx.Response.Headers.Add("[header]", "[value]")```
+    - You can modify per-response values by using ```ctx.Response.Headers.Add("[header]", "[value]")```
     - Values set in ```ctx.Response.Headers``` will override any value in ```server.DefaultHeaders``` for that response only
   - The headers automatically set if a value is supplied include
     - Access-Control-Allow-[Origin|Methods|Headers]
@@ -109,8 +109,9 @@ When you configure HttpServerLite to listen on ```127.0.0.1``` or ```localhost``
 
 To configure access from other nodes outside of ```localhost```, use the following:
 
-- Specify the exact DNS hostname upon which HttpServerLite should listen in the Server constructor. The HOST header on incoming HTTP requests MUST match this value (this is an operating system limitation)
-- If you want to listen on more than one hostname or IP address, use ```*``` or ```+```. You MUST run HttpServerLite as administrator for this to work (this is an operating system limitation)
+- Specify the IP address on which HttpServerLite should listen in the Server constructor. 
+- If you want to listen on more than one IP address, use ```*``` or ```+```
+- If you listen on anything other than ```127.0.0.1```, you may have to run HttpServerLite as administrator (operating system dependent)
 - If you want to use a port number less than 1024, you MUST run HttpServerLite as administrator (this is an operating system limitation)
 - Open a port on your firewall to permit traffic on the TCP port upon which HttpServerLite is listening
 - Since HttpServerLite is not based on ```http.sys``` **you should not have to add URL ACLs** 
