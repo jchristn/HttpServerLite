@@ -768,6 +768,40 @@
             <param name="extension">File extension.</param>
             <returns>String containing MIME type.</returns>
         </member>
+        <member name="T:HttpServerLite.ReflectionCore">
+            <summary>
+            Helper methods for reflection.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.ReflectionCore.LoadRoutes``1(``0,System.Reflection.Assembly)">
+            <summary>
+            Load routes for the server.
+            </summary>
+            <typeparam name="T">Webserver.</typeparam>
+            <param name="server">Webserver.</param>
+            <param name="assembly">Assembly.</param>
+            <returns>Weberver.</returns>
+        </member>
+        <member name="T:HttpServerLite.RouteAttribute">
+            <summary>
+            Attribute that is used to mark methods as route methods.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.RouteAttribute.Path">
+            <summary>
+            The raw URL, i.e. /foo/bar/.  Be sure this begins and ends with '/'.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.RouteAttribute.Method">
+            <summary>
+            The HTTP method, i.e. GET, PUT, POST, DELETE, etc.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.RouteAttribute.#ctor(System.String,HttpServerLite.HttpMethod)">
+            <summary>Instantiate the object.</summary>
+            <param name="path">The raw URL, i.e. /foo/bar/.  Be sure this begins and ends with '/'.</param>
+            <param name="method">The HTTP method, i.e. GET, PUT, POST, DELETE, etc.</param>
+        </member>
         <member name="T:HttpServerLite.StaticRoute">
             <summary>
             Assign a method handler for when requests are received matching the supplied method and path.

@@ -3,8 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using HttpServerLite;
-using HttpServerLite.Routes;
+using HttpServerLite; 
 
 namespace Test
 {
@@ -108,13 +107,13 @@ namespace Test
             await ctx.Response.SendAsync(resp);
         }
 
-        [Route("Test")]
-        public async Task TestRoute(HttpContext context)
+        [RouteAttribute("Test")]
+        public async Task TestRoute(HttpContext ctx)
         {
             byte[] response = Encoding.UTF8.GetBytes("HttpServerLite test route");
-            context.Response.StatusCode = 200;
-            context.Response.ContentType = "text/html";
-            await context.Response.SendAsync(response);
+            ctx.Response.StatusCode = 200;
+            ctx.Response.ContentType = "text/html";
+            await ctx.Response.SendAsync(response);
         }
     }
 }

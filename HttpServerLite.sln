@@ -7,9 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpServerLite", "HttpServe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{99FE6745-0AA9-487E-8368-212B349676A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Ssl", "Test.Ssl\Test.Ssl.csproj", "{8051C1EB-E2E7-4D01-A434-06360542EF31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Ssl", "Test.Ssl\Test.Ssl.csproj", "{8051C1EB-E2E7-4D01-A434-06360542EF31}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Loopback", "Test.Loopback\Test.Loopback.csproj", "{708A67B3-47C5-4A20-BDF1-0765946F8C09}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Loopback", "Test.Loopback\Test.Loopback.csproj", "{708A67B3-47C5-4A20-BDF1-0765946F8C09}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Routes", "Test.Routes\Test.Routes.csproj", "{86958CB1-8ED7-4C4A-8DA7-118B626FCD2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{708A67B3-47C5-4A20-BDF1-0765946F8C09}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{708A67B3-47C5-4A20-BDF1-0765946F8C09}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{708A67B3-47C5-4A20-BDF1-0765946F8C09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86958CB1-8ED7-4C4A-8DA7-118B626FCD2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86958CB1-8ED7-4C4A-8DA7-118B626FCD2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86958CB1-8ED7-4C4A-8DA7-118B626FCD2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86958CB1-8ED7-4C4A-8DA7-118B626FCD2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

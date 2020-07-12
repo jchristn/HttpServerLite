@@ -2,10 +2,12 @@
 
 ## Current Version
 
-v1.0.0
+v1.0.1
 
-- Alpha 
+- Added attribute-based static routes (thank you @Job79!)
 
 ## Previous Versions
 
-Release notes from previous versions will be placed here.
+v1.0.0
+
+- Alpha 

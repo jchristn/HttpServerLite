@@ -6,15 +6,16 @@
 
 TCP-based user-space HTTP and HTTPS server, written in C#.
 
-## New in v1.0.0
+## New in v1.0.1
 
-- Alpha
+- Added attribute-based static routes (thank you @Job79!)
 
 ## Special Thanks
 
 I'd like to extend a special thanks to those that have provided motivation or otherwise directly helped make HttpServerLite better.
 
 - @winkmichael
+- @Job79
 
 ## Performance
 
