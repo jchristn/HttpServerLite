@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HttpServerLite;
+using HttpServerLite.Routes;
 
 namespace Test
 {
@@ -14,7 +15,8 @@ namespace Test
 
         static void Main(string[] args)
         {
-            _Server = new Webserver("localhost", 9000, false, null, null, DefaultRoute);
+            _Server = new Webserver("localhost", 9000, false, null, null, DefaultRoute)
+                .LoadRoutes();
             _Server.DefaultHeaders.Host = "http://localhost:9000";
             // _Server.Events.ConnectionReceived = ConnectionReceived;
             _Server.Start();
@@ -104,6 +106,15 @@ namespace Test
 
             ctx.Response.ContentLength = resp.Length;
             await ctx.Response.SendAsync(resp);
+        }
+
+        [Route("Test")]
+        public async Task TestRoute(HttpContext context)
+        {
+            byte[] response = Encoding.UTF8.GetBytes("HttpServerLite test route");
+            context.Response.StatusCode = 200;
+            context.Response.ContentType = "text/html";
+            await context.Response.SendAsync(response);
         }
     }
 }
