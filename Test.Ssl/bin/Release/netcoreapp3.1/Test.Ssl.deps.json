@@ -8,7 +8,7 @@
     ".NETCoreApp,Version=v3.1": {
       "Test.Ssl/1.0.0": {
         "dependencies": {
-          "HttpServerLite": "1.0.1"
+          "HttpServerLite": "1.0.1.1"
         },
         "runtime": {
           "Test.Ssl.dll": {}
@@ -46,7 +46,7 @@
           }
         }
       },
-      "HttpServerLite/1.0.1": {
+      "HttpServerLite/1.0.1.1": {
         "dependencies": {
           "CavemanTcp": "1.2.1.2",
           "IpMatcher": "1.0.3",
@@ -93,7 +93,7 @@
       "path": "regexmatcher/1.0.3",
       "hashPath": "regexmatcher.1.0.3.nupkg.sha512"
     },
-    "HttpServerLite/1.0.1": {
+    "HttpServerLite/1.0.1.1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
