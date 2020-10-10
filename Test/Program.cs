@@ -10,18 +10,57 @@ namespace Test
     class Program
     {
         static Webserver _Server;
+        static bool _RunForever = true;
         static bool _Debug = false;
 
         static void Main(string[] args)
         {
-            _Server = new Webserver("localhost", 9000, false, null, null, DefaultRoute)
-                .LoadRoutes();
+            _Server = new Webserver("localhost", 9000, false, null, null, DefaultRoute).LoadRoutes();
             _Server.DefaultHeaders.Host = "http://localhost:9000";
-            // _Server.Events.ConnectionReceived = ConnectionReceived;
             _Server.Start();
-            Console.WriteLine("http://localhost:9000");
-            Console.WriteLine("ENTER to exit");
-            Console.ReadLine();
+            Console.WriteLine("Started on http://localhost:9000");
+
+            while (_RunForever)
+            {
+                Console.Write("Command [? for help]: ");
+                string userInput = Console.ReadLine();
+                if (String.IsNullOrEmpty(userInput)) continue;
+
+                switch (userInput)
+                {
+                    case "?":
+                        Menu();
+                        break;
+                    case "q":
+                        _RunForever = false;
+                        break;
+                    case "c":
+                    case "cls":
+                        Console.Clear();
+                        break;
+                    case "start":
+                        _Server.Start();
+                        break;
+                    case "stop":
+                        _Server.Stop();
+                        break;
+                    case "state":
+                        Console.WriteLine(_Server.IsListening);
+                        break;
+                }
+            }
+        }
+
+        static void Menu()
+        {
+            Console.WriteLine("Available commands:");
+            Console.WriteLine(" ?        help, this menu");
+            Console.WriteLine(" q        quit");
+            Console.WriteLine(" cls      clear the screen");
+            Console.WriteLine(" state    display whether or not new connections are accepted");
+            Console.WriteLine(" start    start accepting new connections");
+            Console.WriteLine(" stop     stop accepting new connections");
+            Console.WriteLine("");
         }
 
         static void ConnectionReceived(string ip, int port)

@@ -34,11 +34,11 @@ namespace HttpServerLite
         {
             get
             {
-                return _TcpServer.AcceptInvalidCertificates;
+                return _TcpServer.Settings.AcceptInvalidCertificates;
             }
             set
             {
-                _TcpServer.AcceptInvalidCertificates = value;
+                _TcpServer.Settings.AcceptInvalidCertificates = value;
             }
         }
 
@@ -49,30 +49,14 @@ namespace HttpServerLite
         {
             get
             {
-                return _TcpServer.MutuallyAuthenticate;
+                return _TcpServer.Settings.MutuallyAuthenticate;
             }
             set
             {
-                _TcpServer.MutuallyAuthenticate = value;
+                _TcpServer.Settings.MutuallyAuthenticate = value;
             }
         }
-
-        /// <summary>
-        /// Enable or disable TCP-level connection monitoring.  Default is disabled.
-        /// </summary>
-        public bool MonitorClientConnections
-        {
-            get
-            {
-                if (_TcpServer != null) return _TcpServer.MonitorClientConnections;
-                return false;
-            }
-            set
-            {
-                if (_TcpServer != null) _TcpServer.MonitorClientConnections = value;
-            }
-        }
-
+         
         /// <summary>
         /// Buffer size to use when interacting with streams.
         /// </summary>
@@ -162,7 +146,7 @@ namespace HttpServerLite
         private bool _Ssl = false;
         private string _PfxCertFilename = null;
         private string _PfxCertPassword = null;
-        private TcpServer _TcpServer = null; 
+        private CavemanTcpServer _TcpServer = null; 
         private DefaultHeaderValues _DefaultHeaders = new DefaultHeaderValues();
         private Func<HttpContext, Task> _DefaultRoute = null;
         private ContentRouteProcessor _ContentRouteProcessor;
@@ -198,10 +182,10 @@ namespace HttpServerLite
              
             _ContentRouteProcessor = new ContentRouteProcessor(ContentRoutes);
 
-            _TcpServer = new TcpServer(_Hostname, _Port, _Ssl, _PfxCertFilename, _PfxCertPassword);
-            _TcpServer.MonitorClientConnections = false;
-            _TcpServer.ClientConnected += ClientConnected;
-            _TcpServer.ClientDisconnected += ClientDisconnected;
+            _TcpServer = new CavemanTcpServer(_Hostname, _Port, _Ssl, _PfxCertFilename, _PfxCertPassword);
+            _TcpServer.Settings.MonitorClientConnections = false;
+            _TcpServer.Events.ClientConnected += ClientConnected;
+            _TcpServer.Events.ClientDisconnected += ClientDisconnected;
 
             _Token = _TokenSource.Token;
         }
@@ -220,12 +204,21 @@ namespace HttpServerLite
         #region Public-Methods
 
         /// <summary>
-        /// Start the server.
+        /// Start accepting new connections.
         /// </summary>
         public void Start()
         {
             _TcpServer.Start();
             Task.Run(() => Events.ServerStarted(), _Token);
+        }
+         
+        /// <summary>
+        /// Stop accepting new connections.
+        /// </summary>
+        public void Stop()
+        {
+            _TcpServer.Stop();
+            Task.Run(() => Events.ServerStopped(), _Token);
         }
 
         #endregion

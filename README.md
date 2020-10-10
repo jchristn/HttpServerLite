@@ -6,9 +6,9 @@
 
 TCP-based user-space HTTP and HTTPS server, written in C#.
 
-## New in v1.0.1
+## New in v1.0.2
 
-- Added attribute-based static routes (thank you @Job79!)
+- Added ```Stop()``` API
 
 ## Special Thanks
 

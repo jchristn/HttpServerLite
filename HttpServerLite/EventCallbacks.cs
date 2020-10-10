@@ -125,7 +125,23 @@ namespace HttpServerLite
                 else _ServerStarted = value;
             }
         }
-         
+
+        /// <summary>
+        /// Callback/action to call when the server is stopped.
+        /// </summary>
+        public Action ServerStopped
+        {
+            get
+            {
+                return _ServerStopped;
+            }
+            set
+            {
+                if (value == null) _ServerDisposed = ServerStoppedInternal;
+                else _ServerStopped = value;
+            }
+        }
+
         /// <summary>
         /// Callback/action to call when the server is disposed.
         /// </summary>
@@ -151,7 +167,8 @@ namespace HttpServerLite
         private Action<string, int, string, string> _AccessControlDenied = null; 
         private Action<string, int, string, string, int, double> _ResponseSent = null;
         private Action<string, int, Exception> _ExceptionEncountered = null;
-        private Action _ServerStarted = null; 
+        private Action _ServerStarted = null;
+        private Action _ServerStopped = null;
         private Action _ServerDisposed = null;
 
         #endregion
@@ -203,7 +220,11 @@ namespace HttpServerLite
         private void ServerStartedInternal()
         {
         }
-         
+
+        private void ServerStoppedInternal()
+        {
+        }
+
         private void ServerDisposedInternal()
         {
         }

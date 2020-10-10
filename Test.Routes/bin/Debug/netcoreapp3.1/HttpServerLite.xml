@@ -343,6 +343,11 @@
             Callback/action to call when the server is started.
             </summary>
         </member>
+        <member name="P:HttpServerLite.EventCallbacks.ServerStopped">
+            <summary>
+            Callback/action to call when the server is stopped.
+            </summary>
+        </member>
         <member name="P:HttpServerLite.EventCallbacks.ServerDisposed">
             <summary>
             Callback/action to call when the server is disposed.
@@ -569,6 +574,22 @@
             </summary>
             <param name="key"></param>
             <returns></returns>
+        </member>
+        <member name="M:HttpServerLite.HttpRequest.HeaderExists(System.String,System.Boolean)">
+            <summary>
+            Determine if a header exists.
+            </summary>
+            <param name="key">Header key.</param>
+            <param name="caseSensitive">Specify whether a case sensitive search should be used.</param>
+            <returns>True if exists.</returns>
+        </member>
+        <member name="M:HttpServerLite.HttpRequest.QuerystringExists(System.String,System.Boolean)">
+            <summary>
+            Determine if a querystring entry exists.
+            </summary>
+            <param name="key">Querystring key.</param>
+            <param name="caseSensitive">Specify whether a case sensitive search should be used.</param>
+            <returns>True if exists.</returns>
         </member>
         <member name="M:HttpServerLite.HttpRequest.DataAsString">
             <summary>
@@ -947,11 +968,6 @@
             For SSL, enable to require mutual authentication.
             </summary>
         </member>
-        <member name="P:HttpServerLite.Webserver.MonitorClientConnections">
-            <summary>
-            Enable or disable TCP-level connection monitoring.  Default is disabled.
-            </summary>
-        </member>
         <member name="P:HttpServerLite.Webserver.StreamReadBufferSize">
             <summary>
             Buffer size to use when interacting with streams.
@@ -1022,7 +1038,12 @@
         </member>
         <member name="M:HttpServerLite.Webserver.Start">
             <summary>
-            Start the server.
+            Start accepting new connections.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.Webserver.Stop">
+            <summary>
+            Stop accepting new connections.
             </summary>
         </member>
         <member name="M:HttpServerLite.Webserver.Dispose(System.Boolean)">
