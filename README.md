@@ -49,7 +49,7 @@ It is important to under that that HttpServerLite is minimalistic and leaves con
 - ```server.DefaultHeaders.Host``` should be set when instantiating the server though it is not required
 
 ### Simple Server
-```
+```csharp
 using System;
 using System.Threading.Tasks;
 using HttpServerLite;
