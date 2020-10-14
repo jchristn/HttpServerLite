@@ -18,6 +18,7 @@ namespace Test
             _Server = new Webserver("localhost", 9000, false, null, null, DefaultRoute).LoadRoutes();
             _Server.DefaultHeaders.Host = "http://localhost:9000";
             _Server.Start();
+
             Console.WriteLine("Started on http://localhost:9000");
 
             while (_RunForever)
@@ -88,14 +89,14 @@ namespace Test
                 ctx.Response.ContentType = "text/html";
             } 
             else if (ctx.Request.RawUrlWithoutQuery.Equals("/html/index.html"))
-            { 
-                resp = await File.ReadAllBytesAsync("./html/index.html");
+            {
+                resp = File.ReadAllBytes("./html/index.html");
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "text/html";
             }
             else if (ctx.Request.RawUrlWithoutQuery.Equals("/img/watson.jpg"))
-            { 
-                resp = await File.ReadAllBytesAsync("./img/watson.jpg");
+            {
+                resp = File.ReadAllBytes("./img/watson.jpg");
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "image/jpeg";
             }
@@ -139,11 +140,9 @@ namespace Test
             else
             {  
                 ctx.Response.StatusCode = 404;
-                ctx.Response.ContentType = "text/plain";
+                ctx.Response.ContentType = "text/plain"; 
+                await ctx.Response.SendAsync(0);
             }
-
-            ctx.Response.ContentLength = resp.Length;
-            await ctx.Response.SendAsync(resp);
         }
 
         [RouteAttribute("Test")]

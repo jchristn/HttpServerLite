@@ -2,11 +2,16 @@
 
 ## Current Version
 
+v1.0.4
+
+- Dependency update
+- Configurable match preference in dynamic routes manager
+
+## Previous Versions
+
 v1.0.3
 
 - Added attributes for both static and dynamic routes
-
-## Previous Versions
 
 v1.0.2
 

@@ -6,9 +6,10 @@
 
 TCP-based user-space HTTP and HTTPS server, written in C#.
 
-## New in v1.0.3
+## New in v1.0.4
 
-- Added attributes for both static and dynamic routes
+- Dependency update
+- Configurable match preference in dynamic routes manager
 
 ## Special Thanks
 
