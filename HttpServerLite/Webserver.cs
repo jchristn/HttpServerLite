@@ -108,7 +108,18 @@ namespace HttpServerLite
         /// <summary>
         /// Access control manager, i.e. default mode of operation, permit list, and deny list.
         /// </summary>
-        public AccessControlManager AccessControl = new AccessControlManager(AccessControlMode.DefaultPermit);
+        public AccessControlManager AccessControl
+        {
+            get
+            {
+                return _AccessControl;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(AccessControl));
+                _AccessControl = value;
+            }
+        }
 
         /// <summary>
         /// Function to call prior to routing.  
@@ -125,17 +136,50 @@ namespace HttpServerLite
         /// <summary>
         /// Content routes; i.e. routes to specific files or folders for GET and HEAD requests.
         /// </summary>
-        public ContentRouteManager ContentRoutes = new ContentRouteManager();
+        public ContentRouteManager ContentRoutes
+        {
+            get
+            {
+                return _ContentRoutes;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(AccessControl));
+                _ContentRoutes = value;
+            }
+        }
 
         /// <summary>
         /// Static routes; i.e. routes with explicit matching and any HTTP method.
         /// </summary>
-        public StaticRouteManager StaticRoutes = new StaticRouteManager();
+        public StaticRouteManager StaticRoutes
+        {
+            get
+            {
+                return _StaticRoutes;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(AccessControl));
+                _StaticRoutes = value;
+            }
+        }
 
         /// <summary>
         /// Dynamic routes; i.e. routes with regex matching and any HTTP method.
         /// </summary>
-        public DynamicRouteManager DynamicRoutes = new DynamicRouteManager();
+        public DynamicRouteManager DynamicRoutes
+        {
+            get
+            {
+                return _DynamicRoutes;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(AccessControl));
+                _DynamicRoutes = value;
+            }
+        }
 
         #endregion
 
@@ -149,7 +193,7 @@ namespace HttpServerLite
         private CavemanTcpServer _TcpServer = null; 
         private DefaultHeaderValues _DefaultHeaders = new DefaultHeaderValues();
         private Func<HttpContext, Task> _DefaultRoute = null;
-        private ContentRouteProcessor _ContentRouteProcessor;
+        private ContentRouteProcessor _ContentRouteProcessor = null;
 
         private int _StreamReadBufferSize = 65536;
         private Statistics _Stats = new Statistics();
@@ -157,12 +201,43 @@ namespace HttpServerLite
         private CancellationTokenSource _TokenSource = new CancellationTokenSource();
         private CancellationToken _Token;
 
+        private AccessControlManager _AccessControl = new AccessControlManager(AccessControlMode.DefaultPermit);
+        private ContentRouteManager _ContentRoutes = new ContentRouteManager();
+        private StaticRouteManager _StaticRoutes = new StaticRouteManager();
+        private DynamicRouteManager _DynamicRoutes = new DynamicRouteManager();
+
         #endregion
 
         #region Constructors-and-Factories
 
         /// <summary>
-        /// Instantiate the webserver.
+        /// Instantiate the webserver without SSL.
+        /// </summary>
+        /// <param name="hostname">Hostname or IP address on which to listen.</param>
+        /// <param name="port">TCP port on which to listen.</param>
+        /// <param name="defaultRoute">Default route.</param>
+        public Webserver(string hostname, int port, Func<HttpContext, Task> defaultRoute)
+        {
+            _Hostname = hostname ?? throw new ArgumentNullException(nameof(hostname));
+            _DefaultRoute = defaultRoute ?? throw new ArgumentNullException(nameof(defaultRoute));
+
+            _Port = port;
+            _Ssl = false;
+            _PfxCertFilename = null;
+            _PfxCertPassword = null;
+
+            _ContentRouteProcessor = new ContentRouteProcessor(_ContentRoutes);
+
+            _TcpServer = new CavemanTcpServer(_Hostname, _Port, _Ssl, _PfxCertFilename, _PfxCertPassword);
+            _TcpServer.Settings.MonitorClientConnections = false;
+            _TcpServer.Events.ClientConnected += ClientConnected;
+            _TcpServer.Events.ClientDisconnected += ClientDisconnected;
+
+            _Token = _TokenSource.Token;
+        }
+
+        /// <summary>
+        /// Instantiate the webserver with or without SSL.
         /// </summary>
         /// <param name="hostname">Hostname or IP address on which to listen.</param>
         /// <param name="port">TCP port on which to listen.</param>
@@ -179,8 +254,8 @@ namespace HttpServerLite
             _Ssl = ssl;
             _PfxCertFilename = pfxCertFilename;
             _PfxCertPassword = pfxCertPassword;
-             
-            _ContentRouteProcessor = new ContentRouteProcessor(ContentRoutes);
+
+            _ContentRouteProcessor = new ContentRouteProcessor(_ContentRoutes);
 
             _TcpServer = new CavemanTcpServer(_Hostname, _Port, _Ssl, _PfxCertFilename, _PfxCertPassword);
             _TcpServer.Settings.MonitorClientConnections = false;
@@ -245,14 +320,14 @@ namespace HttpServerLite
 
                 _Stats = null;
                 _DefaultHeaders = null;
-                _DefaultRoute = null;
+                _DefaultRoute = null; 
+                _AccessControl = null;
+                _ContentRoutes = null;
+                _StaticRoutes = null;
+                _DynamicRoutes = null;
 
-                AccessControl = null;
                 OptionsRoute = null;
-                ContentRoutes = null;
-                StaticRoutes = null;
-                DynamicRoutes = null;
-                 
+
                 Task dispTask = Task.Run(() => Events.ServerDisposed());
             }
         }
@@ -338,7 +413,7 @@ namespace HttpServerLite
                 {
                     #region Check-Access-Control
 
-                    if (!AccessControl.Permit(ctx.Request.SourceIp))
+                    if (!_AccessControl.Permit(ctx.Request.SourceIp))
                     {
                         Task aclDenied = Task.Run(() => Events.AccessControlDenied(
                             ctx.Request.SourceIp,
@@ -384,7 +459,7 @@ namespace HttpServerLite
 
                     if (ctx.Request.Method == HttpMethod.GET || ctx.Request.Method == HttpMethod.HEAD)
                     {
-                        if (ContentRoutes.Exists(ctx.Request.RawUrlWithoutQuery))
+                        if (_ContentRoutes.Exists(ctx.Request.RawUrlWithoutQuery))
                         {
                             await _ContentRouteProcessor.Process(ctx);
                             return;
@@ -395,7 +470,7 @@ namespace HttpServerLite
 
                     #region Static-Routes
 
-                    Func<HttpContext, Task> handler = StaticRoutes.Match(ctx.Request.Method, ctx.Request.RawUrlWithoutQuery);
+                    Func<HttpContext, Task> handler = _StaticRoutes.Match(ctx.Request.Method, ctx.Request.RawUrlWithoutQuery);
                     if (handler != null)
                     {
                         await handler(ctx);
@@ -406,7 +481,7 @@ namespace HttpServerLite
 
                     #region Dynamic-Routes
 
-                    handler = DynamicRoutes.Match(ctx.Request.Method, ctx.Request.RawUrlWithoutQuery);
+                    handler = _DynamicRoutes.Match(ctx.Request.Method, ctx.Request.RawUrlWithoutQuery);
                     if (handler != null)
                     {
                         await handler(ctx);

@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.2</Version>
+    <TargetFrameworks>netcoreapp2.0;netcoreapp3.1;netstandard2.0;net461</TargetFrameworks>
+    <Version>1.0.3</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Product>HttpServerLite</Product>
@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/jchristn/httpserverlite</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>http https server rest restful api async</PackageTags>
-    <PackageReleaseNotes>APIs to determine if header or querystring key exists</PackageReleaseNotes>
+    <PackageReleaseNotes>Route attributes for static and dynamic routes.</PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/jchristn/HttpServerLite/master/Assets/icon.ico</PackageIconUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>

@@ -47,6 +47,7 @@ namespace HttpServerLite
         {
             if (path == null) throw new ArgumentNullException(nameof(path));
             if (handler == null) throw new ArgumentNullException(nameof(handler));
+
             _Matcher.Add(
                 new Regex(BuildConsolidatedRegex(method, path)),
                 handler);

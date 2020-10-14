@@ -6,35 +6,48 @@ namespace Test.Routes
 {
     class Program
     {
-        static async Task Main()
-        {
-            // Create server and load all routes with the Route attribute in current assembly
-            using (var server = new Webserver("127.0.0.1", 8080, false, null, null, DefaultRoute))
-            {
-                server.LoadRoutes();
-                server.Start();
-                await Task.Delay(-1);
-            }
+        static string _Hostname = "127.0.0.1";
+        static int _Port = 8080; 
 
-            // Load all methods with Route attribute from custom assembly
-            // server.LoadRoutes(Assembly.GetExecutingAssembly());
+        static void Main(string[] args)
+        {
+            using (var server = new Webserver(_Hostname, _Port, DefaultRoute).LoadRoutes())
+            {
+                server.Start();
+
+                Console.WriteLine("Listening on http://" + _Hostname + ":" + _Port);
+                Console.WriteLine("Press ENTER to exit");
+                Console.ReadLine();
+            }
         }
 
         static async Task DefaultRoute(HttpContext ctx)
         {
-            await ctx.Response.SendAsync("Welcome to the default route!");
+            await ctx.Response.SendAsync("Default route");
         }
 
-        [RouteAttribute("hello")]
+        [StaticRoute(HttpMethod.GET, "hello")]
         public async Task HelloRoute(HttpContext ctx)
         {
-            await ctx.Response.SendAsync("Welcome to the hello route!");
+            await ctx.Response.SendAsync("Static route GET /hello");
         }
 
-        [RouteAttribute("post", HttpMethod.POST)]
+        [StaticRoute(HttpMethod.POST, "submit")]
         public async Task PostRoute(HttpContext ctx)
         {
-            await ctx.Response.SendAsync("Welcome to the post route!");
+            await ctx.Response.SendAsync("Static route POST /submit");
+        }
+
+        [DynamicRoute(HttpMethod.PUT, "^/foo/")]
+        public async Task PutRouteWithoutId(HttpContext ctx)
+        {
+            await ctx.Response.SendAsync("Dynamic route PUT /foo/");
+        }
+
+        [DynamicRoute(HttpMethod.DELETE, "^/foo/\\d+$")]
+        public async Task PutRouteWithId(HttpContext ctx)
+        {
+            await ctx.Response.SendAsync("Dynamic route DELETE /foo/[id]");
         }
     }
 }

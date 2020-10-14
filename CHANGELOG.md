@@ -2,11 +2,15 @@
 
 ## Current Version
 
+v1.0.3
+
+- Added attributes for both static and dynamic routes
+
+## Previous Versions
+
 v1.0.2
 
 - Added ```Stop()``` API
-
-## Previous Versions
 
 v1.0.1
 
