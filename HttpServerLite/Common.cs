@@ -25,12 +25,13 @@ namespace HttpServerLite
         internal static byte[] ByteArrayShiftLeft(byte[] bytes)
         {
             byte[] ret = new byte[bytes.Length];
-            for (int i = 0; i < bytes.Length; i++) ret[i] = 0x00;
 
             for (int i = 1; i < bytes.Length; i++)
             {
                 ret[(i - 1)] = bytes[i];
             }
+
+            ret[(bytes.Length - 1)] = 0x00;
 
             return ret;
         }
@@ -38,13 +39,13 @@ namespace HttpServerLite
         internal static byte[] ByteArrayShiftRight(byte[] bytes)
         {
             byte[] ret = new byte[bytes.Length];
-            for (int i = 0; i < bytes.Length; i++) ret[i] = 0x00;
 
             for (int i = 0; i < (bytes.Length - 1); i++)
             {
                 ret[(i + 1)] = bytes[i];
             }
 
+            ret[0] = 0x00;
             return ret;
         }
 

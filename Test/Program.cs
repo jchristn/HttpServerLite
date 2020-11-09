@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,9 +17,7 @@ namespace Test
 
         static void Main(string[] args)
         {
-            _Server = new Webserver("localhost", 9000, false, null, null, DefaultRoute).LoadRoutes();
-            _Server.DefaultHeaders.Host = "http://localhost:9000";
-            _Server.Start();
+            StartServer();
 
             Console.WriteLine("Started on http://localhost:9000");
 
@@ -39,14 +39,20 @@ namespace Test
                     case "cls":
                         Console.Clear();
                         break;
+                    case "state":
+                        Console.WriteLine(_Server.IsListening);
+                        break;
                     case "start":
                         _Server.Start();
                         break;
                     case "stop":
                         _Server.Stop();
                         break;
-                    case "state":
-                        Console.WriteLine(_Server.IsListening);
+                    case "dispose":
+                        _Server.Dispose();
+                        break; 
+                    case "conn":
+                        ListConnections();
                         break;
                 }
             }
@@ -61,12 +67,41 @@ namespace Test
             Console.WriteLine(" state    display whether or not new connections are accepted");
             Console.WriteLine(" start    start accepting new connections");
             Console.WriteLine(" stop     stop accepting new connections");
+            Console.WriteLine(" dispose  dispose of the server"); 
+            Console.WriteLine(" conn     list connections");
             Console.WriteLine("");
         }
 
-        static void ConnectionReceived(string ip, int port)
+        static void StartServer()
         {
-            Console.WriteLine("Connection received from " + ip + ":" + port);
+            if (_Server != null && _Server.IsListening)
+            {
+                Console.WriteLine("Already initialized");
+                return;
+            }
+            else
+            {
+                Console.WriteLine("Initializing server");
+                _Server = new Webserver("localhost", 9000, false, null, null, DefaultRoute);
+                _Server.LoadRoutes();
+                _Server.DefaultHeaders.Host = "http://localhost:9000";
+                _Server.Start();
+            }
+        }
+
+        static void ListConnections()
+        {
+            IEnumerable<string> conns = _Server.Connections;
+            Console.WriteLine("Connections:");
+
+            if (conns != null && conns.Count() > 0)
+            { 
+                foreach (string conn in conns) Console.WriteLine("  " + conn);
+            }
+            else
+            {
+                Console.WriteLine("  (none)");
+            }
         }
 
         static async Task DefaultRoute(HttpContext ctx)
@@ -74,41 +109,60 @@ namespace Test
             if (_Debug) Console.WriteLine(ctx.Request.ToString());
 
             byte[] reqData = ctx.Request.Data;
-            byte[] resp = null;
-
+            
             if (ctx.Request.RawUrlWithoutQuery.Equals("/"))
-            { 
-                resp = Encoding.UTF8.GetBytes("Hello from HttpServerLite\r\n");
+            {
+                string resp = "Hello from HttpServerLite";
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "text/html";
+                ctx.Response.ContentLength = resp.Length;
+                await ctx.Response.SendAsync(resp);
+                return;
+            }
+            else if (ctx.Request.RawUrlWithoutQuery.Equals("/wait"))
+            {
+                Task.Delay(10000).Wait();
+                string resp = "Hello from HttpServerLite";
+                ctx.Response.StatusCode = 200;
+                ctx.Response.ContentType = "text/html";
+                ctx.Response.ContentLength = resp.Length;
+                await ctx.Response.SendAsync(resp);
+                return;
             }
             else if (ctx.Request.RawUrlWithoutQuery.Equals("/favicon.ico"))
-            { 
-                resp = new byte[0];
+            {  
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "text/html";
+                await ctx.Response.SendAsync(0);
+                return;
             } 
             else if (ctx.Request.RawUrlWithoutQuery.Equals("/html/index.html"))
             {
-                resp = File.ReadAllBytes("./html/index.html");
+                byte[] bytes = File.ReadAllBytes("./html/index.html");
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "text/html";
+                ctx.Response.ContentLength = bytes.Length;
+                await ctx.Response.SendAsync(bytes);
+                return;
             }
             else if (ctx.Request.RawUrlWithoutQuery.Equals("/img/watson.jpg"))
             {
-                resp = File.ReadAllBytes("./img/watson.jpg");
+                byte[] bytes = File.ReadAllBytes("./img/watson.jpg");
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "image/jpeg";
+                ctx.Response.ContentLength = bytes.Length;
+                await ctx.Response.SendAsync(bytes);
+                return;
             }
             else if (ctx.Request.RawUrlWithoutQuery.Equals("/img-streamed/watson.jpg"))
             {
-                Console.WriteLine("Watson streamed route");
                 byte[] buffer = new byte[8192];
                 long len = new FileInfo("./img/watson.jpg").Length;
                 long bytesRemaining = len;
 
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentType = "image/jpeg";
+                ctx.Response.ContentLength = len;
 
                 using (FileStream fs = new FileStream("./img/watson.jpg", FileMode.Open))
                 {
@@ -141,17 +195,31 @@ namespace Test
             {  
                 ctx.Response.StatusCode = 404;
                 ctx.Response.ContentType = "text/plain"; 
-                await ctx.Response.SendAsync(0);
+                ctx.Response.Send(true);
+                return;
             }
-        }
+        } 
 
-        [RouteAttribute("Test")]
-        public async Task TestRoute(HttpContext ctx)
+        [StaticRoute(HttpMethod.GET, "/static")]
+        public static async Task MyStaticRoute(HttpContext ctx)
         {
-            byte[] response = Encoding.UTF8.GetBytes("HttpServerLite test route");
+            string resp = "Hello from the static route";
             ctx.Response.StatusCode = 200;
             ctx.Response.ContentType = "text/html";
-            await ctx.Response.SendAsync(response);
+            ctx.Response.ContentLength = resp.Length;
+            await ctx.Response.SendAsync(resp);
+            return;
+        }
+
+        [DynamicRoute(HttpMethod.GET, "^/dynamic/\\d+$")]
+        public static async Task MyDynamicRoute(HttpContext ctx)
+        {
+            string resp = "Hello from the dynamic route";
+            ctx.Response.StatusCode = 200;
+            ctx.Response.ContentType = "text/html";
+            ctx.Response.ContentLength = resp.Length;
+            await ctx.Response.SendAsync(resp);
+            return;
         }
     }
 }

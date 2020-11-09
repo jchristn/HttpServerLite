@@ -6,10 +6,10 @@
 
 TCP-based user-space HTTP and HTTPS server, written in C#.
 
-## New in v1.0.4
+## New in v1.0.5
 
 - Dependency update
-- Configurable match preference in dynamic routes manager
+- Performance improvements
 
 ## Special Thanks
 
@@ -20,9 +20,7 @@ I'd like to extend a special thanks to those that have provided motivation or ot
 
 ## Performance
 
-HttpServerLite is quite fast, however, it's in user-space and is much slower than other webservers that have the benefit of a kernel-mode driver (such as ```http.sys``` and IIS or Watson).  Simple tests using Bombardier (https://github.com/codesenberg/bombardier) show Watson Webserver (see https://github.com/jchristn/watsonwebserver) to be roughly 3X-5X lower latency and 3X-5X higher throughput.
-
-Therefore, use of HttpServerLite is primarily recommended for those that need to satisfy specific use cases where the utmost control over HTTP is required and simply not allowed by webservers that are built on top of ```http.sys```.
+HttpServerLite is quite fast, however, it's in user-space and may be slower than other webservers that have the benefit of a kernel-mode driver (such as ```http.sys``` and IIS or Watson). 
 
 ## Getting Started
 
@@ -65,7 +63,6 @@ namespace Test
     {
       Webserver server = new Webserver("localhost", 9000, false, null, null, DefaultRoute); 
       server.DefaultHeaders.Host = "https://localhost:9000";
-      server.DefaultHeaders.Connection = "close";
       server.Start();
       Console.WriteLine("HttpServerLite listening on http://localhost:9000");
       Console.WriteLine("ENTER to exit");
@@ -105,6 +102,35 @@ HttpServerLite includes the following routing capabilities.  These are listed in
 - ```server.DynamicRoutes``` - invoke functions based on specific HTTP method and a regular expression for the URL
 - ```server.DefaultRoute``` - any request that did not match a content route, static route, or dynamic route, is routed here
 
+Additionally, you can annotate your own methods using the ```StaticRoute``` or ```DynamicRoute``` attribute.  Be sure to call ```LoadRoutes()``` if you use route attributes.
+```csharp
+Webserver server = new Webserver("localhost", 9000, false, null, null, DefaultRoute);
+server.LoadRoutes();
+server.Start();
+
+[StaticRoute(HttpMethod.GET, "/static")]
+public static async Task MyStaticRoute(HttpContext ctx)
+{
+    string resp = "Hello from the static route";
+    ctx.Response.StatusCode = 200;
+    ctx.Response.ContentType = "text/html";
+    ctx.Response.ContentLength = resp.Length;
+    await ctx.Response.SendAsync(resp);
+    return;
+}
+
+[DynamicRoute(HttpMethod.GET, "^/dynamic/\\d+$")]
+public static async Task MyDynamicRoute(HttpContext ctx)
+{
+    string resp = "Hello from the dynamic route";
+    ctx.Response.StatusCode = 200;
+    ctx.Response.ContentType = "text/html";
+    ctx.Response.ContentLength = resp.Length;
+    await ctx.Response.SendAsync(resp);
+    return;
+}
+```
+
 ## Accessing from Outside Localhost
 
 When you configure HttpServerLite to listen on ```127.0.0.1``` or ```localhost```, it will only respond to requests received from within the local machine.
@@ -113,11 +139,10 @@ To configure access from other nodes outside of ```localhost```, use the followi
 
 - Specify the IP address on which HttpServerLite should listen in the Server constructor. 
 - If you want to listen on more than one IP address, use ```*``` or ```+```
-- If you listen on anything other than ```127.0.0.1```, you may have to run HttpServerLite as administrator (operating system dependent)
+- If you listen on anything other than ```localhost``` or ```127.0.0.1```, you may have to run HttpServerLite as administrator (operating system dependent)
 - If you want to use a port number less than 1024, you MUST run HttpServerLite as administrator (this is an operating system limitation)
 - Open a port on your firewall to permit traffic on the TCP port upon which HttpServerLite is listening
-- Since HttpServerLite is not based on ```http.sys``` **you should not have to add URL ACLs** 
-- If you're still having problems, please do not hesitate to file an issue here, and I will do my best to help and update the documentation.
+- If you're still having problems, please do not hesitate to file an issue here, and I will do my best to help and update the documentation
 
 ## Version History
 

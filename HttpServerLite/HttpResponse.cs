@@ -664,8 +664,7 @@ namespace HttpServerLite
         }
 
         private void SendInternal(long contentLength, Stream stream, bool close)
-        {   
-            byte[] resp = new byte[0];
+        {
             if (!HeadersSent)
             {
                 SetDefaultHeaders();

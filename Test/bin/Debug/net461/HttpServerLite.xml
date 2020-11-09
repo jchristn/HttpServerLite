@@ -303,7 +303,7 @@
         </member>
         <member name="M:HttpServerLite.DynamicRouteManager.Exists(HttpServerLite.HttpMethod,System.Text.RegularExpressions.Regex)">
             <summary>
-            Check if a content route exists.
+            Check if a route exists.
             </summary>
             <param name="method">The HTTP method.</param>
             <param name="path">URL path.</param>
@@ -831,26 +831,6 @@
             <param name="assembly">Assembly.</param>
             <returns>Webserver.</returns>
         </member>
-        <member name="T:HttpServerLite.RouteAttribute">
-            <summary>
-            Attribute that is used to mark methods as route methods.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.RouteAttribute.Path">
-            <summary>
-            The raw URL, i.e. /foo/bar/.  Be sure this begins and ends with '/'.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.RouteAttribute.Method">
-            <summary>
-            The HTTP method, i.e. GET, PUT, POST, DELETE, etc.
-            </summary>
-        </member>
-        <member name="M:HttpServerLite.RouteAttribute.#ctor(System.String,HttpServerLite.HttpMethod)">
-            <summary>Instantiate the object.</summary>
-            <param name="path">The raw URL, i.e. /foo/bar/.  Be sure this begins and ends with '/'.</param>
-            <param name="method">The HTTP method, i.e. GET, PUT, POST, DELETE, etc.</param>
-        </member>
         <member name="T:HttpServerLite.StaticRoute">
             <summary>
             Assign a method handler for when requests are received matching the supplied method and path.
@@ -1023,9 +1003,19 @@
             Buffer size to use when interacting with streams.
             </summary>
         </member>
+        <member name="P:HttpServerLite.Webserver.ReadTimeoutMs">
+            <summary>
+            Number of milliseconds to await a read response prior to considering the connection to have timed out.
+            </summary>
+        </member>
         <member name="F:HttpServerLite.Webserver.Events">
             <summary>
             Set specific actions/callbacks to use when events are raised.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.Webserver.Connections">
+            <summary>
+            List connections by requestor IP:port.
             </summary>
         </member>
         <member name="P:HttpServerLite.Webserver.Stats">

@@ -303,7 +303,7 @@
         </member>
         <member name="M:HttpServerLite.DynamicRouteManager.Exists(HttpServerLite.HttpMethod,System.Text.RegularExpressions.Regex)">
             <summary>
-            Check if a content route exists.
+            Check if a route exists.
             </summary>
             <param name="method">The HTTP method.</param>
             <param name="path">URL path.</param>
@@ -831,26 +831,6 @@
             <param name="assembly">Assembly.</param>
             <returns>Webserver.</returns>
         </member>
-        <member name="T:HttpServerLite.RouteAttribute">
-            <summary>
-            Attribute that is used to mark methods as route methods.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.RouteAttribute.Path">
-            <summary>
-            The raw URL, i.e. /foo/bar/.  Be sure this begins and ends with '/'.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.RouteAttribute.Method">
-            <summary>
-            The HTTP method, i.e. GET, PUT, POST, DELETE, etc.
-            </summary>
-        </member>
-        <member name="M:HttpServerLite.RouteAttribute.#ctor(System.String,HttpServerLite.HttpMethod)">
-            <summary>Instantiate the object.</summary>
-            <param name="path">The raw URL, i.e. /foo/bar/.  Be sure this begins and ends with '/'.</param>
-            <param name="method">The HTTP method, i.e. GET, PUT, POST, DELETE, etc.</param>
-        </member>
         <member name="T:HttpServerLite.StaticRoute">
             <summary>
             Assign a method handler for when requests are received matching the supplied method and path.
@@ -1023,9 +1003,19 @@
             Buffer size to use when interacting with streams.
             </summary>
         </member>
+        <member name="P:HttpServerLite.Webserver.ReadTimeoutMs">
+            <summary>
+            Number of milliseconds to await a read response prior to considering the connection to have timed out.
+            </summary>
+        </member>
         <member name="F:HttpServerLite.Webserver.Events">
             <summary>
             Set specific actions/callbacks to use when events are raised.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.Webserver.Connections">
+            <summary>
+            List connections by requestor IP:port.
             </summary>
         </member>
         <member name="P:HttpServerLite.Webserver.Stats">
@@ -1033,82 +1023,4 @@
             Webserver statistics.
             </summary>
         </member>
-        <member name="P:HttpServerLite.Webserver.DefaultHeaders">
-            <summary>
-            Headers that will be added to every response unless previously set.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Webserver.AccessControl">
-            <summary>
-            Access control manager, i.e. default mode of operation, permit list, and deny list.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.Webserver.PreRoutingHandler">
-            <summary>
-            Function to call prior to routing.  
-            Return 'true' if the connection should be terminated.
-            Return 'false' to allow the connection to continue routing.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.Webserver.OptionsRoute">
-            <summary>
-            Function to call when an OPTIONS request is received.  Often used to handle CORS.  Leave as 'null' to use the default OPTIONS handler.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Webserver.ContentRoutes">
-            <summary>
-            Content routes; i.e. routes to specific files or folders for GET and HEAD requests.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Webserver.StaticRoutes">
-            <summary>
-            Static routes; i.e. routes with explicit matching and any HTTP method.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Webserver.DynamicRoutes">
-            <summary>
-            Dynamic routes; i.e. routes with regex matching and any HTTP method.
-            </summary>
-        </member>
-        <member name="M:HttpServerLite.Webserver.#ctor(System.String,System.Int32,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
-            <summary>
-            Instantiate the webserver without SSL.
-            </summary>
-            <param name="hostname">Hostname or IP address on which to listen.</param>
-            <param name="port">TCP port on which to listen.</param>
-            <param name="defaultRoute">Default route.</param>
-        </member>
-        <member name="M:HttpServerLite.Webserver.#ctor(System.String,System.Int32,System.Boolean,System.String,System.String,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
-            <summary>
-            Instantiate the webserver with or without SSL.
-            </summary>
-            <param name="hostname">Hostname or IP address on which to listen.</param>
-            <param name="port">TCP port on which to listen.</param>
-            <param name="ssl">Enable or disable SSL.</param>
-            <param name="pfxCertFilename">For SSL, the PFX certificate filename.</param>
-            <param name="pfxCertPassword">For SSL, the PFX certificate password.</param>
-            <param name="defaultRoute">Default route.</param>
-        </member>
-        <member name="M:HttpServerLite.Webserver.Dispose">
-            <summary>
-            Dispose of the object.
-            </summary>
-        </member>
-        <member name="M:HttpServerLite.Webserver.Start">
-            <summary>
-            Start accepting new connections.
-            </summary>
-        </member>
-        <member name="M:HttpServerLite.Webserver.Stop">
-            <summary>
-            Stop accepting new connections.
-            </summary>
-        </member>
-        <member name="M:HttpServerLite.Webserver.Dispose(System.Boolean)">
-            <summary>
-            Tear down the server and dispose of background workers.
-            </summary>
-            <param name="disposing">Indicate if resources should be disposed.</param>
-        </member>
-    </members>
-</doc>
+        <member name="P:HttpServerLite.Webserver.DefaultHead

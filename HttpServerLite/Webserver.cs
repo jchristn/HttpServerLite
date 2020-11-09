@@ -74,9 +74,37 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Number of milliseconds to await a read response prior to considering the connection to have timed out.
+        /// </summary>
+        public int ReadTimeoutMs
+        {
+            get
+            {
+                return _ReadTimeoutMs;
+            }
+            set
+            {
+                if (value < 1) throw new ArgumentException("Read timeout must be greater than zero.");
+                _ReadTimeoutMs = value;
+            }
+        }
+        
+        /// <summary>
         /// Set specific actions/callbacks to use when events are raised.
         /// </summary>
         public EventCallbacks Events = new EventCallbacks();
+
+        /// <summary>
+        /// List connections by requestor IP:port.
+        /// </summary>
+        public IEnumerable<string> Connections
+        {
+            get
+            {
+                if (_TcpServer != null) return _TcpServer.GetClients();
+                return new List<string>();
+            }
+        }
 
         /// <summary>
         /// Webserver statistics.
@@ -196,6 +224,7 @@ namespace HttpServerLite
         private ContentRouteProcessor _ContentRouteProcessor = null;
 
         private int _StreamReadBufferSize = 65536;
+        private int _ReadTimeoutMs = 5000;
         private Statistics _Stats = new Statistics();
          
         private CancellationTokenSource _TokenSource = new CancellationTokenSource();
@@ -226,14 +255,7 @@ namespace HttpServerLite
             _PfxCertFilename = null;
             _PfxCertPassword = null;
 
-            _ContentRouteProcessor = new ContentRouteProcessor(_ContentRoutes);
-
-            _TcpServer = new CavemanTcpServer(_Hostname, _Port, _Ssl, _PfxCertFilename, _PfxCertPassword);
-            _TcpServer.Settings.MonitorClientConnections = false;
-            _TcpServer.Events.ClientConnected += ClientConnected;
-            _TcpServer.Events.ClientDisconnected += ClientDisconnected;
-
-            _Token = _TokenSource.Token;
+            InitializeServer(); 
         }
 
         /// <summary>
@@ -255,14 +277,7 @@ namespace HttpServerLite
             _PfxCertFilename = pfxCertFilename;
             _PfxCertPassword = pfxCertPassword;
 
-            _ContentRouteProcessor = new ContentRouteProcessor(_ContentRoutes);
-
-            _TcpServer = new CavemanTcpServer(_Hostname, _Port, _Ssl, _PfxCertFilename, _PfxCertPassword);
-            _TcpServer.Settings.MonitorClientConnections = false;
-            _TcpServer.Events.ClientConnected += ClientConnected;
-            _TcpServer.Events.ClientDisconnected += ClientDisconnected;
-
-            _Token = _TokenSource.Token;
+            InitializeServer(); 
         }
 
         /// <summary>
@@ -283,7 +298,10 @@ namespace HttpServerLite
         /// </summary>
         public void Start()
         {
+            if (_TcpServer == null) throw new ObjectDisposedException("Webserver has been disposed.");
+
             _TcpServer.Start();
+
             Task.Run(() => Events.ServerStarted(), _Token);
         }
          
@@ -293,6 +311,7 @@ namespace HttpServerLite
         public void Stop()
         {
             _TcpServer.Stop();
+
             Task.Run(() => Events.ServerStopped(), _Token);
         }
 
@@ -311,6 +330,7 @@ namespace HttpServerLite
                 if (_TcpServer != null)
                 {
                     _TcpServer.Dispose();
+                    _TcpServer = null;
                 }
 
                 if (_TokenSource != null && _Token != null)
@@ -325,11 +345,22 @@ namespace HttpServerLite
                 _ContentRoutes = null;
                 _StaticRoutes = null;
                 _DynamicRoutes = null;
-
+                
                 OptionsRoute = null;
 
                 Task dispTask = Task.Run(() => Events.ServerDisposed());
             }
+        }
+
+        private void InitializeServer()
+        {
+            _ContentRouteProcessor = new ContentRouteProcessor(_ContentRoutes);
+
+            _TcpServer = new CavemanTcpServer(_Hostname, _Port, _Ssl, _PfxCertFilename, _PfxCertPassword);
+            _TcpServer.Settings.MonitorClientConnections = false;
+            _TcpServer.Events.ClientConnected += ClientConnected;
+            _TcpServer.Events.ClientDisconnected += ClientDisconnected;
+            _Token = _TokenSource.Token;
         }
 
         private async void ClientConnected(object sender, ClientConnectedEventArgs args)
@@ -342,6 +373,8 @@ namespace HttpServerLite
             string ip = null;
             int port = 0;
             Common.ParseIpPort(ipPort, out ip, out port);
+            HttpContext ctx = null;
+
             Task connRecvTask = Task.Run(() => Events.ConnectionReceived(ip, port), _Token);
 
             #endregion
@@ -352,35 +385,48 @@ namespace HttpServerLite
             {
                 #region Retrieve-Headers
 
-                bool retrievingHeaders = true;
                 byte[] headerTest = new byte[4];
-                for (int i = 0; i < 4; i++) headerTest[i] = 0x00;
-                byte[] headerBytes = new byte[0];
 
+                //                           123456789012345 6 7 8
+                // minimum request 16 bytes: GET / HTTP/1.1\r\n\r\n
+                int preReadLen = 18;
+                byte[] headerBytes = new byte[preReadLen];
+                ReadResult rr = await _TcpServer.ReadWithTimeoutAsync(_ReadTimeoutMs, args.IpPort, preReadLen);
+                if (rr.Status != ReadResultStatus.Success 
+                    || rr.BytesRead != preReadLen 
+                    || rr.Data == null 
+                    || rr.Data.Length != preReadLen) return;
+
+                Buffer.BlockCopy(rr.Data, 0, headerBytes, 0, preReadLen);
+                headerTest[3] = headerBytes[(preReadLen - 1)];
+                headerTest[2] = headerBytes[(preReadLen - 2)];
+                headerTest[1] = headerBytes[(preReadLen - 3)];
+                headerTest[0] = headerBytes[(preReadLen - 4)];
+
+                bool retrievingHeaders = true;
                 while (retrievingHeaders)
                 {
-                    ReadResult rr = _TcpServer.Read(args.IpPort, 1);
-                    if (rr.Status == ReadResultStatus.Success)
+                    if (((int)headerTest[3]) == 10
+                        && ((int)headerTest[2]) == 13
+                        && ((int)headerTest[1]) == 10
+                        && ((int)headerTest[0]) == 13)
                     {
-                        headerTest = Common.ByteArrayShiftLeft(headerTest);
-                        headerTest[3] = rr.Data[0];
-
-                        if (((int)headerTest[3]) == 10
-                            && ((int)headerTest[2]) == 13
-                            && ((int)headerTest[1]) == 10
-                            && ((int)headerTest[0]) == 13)
+                        // end of headers detected
+                        retrievingHeaders = false;
+                    }
+                    else
+                    { 
+                        rr = await _TcpServer.ReadWithTimeoutAsync(_ReadTimeoutMs, args.IpPort, 1);
+                        if (rr.Status == ReadResultStatus.Success)
                         {
-                            // end of headers detected
-                            retrievingHeaders = false;
+                            headerBytes = Common.AppendBytes(headerBytes, rr.Data);
+                            headerTest = Common.ByteArrayShiftLeft(headerTest);
+                            headerTest[3] = rr.Data[0];
                         }
                         else
                         {
-                            headerBytes = Common.AppendBytes(headerBytes, rr.Data);
+                            return;
                         }
-                    }
-                    else
-                    {
-                        return;
                     }
                 } 
 
@@ -388,7 +434,7 @@ namespace HttpServerLite
 
                 #region Build-Context
 
-                HttpContext ctx = new HttpContext(
+                ctx = new HttpContext(
                     ipPort, 
                     _TcpServer.GetStream(ipPort), 
                     headerBytes, 
@@ -406,97 +452,110 @@ namespace HttpServerLite
                     _Token);
 
                 #endregion
+                 
+                #region Check-Access-Control
 
-                #region Process
-
-                try
+                if (!_AccessControl.Permit(ctx.Request.SourceIp))
                 {
-                    #region Check-Access-Control
-
-                    if (!_AccessControl.Permit(ctx.Request.SourceIp))
-                    {
-                        Task aclDenied = Task.Run(() => Events.AccessControlDenied(
-                            ctx.Request.SourceIp,
-                            ctx.Request.SourcePort,
-                            ctx.Request.Method.ToString(),
-                            ctx.Request.FullUrl),
-                            _Token);
-                        return;
-                    }
-
-                    #endregion
-
-                    #region Process-Preflight-Requests
-
-                    if (ctx.Request.Method == HttpMethod.OPTIONS)
-                    {
-                        if (OptionsRoute != null)
-                        {
-                            await OptionsRoute?.Invoke(ctx);
-                            return;
-                        }
-                        else
-                        {
-                            await OptionsProcessor(ctx);
-                            return;
-                        }
-                    }
-
-                    #endregion
-
-                    #region Pre-Routing-Handler
-
-                    bool terminate = false;
-                    if (PreRoutingHandler != null)
-                    {
-                        terminate = await PreRoutingHandler(ctx);
-                        if (terminate) return;
-                    }
-
-                    #endregion
-
-                    #region Content-Routes
-
-                    if (ctx.Request.Method == HttpMethod.GET || ctx.Request.Method == HttpMethod.HEAD)
-                    {
-                        if (_ContentRoutes.Exists(ctx.Request.RawUrlWithoutQuery))
-                        {
-                            await _ContentRouteProcessor.Process(ctx);
-                            return;
-                        }
-                    }
-
-                    #endregion
-
-                    #region Static-Routes
-
-                    Func<HttpContext, Task> handler = _StaticRoutes.Match(ctx.Request.Method, ctx.Request.RawUrlWithoutQuery);
-                    if (handler != null)
-                    {
-                        await handler(ctx);
-                        return;
-                    }
-
-                    #endregion
-
-                    #region Dynamic-Routes
-
-                    handler = _DynamicRoutes.Match(ctx.Request.Method, ctx.Request.RawUrlWithoutQuery);
-                    if (handler != null)
-                    {
-                        await handler(ctx);
-                        return;
-                    }
-
-                    #endregion
-
-                    #region Default-Route
-
-                    await _DefaultRoute?.Invoke(ctx);
-
-                    #endregion
+                    Task aclDenied = Task.Run(() => Events.AccessControlDenied(
+                        ctx.Request.SourceIp,
+                        ctx.Request.SourcePort,
+                        ctx.Request.Method.ToString(),
+                        ctx.Request.FullUrl),
+                        _Token);
+                    return;
                 }
-                finally
+
+                #endregion
+
+                #region Process-Preflight-Requests
+
+                if (ctx.Request.Method == HttpMethod.OPTIONS)
+                {
+                    if (OptionsRoute != null)
+                    {
+                        await OptionsRoute?.Invoke(ctx);
+                        return;
+                    }
+                    else
+                    {
+                        await OptionsProcessor(ctx);
+                        return;
+                    }
+                }
+
+                #endregion
+
+                #region Pre-Routing-Handler
+
+                bool terminate = false;
+                if (PreRoutingHandler != null)
+                {
+                    terminate = await PreRoutingHandler(ctx);
+                    if (terminate) return;
+                }
+
+                #endregion
+
+                #region Content-Routes
+
+                if (ctx.Request.Method == HttpMethod.GET || ctx.Request.Method == HttpMethod.HEAD)
+                {
+                    if (_ContentRoutes.Exists(ctx.Request.RawUrlWithoutQuery))
+                    {
+                        await _ContentRouteProcessor.Process(ctx);
+                        return;
+                    }
+                }
+
+                #endregion
+
+                #region Static-Routes
+
+                Func<HttpContext, Task> handler = _StaticRoutes.Match(ctx.Request.Method, ctx.Request.RawUrlWithoutQuery);
+                if (handler != null)
+                {
+                    await handler(ctx);
+                    return;
+                }
+
+                #endregion
+
+                #region Dynamic-Routes
+
+                handler = _DynamicRoutes.Match(ctx.Request.Method, ctx.Request.RawUrlWithoutQuery);
+                if (handler != null)
+                {
+                    await handler(ctx);
+                    return;
+                }
+
+                #endregion
+
+                #region Default-Route
+
+                await _DefaultRoute?.Invoke(ctx);
+
+                #endregion  
+            }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
+            catch (ObjectDisposedException)
+            {
+                return;
+            }
+            catch (Exception e)
+            {
+                Task excTask = Task.Run(() => Events.ExceptionEncountered(ip, port, e), _Token);
+                return;
+            }
+            finally
+            { 
+                _TcpServer.DisconnectClient(ipPort);
+
+                if (ctx != null)
                 {
                     Task respSentTask = Task.Run(() => Events.ResponseSent(
                         ctx.Request.SourceIp,
@@ -509,20 +568,7 @@ namespace HttpServerLite
 
                     if (ctx.Response.ContentLength != null)
                         _Stats.SentPayloadBytes += Convert.ToInt64(ctx.Response.ContentLength);
-
-                    _TcpServer.DisconnectClient(ipPort);
                 }
-
-                #endregion
-            }
-            catch (ObjectDisposedException)
-            {
-                return;
-            }
-            catch (Exception e)
-            {
-                Task excTask = Task.Run(() => Events.ExceptionEncountered(ip, port, e), _Token);
-                return;
             }
 
             #endregion

@@ -78,7 +78,7 @@ namespace HttpServerLite
         }
 
         /// <summary>
-        /// Check if a content route exists.
+        /// Check if a route exists.
         /// </summary>
         /// <param name="method">The HTTP method.</param>
         /// <param name="path">URL path.</param>
