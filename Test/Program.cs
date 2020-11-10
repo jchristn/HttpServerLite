@@ -14,6 +14,7 @@ namespace Test
         static Webserver _Server;
         static bool _RunForever = true;
         static bool _Debug = false;
+        static int _BufferSize = 65536;
 
         static void Main(string[] args)
         {
@@ -108,97 +109,115 @@ namespace Test
         {
             if (_Debug) Console.WriteLine(ctx.Request.ToString());
 
-            byte[] reqData = ctx.Request.Data;
-            
-            if (ctx.Request.RawUrlWithoutQuery.Equals("/"))
+            try
             {
-                string resp = "Hello from HttpServerLite";
-                ctx.Response.StatusCode = 200;
-                ctx.Response.ContentType = "text/html";
-                ctx.Response.ContentLength = resp.Length;
-                await ctx.Response.SendAsync(resp);
-                return;
-            }
-            else if (ctx.Request.RawUrlWithoutQuery.Equals("/wait"))
-            {
-                Task.Delay(10000).Wait();
-                string resp = "Hello from HttpServerLite";
-                ctx.Response.StatusCode = 200;
-                ctx.Response.ContentType = "text/html";
-                ctx.Response.ContentLength = resp.Length;
-                await ctx.Response.SendAsync(resp);
-                return;
-            }
-            else if (ctx.Request.RawUrlWithoutQuery.Equals("/favicon.ico"))
-            {  
-                ctx.Response.StatusCode = 200;
-                ctx.Response.ContentType = "text/html";
-                await ctx.Response.SendAsync(0);
-                return;
-            } 
-            else if (ctx.Request.RawUrlWithoutQuery.Equals("/html/index.html"))
-            {
-                byte[] bytes = File.ReadAllBytes("./html/index.html");
-                ctx.Response.StatusCode = 200;
-                ctx.Response.ContentType = "text/html";
-                ctx.Response.ContentLength = bytes.Length;
-                await ctx.Response.SendAsync(bytes);
-                return;
-            }
-            else if (ctx.Request.RawUrlWithoutQuery.Equals("/img/watson.jpg"))
-            {
-                byte[] bytes = File.ReadAllBytes("./img/watson.jpg");
-                ctx.Response.StatusCode = 200;
-                ctx.Response.ContentType = "image/jpeg";
-                ctx.Response.ContentLength = bytes.Length;
-                await ctx.Response.SendAsync(bytes);
-                return;
-            }
-            else if (ctx.Request.RawUrlWithoutQuery.Equals("/img-streamed/watson.jpg"))
-            {
-                byte[] buffer = new byte[8192];
-                long len = new FileInfo("./img/watson.jpg").Length;
-                long bytesRemaining = len;
+                byte[] reqData = ctx.Request.Data;
 
-                ctx.Response.StatusCode = 200;
-                ctx.Response.ContentType = "image/jpeg";
-                ctx.Response.ContentLength = len;
-
-                using (FileStream fs = new FileStream("./img/watson.jpg", FileMode.Open))
+                if (ctx.Request.RawUrlWithoutQuery.Equals("/"))
                 {
-                    while (bytesRemaining > 0)
+                    string resp = "Hello from HttpServerLite";
+                    ctx.Response.StatusCode = 200;
+                    ctx.Response.ContentType = "text/html";
+                    ctx.Response.ContentLength = resp.Length;
+                    await ctx.Response.SendAsync(resp);
+                    return;
+                }
+                else if (ctx.Request.RawUrlWithoutQuery.Equals("/wait"))
+                {
+                    Task.Delay(10000).Wait();
+                    string resp = "Hello from HttpServerLite";
+                    ctx.Response.StatusCode = 200;
+                    ctx.Response.ContentType = "text/html";
+                    ctx.Response.ContentLength = resp.Length;
+                    await ctx.Response.SendAsync(resp);
+                    return;
+                }
+                else if (ctx.Request.RawUrlWithoutQuery.Equals("/favicon.ico"))
+                {
+                    ctx.Response.StatusCode = 200;
+                    ctx.Response.ContentType = "text/html";
+                    await ctx.Response.SendAsync(0);
+                    return;
+                }
+                else if (ctx.Request.RawUrlWithoutQuery.Equals("/html/index.html"))
+                {
+                    SendFile(ctx, "./html/index.html", "text/html", _BufferSize);
+                    return;
+                }
+                else if (ctx.Request.RawUrlWithoutQuery.Equals("/img/watson.jpg"))
+                {
+                    SendFile(ctx, "./img/watson.jpg", "image/jpg", _BufferSize);
+                    return;
+                }
+                else if (ctx.Request.RawUrlWithoutQuery.Equals("/img-streamed/watson.jpg"))
+                {
+                    byte[] buffer = new byte[8192];
+                    long len = new FileInfo("./img/watson.jpg").Length;
+                    long bytesRemaining = len;
+
+                    ctx.Response.StatusCode = 200;
+                    ctx.Response.ContentType = "image/jpeg";
+                    ctx.Response.ContentLength = len;
+
+                    using (FileStream fs = new FileStream("./img/watson.jpg", FileMode.Open))
                     {
-                        int bytesRead = await fs.ReadAsync(buffer, 0, buffer.Length);
-                        if (bytesRead > 0)
+                        while (bytesRemaining > 0)
                         {
-                            bytesRemaining -= bytesRead;
-                            if (bytesRead == buffer.Length)
+                            int bytesRead = await fs.ReadAsync(buffer, 0, buffer.Length);
+                            if (bytesRead > 0)
                             {
-                                await ctx.Response.SendWithoutCloseAsync(buffer);
-                            }
-                            else
-                            {
-                                byte[] tempBuffer = new byte[bytesRead];
-                                Buffer.BlockCopy(buffer, 0, tempBuffer, 0, bytesRead);
-                                await ctx.Response.SendWithoutCloseAsync(tempBuffer);
-                            }
+                                bytesRemaining -= bytesRead;
+                                if (bytesRead == buffer.Length)
+                                {
+                                    await ctx.Response.SendWithoutCloseAsync(buffer);
+                                }
+                                else
+                                {
+                                    byte[] tempBuffer = new byte[bytesRead];
+                                    Buffer.BlockCopy(buffer, 0, tempBuffer, 0, bytesRead);
+                                    await ctx.Response.SendWithoutCloseAsync(tempBuffer);
+                                }
 
-                            Thread.Sleep(100);
+                                Thread.Sleep(100);
+                            }
                         }
-                    }
 
-                    ctx.Response.Close();
+                        ctx.Response.Close();
+                        return;
+                    }
+                }
+                else
+                {
+                    ctx.Response.StatusCode = 404;
+                    ctx.Response.ContentType = "text/plain";
+                    ctx.Response.Send(true);
                     return;
                 }
             }
-            else
-            {  
-                ctx.Response.StatusCode = 404;
-                ctx.Response.ContentType = "text/plain"; 
-                ctx.Response.Send(true);
+            catch (Exception e)
+            {
+                ctx.Response.StatusCode = 500;
+                ctx.Response.ContentType = "text/plain";
+                ctx.Response.Send(e.ToString());
+                Console.WriteLine(e.ToString());
                 return;
             }
         } 
+
+        static void SendFile(HttpContext ctx, string file, string contentType, int bufferSize)
+        {
+            byte[] buffer = new byte[bufferSize];
+            long contentLen = new FileInfo(file).Length; 
+
+            using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+            {
+                ctx.Response.ContentType = contentType;
+                ctx.Response.ContentLength = contentLen;
+                ctx.Response.StatusCode = 200;
+                ctx.Response.Send(contentLen, fs);
+                return;
+            }
+        }
 
         [StaticRoute(HttpMethod.GET, "/static")]
         public static async Task MyStaticRoute(HttpContext ctx)
