@@ -86,6 +86,9 @@ namespace Test
                 _Server = new Webserver("localhost", 9000, false, null, null, DefaultRoute);
                 _Server.LoadRoutes();
                 _Server.DefaultHeaders.Host = "http://localhost:9000";
+                _Server.Events.ServerStarted = ServerStarted;
+                _Server.Events.ServerStopped = ServerStopped;
+                _Server.Events.ServerDisposed = ServerDisposed;
                 _Server.Start();
             }
         }
@@ -202,7 +205,11 @@ namespace Test
                 Console.WriteLine(e.ToString());
                 return;
             }
-        } 
+        }
+
+        static void ServerStarted() => Console.WriteLine("Server started");
+        static void ServerStopped() => Console.WriteLine("Server stopped");
+        static void ServerDisposed() => Console.WriteLine("Server disposed");
 
         static void SendFile(HttpContext ctx, string file, string contentType, int bufferSize)
         {

@@ -299,8 +299,12 @@ namespace HttpServerLite
         public void Start()
         {
             if (_TcpServer == null) throw new ObjectDisposedException("Webserver has been disposed.");
+            if (_TcpServer.IsListening) throw new InvalidOperationException("Webserver is already running.");
 
             _TcpServer.Start();
+
+            _TokenSource = new CancellationTokenSource();
+            _Token = _TokenSource.Token;
 
             Task.Run(() => Events.ServerStarted(), _Token);
         }
@@ -310,6 +314,9 @@ namespace HttpServerLite
         /// </summary>
         public void Stop()
         {
+            if (_TcpServer == null) throw new ObjectDisposedException("Webserver has been disposed.");
+            if (!_TcpServer.IsListening) throw new InvalidOperationException("Webserver is already stopped.");
+
             _TcpServer.Stop();
 
             Task.Run(() => Events.ServerStopped(), _Token);
@@ -329,6 +336,8 @@ namespace HttpServerLite
             {
                 if (_TcpServer != null)
                 {
+                    if (_TcpServer.IsListening) Stop();
+
                     _TcpServer.Dispose();
                     _TcpServer = null;
                 }
@@ -354,13 +363,15 @@ namespace HttpServerLite
 
         private void InitializeServer()
         {
+            _TokenSource = new CancellationTokenSource();
+            _Token = _TokenSource.Token;
+
             _ContentRouteProcessor = new ContentRouteProcessor(_ContentRoutes);
 
             _TcpServer = new CavemanTcpServer(_Hostname, _Port, _Ssl, _PfxCertFilename, _PfxCertPassword);
             _TcpServer.Settings.MonitorClientConnections = false;
             _TcpServer.Events.ClientConnected += ClientConnected;
-            _TcpServer.Events.ClientDisconnected += ClientDisconnected;
-            _Token = _TokenSource.Token;
+            _TcpServer.Events.ClientDisconnected += ClientDisconnected; 
         }
 
         private async void ClientConnected(object sender, ClientConnectedEventArgs args)

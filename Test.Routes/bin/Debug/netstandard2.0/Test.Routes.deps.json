@@ -9,7 +9,7 @@
     ".NETStandard,Version=v2.0/": {
       "Test.Routes/1.0.0": {
         "dependencies": {
-          "HttpServerLite": "1.0.6",
+          "HttpServerLite": "1.0.6.1",
           "NETStandard.Library": "2.0.3"
         },
         "runtime": {
@@ -54,7 +54,7 @@
           }
         }
       },
-      "HttpServerLite/1.0.6": {
+      "HttpServerLite/1.0.6.1": {
         "dependencies": {
           "CavemanTcp": "1.3.0.11",
           "IpMatcher": "1.0.3",
@@ -115,7 +115,7 @@
       "path": "regexmatcher/1.0.5",
       "hashPath": "regexmatcher.1.0.5.nupkg.sha512"
     },
-    "HttpServerLite/1.0.6": {
+    "HttpServerLite/1.0.6.1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
