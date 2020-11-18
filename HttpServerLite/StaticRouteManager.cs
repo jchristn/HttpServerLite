@@ -78,6 +78,18 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Retrieve all static routes.
+        /// </summary>
+        /// <returns>List of StaticRoute.</returns>
+        public List<StaticRoute> All()
+        {
+            lock (_Lock)
+            {
+                return new List<StaticRoute>(_Routes);
+            }
+        }
+
+        /// <summary>
         /// Retrieve a static route.
         /// </summary>
         /// <param name="method">The HTTP method.</param>
@@ -144,7 +156,7 @@ namespace HttpServerLite
             path = path.ToLower();
             if (!path.StartsWith("/")) path = "/" + path;
             if (!path.EndsWith("/")) path = path + "/";
-
+            
             lock (_Lock)
             {
                 StaticRoute curr = _Routes.FirstOrDefault(i => i.Method == method && i.Path == path);
@@ -170,15 +182,15 @@ namespace HttpServerLite
             route.Path = route.Path.ToLower();
             if (!route.Path.StartsWith("/")) route.Path = "/" + route.Path;
             if (!route.Path.EndsWith("/")) route.Path = route.Path + "/";
-
+             
             if (Exists(route.Method, route.Path))
-            {
+            { 
                 return;
             }
 
             lock (_Lock)
             {
-                _Routes.Add(route);
+                _Routes.Add(route); 
             }
         }
 

@@ -11,6 +11,8 @@ namespace Test
 {
     class Program
     {
+        static string _Hostname = "localhost";
+        static int _Port = 8080;
         static Webserver _Server;
         static bool _RunForever = true;
         static bool _Debug = false;
@@ -20,7 +22,7 @@ namespace Test
         {
             StartServer();
 
-            Console.WriteLine("Started on http://localhost:9000");
+            Console.WriteLine("Started on http://" + _Hostname + ":" + _Port);
 
             while (_RunForever)
             {
@@ -83,12 +85,14 @@ namespace Test
             else
             {
                 Console.WriteLine("Initializing server");
-                _Server = new Webserver("localhost", 9000, false, null, null, DefaultRoute);
-                _Server.LoadRoutes();
-                _Server.DefaultHeaders.Host = "http://localhost:9000";
-                _Server.Events.ServerStarted = ServerStarted;
-                _Server.Events.ServerStopped = ServerStopped;
-                _Server.Events.ServerDisposed = ServerDisposed;
+                _Server = new Webserver(_Hostname, _Port, false, null, null, DefaultRoute);
+                _Server.Settings.Headers.Host = "http://" + _Hostname + ":" + _Port;
+                _Server.Events.ServerStarted += ServerStarted;
+                _Server.Events.ServerStopped += ServerStopped;
+                _Server.Events.ServerDisposing += ServerDisposing;
+                _Server.Events.Logger = Console.WriteLine;
+                _Server.Settings.Debug.Responses = true;
+                _Server.Settings.Debug.Routing = true;
                 _Server.Start();
             }
         }
@@ -116,43 +120,41 @@ namespace Test
             {
                 byte[] reqData = ctx.Request.Data;
 
-                if (ctx.Request.RawUrlWithoutQuery.Equals("/"))
+                if (ctx.Request.Url.WithoutQuery.Equals("/"))
                 {
-                    string resp = "Hello from HttpServerLite";
+                    string resp = DefaultHtml();
                     ctx.Response.StatusCode = 200;
                     ctx.Response.ContentType = "text/html";
-                    ctx.Response.ContentLength = resp.Length;
                     await ctx.Response.SendAsync(resp);
                     return;
                 }
-                else if (ctx.Request.RawUrlWithoutQuery.Equals("/wait"))
+                else if (ctx.Request.Url.WithoutQuery.Equals("/wait"))
                 {
                     Task.Delay(10000).Wait();
                     string resp = "Hello from HttpServerLite";
                     ctx.Response.StatusCode = 200;
                     ctx.Response.ContentType = "text/html";
-                    ctx.Response.ContentLength = resp.Length;
                     await ctx.Response.SendAsync(resp);
                     return;
                 }
-                else if (ctx.Request.RawUrlWithoutQuery.Equals("/favicon.ico"))
+                else if (ctx.Request.Url.WithoutQuery.Equals("/favicon.ico"))
                 {
                     ctx.Response.StatusCode = 200;
                     ctx.Response.ContentType = "text/html";
                     await ctx.Response.SendAsync(0);
                     return;
                 }
-                else if (ctx.Request.RawUrlWithoutQuery.Equals("/html/index.html"))
+                else if (ctx.Request.Url.WithoutQuery.Equals("/html/index.html"))
                 {
                     SendFile(ctx, "./html/index.html", "text/html", _BufferSize);
                     return;
                 }
-                else if (ctx.Request.RawUrlWithoutQuery.Equals("/img/watson.jpg"))
+                else if (ctx.Request.Url.WithoutQuery.Equals("/img/watson.jpg"))
                 {
                     SendFile(ctx, "./img/watson.jpg", "image/jpg", _BufferSize);
                     return;
                 }
-                else if (ctx.Request.RawUrlWithoutQuery.Equals("/img-streamed/watson.jpg"))
+                else if (ctx.Request.Url.WithoutQuery.Equals("/img-streamed/watson.jpg"))
                 {
                     byte[] buffer = new byte[8192];
                     long len = new FileInfo("./img/watson.jpg").Length;
@@ -207,9 +209,9 @@ namespace Test
             }
         }
 
-        static void ServerStarted() => Console.WriteLine("Server started");
-        static void ServerStopped() => Console.WriteLine("Server stopped");
-        static void ServerDisposed() => Console.WriteLine("Server disposed");
+        static void ServerStarted(object sender, EventArgs args) => Console.WriteLine("Server started");
+        static void ServerStopped(object sender, EventArgs args) => Console.WriteLine("Server stopped");
+        static void ServerDisposing(object sender, EventArgs args) => Console.WriteLine("Server disposing");
 
         static void SendFile(HttpContext ctx, string file, string contentType, int bufferSize)
         {
@@ -218,22 +220,73 @@ namespace Test
 
             using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
             {
-                ctx.Response.ContentType = contentType;
-                ctx.Response.ContentLength = contentLen;
+                ctx.Response.ContentType = contentType; 
                 ctx.Response.StatusCode = 200;
                 ctx.Response.Send(contentLen, fs);
                 return;
             }
         }
 
-        [StaticRoute(HttpMethod.GET, "/static")]
+        static string DefaultHtml()
+        {
+            return
+                "<html>" +
+                " <head><title>HttpServerLite</title></head>" +
+                " <body><h2>HttpServerLite</h2><p>HttpServerLite is running!</p></body>" +
+                "</html>";
+        }
+
+        [StaticRoute(HttpMethod.GET, "static")]
         public static async Task MyStaticRoute(HttpContext ctx)
         {
-            string resp = "Hello from the static route";
             ctx.Response.StatusCode = 200;
-            ctx.Response.ContentType = "text/html";
-            ctx.Response.ContentLength = resp.Length;
-            await ctx.Response.SendAsync(resp);
+            ctx.Response.ContentType = "text/plain";
+            await ctx.Response.SendAsync("Hello from the static route");
+            return;
+        }
+
+        [StaticRoute(HttpMethod.GET, "static/1")]
+        public static async Task MyStatic1Route(HttpContext ctx)
+        {
+            ctx.Response.StatusCode = 200;
+            ctx.Response.ContentType = "text/plain";
+            await ctx.Response.SendAsync("Hello from the static 1 route");
+            return;
+        }
+
+        [StaticRoute(HttpMethod.GET, "static/2")]
+        public static async Task MyStatic2Route(HttpContext ctx)
+        {
+            ctx.Response.StatusCode = 200;
+            ctx.Response.ContentType = "text/plain";
+            await ctx.Response.SendAsync("Hello from the static 2 route");
+            return;
+        }
+
+        [StaticRoute(HttpMethod.GET, "mirror")]
+        public static async Task MyMirrorRoute(HttpContext ctx)
+        {
+            ctx.Response.StatusCode = 200;
+            ctx.Response.ContentType = "application/json";
+            await ctx.Response.SendAsync(ctx.ToJson(true));
+            return;
+        }
+
+        [StaticRoute(HttpMethod.GET, "mirror/1")]
+        public static async Task MyMirror1Route(HttpContext ctx)
+        {
+            ctx.Response.StatusCode = 200;
+            ctx.Response.ContentType = "application/json";
+            await ctx.Response.SendAsync(ctx.ToJson(true));
+            return;
+        }
+
+        [StaticRoute(HttpMethod.GET, "mirror/2")]
+        public static async Task MyMirror2Route(HttpContext ctx)
+        {
+            ctx.Response.StatusCode = 200;
+            ctx.Response.ContentType = "application/json";
+            await ctx.Response.SendAsync(ctx.ToJson(true));
             return;
         }
 
@@ -242,8 +295,7 @@ namespace Test
         {
             string resp = "Hello from the dynamic route";
             ctx.Response.StatusCode = 200;
-            ctx.Response.ContentType = "text/html";
-            ctx.Response.ContentLength = resp.Length;
+            ctx.Response.ContentType = "text/plain"; 
             await ctx.Response.SendAsync(resp);
             return;
         }

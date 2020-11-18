@@ -22,6 +22,32 @@ namespace HttpServerLite
             }
         }
 
+        internal static string IpFromIpPort(string ipPort)
+        {
+            if (String.IsNullOrEmpty(ipPort)) throw new ArgumentNullException(nameof(ipPort));
+
+            int colonIndex = ipPort.LastIndexOf(':');
+            if (colonIndex != -1)
+            {
+                return ipPort.Substring(0, colonIndex);
+            }
+
+            return null;
+        }
+
+        internal static int PortFromIpPort(string ipPort)
+        {
+            if (String.IsNullOrEmpty(ipPort)) throw new ArgumentNullException(nameof(ipPort));
+
+            int colonIndex = ipPort.LastIndexOf(':');
+            if (colonIndex != -1)
+            {
+                return Convert.ToInt32(ipPort.Substring(colonIndex + 1));
+            }
+
+            return 0;
+        }
+
         internal static byte[] ByteArrayShiftLeft(byte[] bytes)
         {
             byte[] ret = new byte[bytes.Length];
@@ -115,6 +141,36 @@ namespace HttpServerLite
             {
                 return -1;
             }
-        } 
+        }
+
+        internal static Dictionary<string, string> AddToDict(string key, string val, Dictionary<string, string> existing)
+        {
+            if (String.IsNullOrEmpty(key)) return existing;
+
+            Dictionary<string, string> ret = new Dictionary<string, string>();
+
+            if (existing == null)
+            {
+                ret.Add(key, val);
+                return ret;
+            }
+            else
+            {
+                if (existing.ContainsKey(key))
+                {
+                    if (String.IsNullOrEmpty(val)) return existing;
+                    string tempVal = existing[key];
+                    tempVal += "," + val;
+                    existing.Remove(key);
+                    existing.Add(key, tempVal);
+                    return existing;
+                }
+                else
+                {
+                    existing.Add(key, val);
+                    return existing;
+                }
+            }
+        }
     }
 }

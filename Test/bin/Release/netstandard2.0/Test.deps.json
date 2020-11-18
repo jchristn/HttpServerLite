@@ -9,26 +9,26 @@
     ".NETStandard,Version=v2.0/": {
       "Test/1.0.0": {
         "dependencies": {
-          "HttpServerLite": "1.0.6.1",
+          "HttpServerLite": "1.1.0.1",
           "NETStandard.Library": "2.0.3"
         },
         "runtime": {
           "Test.dll": {}
         }
       },
-      "CavemanTcp/1.3.0.11": {
+      "CavemanTcp/1.3.2.1": {
         "runtime": {
           "lib/netstandard2.0/CavemanTcp.dll": {
-            "assemblyVersion": "1.3.0.11",
-            "fileVersion": "1.3.0.11"
+            "assemblyVersion": "1.3.2.1",
+            "fileVersion": "1.3.2.1"
           }
         }
       },
-      "IpMatcher/1.0.3": {
+      "IpMatcher/1.0.4": {
         "runtime": {
           "lib/netstandard2.0/IpMatcher.dll": {
-            "assemblyVersion": "1.0.3.0",
-            "fileVersion": "1.0.3.0"
+            "assemblyVersion": "1.0.4.0",
+            "fileVersion": "1.0.4.0"
           }
         }
       },
@@ -46,20 +46,20 @@
           }
         }
       },
-      "RegexMatcher/1.0.5": {
+      "RegexMatcher/1.0.7": {
         "runtime": {
           "lib/netstandard2.0/RegexMatcher.dll": {
-            "assemblyVersion": "1.0.5.0",
-            "fileVersion": "1.0.5.0"
+            "assemblyVersion": "1.0.7.0",
+            "fileVersion": "1.0.7.0"
           }
         }
       },
-      "HttpServerLite/1.0.6.1": {
+      "HttpServerLite/1.1.0.1": {
         "dependencies": {
-          "CavemanTcp": "1.3.0.11",
-          "IpMatcher": "1.0.3",
+          "CavemanTcp": "1.3.2.1",
+          "IpMatcher": "1.0.4",
           "Newtonsoft.Json": "12.0.3",
-          "RegexMatcher": "1.0.5"
+          "RegexMatcher": "1.0.7"
         },
         "runtime": {
           "HttpServerLite.dll": {}
@@ -73,19 +73,19 @@
       "serviceable": false,
       "sha512": ""
     },
-    "CavemanTcp/1.3.0.11": {
+    "CavemanTcp/1.3.2.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-pL6j+QAxl3Tg35qq9tbqgyTdWHHTH/XcsYxlLHsprqF5py2NEKPIJ3K+MxJBNbcgTj6r2xubR/hKcFyLPC446g==",
-      "path": "cavemantcp/1.3.0.11",
-      "hashPath": "cavemantcp.1.3.0.11.nupkg.sha512"
+      "sha512": "sha512-J0LUUMwlJNwAkzisaqfrAhggmZzFI6s/2FF/zDVW3MFDh8g0lD+uTaErcDa2Rc3YKBVzugITooHWDBeRK4VIVw==",
+      "path": "cavemantcp/1.3.2.1",
+      "hashPath": "cavemantcp.1.3.2.1.nupkg.sha512"
     },
-    "IpMatcher/1.0.3": {
+    "IpMatcher/1.0.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ioBq6C/wBaDIXQRNACa8sXf5RNV/+X2etYTSACf/0FP9e7RBc79aszeXjCbkX5QyVTnwW/JmPz661AyENjckqQ==",
-      "path": "ipmatcher/1.0.3",
-      "hashPath": "ipmatcher.1.0.3.nupkg.sha512"
+      "sha512": "sha512-Qt4NTwW5UTQ5BFNUE8s8P1ybmthu1cKn+ZjOufguBoJNS89b/dDQxnUCAp9Iv7ts6C23GuO6h1JrcrItAlHPMA==",
+      "path": "ipmatcher/1.0.4",
+      "hashPath": "ipmatcher.1.0.4.nupkg.sha512"
     },
     "Microsoft.NETCore.Platforms/1.1.0": {
       "type": "package",
@@ -108,14 +108,14 @@
       "path": "newtonsoft.json/12.0.3",
       "hashPath": "newtonsoft.json.12.0.3.nupkg.sha512"
     },
-    "RegexMatcher/1.0.5": {
+    "RegexMatcher/1.0.7": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-PWhwtQEROmtL2nR3FL74xuOF2Tvy8ZiJnwKWsZuwdraWHSgYDU47GrHo8Jq3+T8QUDD/TdhT9H8ySNjYkFh6pQ==",
-      "path": "regexmatcher/1.0.5",
-      "hashPath": "regexmatcher.1.0.5.nupkg.sha512"
+      "sha512": "sha512-UvR1Hf3YaLgCUj5Ec7lELvS+iPotID44c/+v+TiGCNWz90T5V/t7rF3RXURNQMmORn0fGcJXTqgeR6gKOuF+8w==",
+      "path": "regexmatcher/1.0.7",
+      "hashPath": "regexmatcher.1.0.7.nupkg.sha512"
     },
-    "HttpServerLite/1.0.6.1": {
+    "HttpServerLite/1.1.0.1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

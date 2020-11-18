@@ -4,14 +4,15 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HttpServerLite
 {
     /// <summary>
-    /// Content route processor.  Handles GET and HEAD requests to content routes for files and directories. 
+    /// Content route handler.  Handles GET and HEAD requests to content routes for files and directories. 
     /// </summary>
-    public class ContentRouteProcessor
+    public class ContentRouteHandler
     {
         #region Public-Members
 
@@ -40,7 +41,7 @@ namespace HttpServerLite
 
         #region Constructors-and-Factories
 
-        internal ContentRouteProcessor(ContentRouteManager routes)
+        internal ContentRouteHandler(ContentRouteManager routes)
         {
             if (routes == null) throw new ArgumentNullException(nameof(routes));
 
@@ -51,7 +52,7 @@ namespace HttpServerLite
 
         #region Internal-Methods
 
-        internal async Task Process(HttpContext ctx)
+        internal async Task Process(HttpContext ctx, CancellationToken token)
         {
             if (ctx == null) throw new ArgumentNullException(nameof(ctx));
             if (ctx.Request == null) throw new ArgumentNullException(nameof(ctx.Request));
@@ -61,11 +62,11 @@ namespace HttpServerLite
                 && ctx.Request.Method != HttpMethod.HEAD)
             {
                 Set500Response(ctx);
-                await ctx.Response.SendAsync(0);
+                await ctx.Response.SendAsync(0).ConfigureAwait(false);
                 return;
             }
 
-            string filePath = ctx.Request.RawUrlWithoutQuery;
+            string filePath = ctx.Request.Url.WithoutQuery;
             if (!String.IsNullOrEmpty(filePath))
             {
                 while (filePath.StartsWith("/")) filePath = filePath.Substring(1);
@@ -83,7 +84,7 @@ namespace HttpServerLite
             if (!File.Exists(filePath))
             {
                 Set404Response(ctx);
-                await ctx.Response.SendAsync(0);
+                await ctx.Response.SendAsync(0).ConfigureAwait(false);
                 return;
             }
 
@@ -96,7 +97,7 @@ namespace HttpServerLite
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentLength = contentLength;
                 ctx.Response.ContentType = GetContentType(filePath);
-                await ctx.Response.SendAsync(contentLength, fs);
+                await ctx.Response.SendAsync(contentLength, fs).ConfigureAwait(false);
                 return;
             }
             else if (ctx.Request.Method == HttpMethod.HEAD)
@@ -104,13 +105,13 @@ namespace HttpServerLite
                 ctx.Response.StatusCode = 200;
                 ctx.Response.ContentLength = contentLength;
                 ctx.Response.ContentType = GetContentType(filePath);
-                await ctx.Response.SendAsync(contentLength);
+                await ctx.Response.SendAsync(contentLength).ConfigureAwait(false);
                 return;
             }
             else
             {
                 Set500Response(ctx);
-                await ctx.Response.SendAsync(0);
+                await ctx.Response.SendAsync(0).ConfigureAwait(false);
                 return;
             }
         }

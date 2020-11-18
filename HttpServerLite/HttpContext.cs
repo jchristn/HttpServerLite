@@ -11,40 +11,21 @@ namespace HttpServerLite
     public class HttpContext
     {
         #region Public-Members
-         
+
         /// <summary>
         /// The HTTP request that was received.
         /// </summary>
-        public HttpRequest Request;
+        public HttpRequest Request { get; private set; } = null;
 
         /// <summary>
         /// The HTTP response that will be sent.  This object is preconstructed on your behalf and can be modified directly.
         /// </summary>
-        public HttpResponse Response;
-
-        /// <summary>
-        /// Buffer size to use while writing the response from a supplied stream. 
-        /// </summary>
-        public int StreamBufferSize
-        {
-            get
-            {
-                return _StreamBufferSize;
-            }
-            set
-            {
-                if (value < 1) throw new ArgumentException("StreamBufferSize must be greater than zero bytes.");
-                _StreamBufferSize = value;
-            }
-        }
-
+        public HttpResponse Response { get; private set; } = null;
+         
         #endregion
 
         #region Private-Members
-
-        private int _StreamBufferSize = 65536; 
-        private EventCallbacks _Events;
-
+         
         #endregion
 
         #region Constructors-and-Factories
@@ -57,15 +38,35 @@ namespace HttpServerLite
 
         }
 
-        internal HttpContext(string ipPort, Stream stream, byte[] headerBytes, EventCallbacks events, DefaultHeaderValues headers)
+        internal HttpContext(
+            string ipPort, 
+            Stream stream, 
+            string requestHeader, 
+            WebserverEvents events, 
+            WebserverSettings.HeaderSettings headers,
+            int streamBufferSize)
         { 
-            _Events = events ?? throw new ArgumentNullException(nameof(events));
-            if (headerBytes == null) throw new ArgumentNullException(nameof(headerBytes));
+            if (String.IsNullOrEmpty(requestHeader)) throw new ArgumentNullException(nameof(requestHeader));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             if (headers == null) throw new ArgumentNullException(nameof(headers));
+            if (streamBufferSize < 1) throw new ArgumentOutOfRangeException(nameof(streamBufferSize));
 
-            Request = new HttpRequest(ipPort, stream, headerBytes);
-            Response = new HttpResponse(ipPort, headers, stream, Request, _Events, _StreamBufferSize);
+            Request = new HttpRequest(ipPort, stream, requestHeader);
+            Response = new HttpResponse(ipPort, headers, stream, Request, events, streamBufferSize);
+        }
+
+        #endregion
+
+        #region Public-Methods
+
+        /// <summary>
+        /// Retrieve a JSON-encoded version of the context object.
+        /// </summary>
+        /// <param name="pretty">True to enable pretty print.</param>
+        /// <returns>JSON string.</returns>
+        public string ToJson(bool pretty)
+        {
+            return SerializationHelper.SerializeJson(this, pretty);
         }
 
         #endregion

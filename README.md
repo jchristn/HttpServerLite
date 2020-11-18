@@ -6,10 +6,17 @@
 
 TCP-based user-space HTTP and HTTPS server, written in C#.
 
-## New in v1.0.5
+## New in v1.1.0
 
-- Dependency update
-- Performance improvements
+- Breaking changes to improve simplicity and reliability
+- Consolidated settings into the ```Settings``` property
+- Consolidated routing into the ```Routing``` property
+- Use of ```EventHandler``` for events instead of ```Action```
+- Use of ```ConfigureAwait``` for reliability within your application
+- Simplified constructors
+- Pages property to set how 404 and 500 responses should be sent, if not handled within your application
+- Attribute-based routes now loaded automatically, removed ```LoadRoutes``` method
+- Restructured ```HttpContext```, ```HttpRequest```, and ```HttpResponse``` for better usability
 
 ## Special Thanks
 
@@ -28,11 +35,11 @@ Refer to the ```Test``` project for a working example.
 
 It is important to under that that HttpServerLite is minimalistic and leaves control to you on which headers are set.  Thus it is important to understand the following:
 
-- ```server.DefaultHeaders``` contains default values for a series of HTTP headers
+- ```server.Settings.Headers``` contains default values for a series of HTTP headers
   - These will be included **in every response** if they have a value assigned
-  - The values in ```server.DefaultHeaders``` can be written directly, or
+  - The values in ```server.Settings.Headers``` can be written directly, or
     - You can modify per-response values by using ```ctx.Response.Headers.Add("[header]", "[value]")```
-    - Values set in ```ctx.Response.Headers``` will override any value in ```server.DefaultHeaders``` for that response only
+    - Values set in ```ctx.Response.Headers``` will override any value in ```server.Settings.Headers``` for that response only
   - The headers automatically set if a value is supplied include
     - Access-Control-Allow-[Origin|Methods|Headers]
     - Access-Control-Expose-Headers
@@ -43,9 +50,9 @@ It is important to under that that HttpServerLite is minimalistic and leaves con
   - ```Connection``` is an example of one of these headers.  By default it is set to ```close```, therefore you should:
     - Leave it as is
     - Explicitly set it prior to sending a response using ```ctx.Response.Headers.Add("connection", "value")```, or
-    - Set the default value in ```server.DefaultHeaders.Connection```
+    - Set the default value in ```server.Settings.Headers.Connection```
 - ```ctx.Response.ContentLength``` should be set if you want the ```Content-Length``` header to be sent
-- ```server.DefaultHeaders.Host``` should be set when instantiating the server though it is not required
+- ```server.Settings.Headers.Host``` should be set when instantiating the server though it is not required
 
 ### Simple Server
 ```csharp
@@ -62,7 +69,7 @@ namespace Test
     static void Main(string[] args)
     {
       Webserver server = new Webserver("localhost", 9000, false, null, null, DefaultRoute); 
-      server.DefaultHeaders.Host = "https://localhost:9000";
+      server.Settings.Headers.Host = "https://localhost:9000";
       server.Start();
       Console.WriteLine("HttpServerLite listening on http://localhost:9000");
       Console.WriteLine("ENTER to exit");
@@ -85,27 +92,26 @@ namespace Test
 
 HttpServerLite includes the following routing capabilities.  These are listed in the other in which they are processed within HttpServerLite:
 
-- ```server.AccessControl``` - access control based on IP address
+- ```server.Settings.AccessControl``` - access control based on IP address
   - You can specify the ```Mode``` to either be ```DefaultPermit``` or ```DefaultDeny```
     - ```DefaultPermit``` will allow everything unless explicitly blocked through ```DenyList```
     - ```DefaultDeny``` will deny everything unless explicitly permitted through ```PermitList```
     - The default value is ```DefaultPermit```
-- ```server.OptionsRoute``` - a default route to use when the HTTP verb is ```OPTIONS```
+- ```server.Routes.Preflight``` - a default route to use when the HTTP verb is ```OPTIONS```
   - When set, the connection is terminated after being handled by ```server.OptionsRoute```
-- ```server.PreRoutingHandler``` - a route through which **all** requests will pass, useful for authentication, logging, and other functions
+- ```server.Routes.PreRouting``` - a route through which **all** requests will pass, useful for authentication, logging, and other functions
   - If defined, return ```true``` from this task if you wish to terminate the connection
   - Otherwise return ```false``` to allow routing to continue
-- ```server.ContentRoutes``` - serve GET and HEAD requests for static content based on URL path
-  - Content will be read from the ```server.ContentRoutes.BaseDirectory``` plus the URL path
+- ```server.Routes.Content``` - serve GET and HEAD requests for static content based on URL path
+  - Content will be read from the ```server.Routes.Content.BaseDirectory``` plus the URL path
   - An entire directory can be listed as a content route when adding the route
-- ```server.StaticRoutes``` - invoke functions based on specific HTTP method and URL combinations
-- ```server.DynamicRoutes``` - invoke functions based on specific HTTP method and a regular expression for the URL
-- ```server.DefaultRoute``` - any request that did not match a content route, static route, or dynamic route, is routed here
+- ```server.Routes.Static``` - invoke functions based on specific HTTP method and URL combinations
+- ```server.Routes.Dynamic``` - invoke functions based on specific HTTP method and a regular expression for the URL
+- ```server.Routes.Default``` - any request that did not match a content route, static route, or dynamic route, is routed here
 
-Additionally, you can annotate your own methods using the ```StaticRoute``` or ```DynamicRoute``` attribute.  Be sure to call ```LoadRoutes()``` if you use route attributes.
+Additionally, you can annotate your own methods using the ```StaticRoute``` or ```DynamicRoute``` attribute.  
 ```csharp
 Webserver server = new Webserver("localhost", 9000, false, null, null, DefaultRoute);
-server.LoadRoutes();
 server.Start();
 
 [StaticRoute(HttpMethod.GET, "/static")]

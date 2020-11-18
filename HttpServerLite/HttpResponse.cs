@@ -20,25 +20,9 @@ namespace HttpServerLite
         #region Public-Members
 
         /// <summary>
-        /// Buffer size to use while writing the response from a supplied stream. 
-        /// </summary>
-        public int StreamBufferSize
-        {
-            get
-            {
-                return _StreamBufferSize;
-            }
-            set
-            {
-                if (value < 1) throw new ArgumentException("StreamBufferSize must be greater than zero bytes.");
-                _StreamBufferSize = value;
-            }
-        }
-
-        /// <summary>
         /// The protocol and version.
         /// </summary>
-        public string ProtocolVersion;
+        public string ProtocolVersion { get; private set; } = null;
 
         /// <summary>
         /// The HTTP status code to return to the requestor (client).
@@ -69,17 +53,12 @@ namespace HttpServerLite
         /// <summary>
         /// User-supplied content-type to include in the response.
         /// </summary>
-        public string ContentType = String.Empty;
+        public string ContentType = null;
 
         /// <summary>
         /// The length of the supplied response data.
         /// </summary>
         public long? ContentLength = null;
-
-        /// <summary>
-        /// Access-Control-Allow-Origin header value.
-        /// </summary>
-        public string AccessControlAllowOriginHeader = "*";
 
         #endregion
 
@@ -93,12 +72,12 @@ namespace HttpServerLite
         #region Private-Members
 
         private string _IpPort;
-        private DefaultHeaderValues _DefaultHeaders = null;
+        private WebserverSettings.HeaderSettings _HeaderSettings = null;
         private int _StreamBufferSize = 65536;
         private Dictionary<string, string> _Headers = new Dictionary<string, string>();
         private Stream _Stream;
         private HttpRequest _Request;  
-        private EventCallbacks _Events = new EventCallbacks();
+        private WebserverEvents _Events = new WebserverEvents();
 
         #endregion
 
@@ -112,7 +91,13 @@ namespace HttpServerLite
 
         }
 
-        internal HttpResponse(string ipPort, DefaultHeaderValues headers, Stream stream, HttpRequest req, EventCallbacks events, int bufferSize)
+        internal HttpResponse(
+            string ipPort, 
+            WebserverSettings.HeaderSettings headers, 
+            Stream stream, 
+            HttpRequest req, 
+            WebserverEvents events, 
+            int bufferSize)
         {
             if (String.IsNullOrEmpty(ipPort)) throw new ArgumentNullException(nameof(ipPort));
             if (headers == null) throw new ArgumentNullException(nameof(headers));
@@ -123,7 +108,7 @@ namespace HttpServerLite
             ProtocolVersion = req.ProtocolVersion;
 
             _IpPort = ipPort;
-            _DefaultHeaders = headers;
+            _HeaderSettings = headers;
             _Request = req;
             _Stream = stream;
             _Events = events;
@@ -135,32 +120,13 @@ namespace HttpServerLite
         #region Public-Methods
 
         /// <summary>
-        /// Retrieve a string-formatted, human-readable copy of the HttpResponse instance.
+        /// Retrieve a JSON-encoded version of the response object.
         /// </summary>
-        /// <returns>String-formatted, human-readable copy of the HttpResponse instance.</returns>
-        public override string ToString()
+        /// <param name="pretty">True to enable pretty print.</param>
+        /// <returns>JSON string.</returns>
+        public string ToJson(bool pretty)
         {
-            string ret = "";
-
-            ret += "--- HTTP Response ---" + Environment.NewLine; 
-            ret += "  Status Code        : " + StatusCode + Environment.NewLine;
-            ret += "  Status Description : " + StatusDescription + Environment.NewLine;
-            ret += "  Content            : " + ContentType + Environment.NewLine;
-            ret += "  Content Length     : " + ContentLength + " bytes" + Environment.NewLine; 
-            if (Headers != null && Headers.Count > 0)
-            {
-                ret += "  Headers            : " + Environment.NewLine;
-                foreach (KeyValuePair<string, string> curr in Headers)
-                {
-                    ret += "  - " + curr.Key + ": " + curr.Value + Environment.NewLine;
-                }
-            }
-            else
-            {
-                ret += "  Headers          : none" + Environment.NewLine;
-            }
-
-            return ret;
+            return SerializationHelper.SerializeJson(this, pretty);
         }
 
         /// <summary>
@@ -236,45 +202,48 @@ namespace HttpServerLite
         /// Send headers with a specified content length and no data to the requestor and terminate the connection.  Useful for HEAD requests where the content length must be set.
         /// </summary> 
         /// <param name="contentLength">Value to set in Content-Length header.</param>
-        public async Task SendAsync(long contentLength)
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        public async Task SendAsync(long contentLength, CancellationToken token = default)
         {
             ContentLength = contentLength;
-            await SendInternalAsync(0, null, true);
+            await SendInternalAsync(0, null, true, token).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Send headers and data to the requestor and terminate the connection.
         /// </summary>
         /// <param name="data">Data.</param> 
-        public async Task SendAsync(string data)
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        public async Task SendAsync(string data, CancellationToken token = default)
         {
             if (String.IsNullOrEmpty(data))
             {
-                await SendInternalAsync(0, null, true);
+                await SendInternalAsync(0, null, true, token).ConfigureAwait(false);
                 return;
             }
             byte[] bytes = Encoding.UTF8.GetBytes(data);
             MemoryStream ms = new MemoryStream();
-            await ms.WriteAsync(bytes, 0, bytes.Length);
+            await ms.WriteAsync(bytes, 0, bytes.Length, token).ConfigureAwait(false);
             ms.Seek(0, SeekOrigin.Begin);
-            await SendInternalAsync(bytes.Length, ms, true);
+            await SendInternalAsync(bytes.Length, ms, true, token).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Send headers and data to the requestor and terminate the connection.
         /// </summary>
         /// <param name="data">Data.</param> 
-        public async Task SendAsync(byte[] data)
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        public async Task SendAsync(byte[] data, CancellationToken token = default)
         {
             if (data == null || data.Length < 1)
             {
-                await SendInternalAsync(0, null, true);
+                await SendInternalAsync(0, null, true, token).ConfigureAwait(false);
                 return;
             } 
             MemoryStream ms = new MemoryStream();
-            await ms.WriteAsync(data, 0, data.Length);
+            await ms.WriteAsync(data, 0, data.Length, token).ConfigureAwait(false);
             ms.Seek(0, SeekOrigin.Begin); 
-            await SendInternalAsync(data.Length, ms, true);
+            await SendInternalAsync(data.Length, ms, true, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -282,15 +251,16 @@ namespace HttpServerLite
         /// </summary>
         /// <param name="contentLength">Number of bytes to read from the stream.</param>
         /// <param name="stream">Stream containing response data.</param>
-        public async Task SendAsync(long contentLength, Stream stream)
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        public async Task SendAsync(long contentLength, Stream stream, CancellationToken token = default)
         {
             if (contentLength <= 0 || stream == null || !stream.CanRead)
             {
-                await SendInternalAsync(0, null, true);
+                await SendInternalAsync(0, null, true, token).ConfigureAwait(false);
                 return;
             }
 
-            await SendInternalAsync(contentLength, stream, true);
+            await SendInternalAsync(contentLength, stream, true, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -358,45 +328,48 @@ namespace HttpServerLite
         /// Send headers and data to the requestor but do not terminate the connection.
         /// </summary>
         /// <param name="contentLength">Value to set in Content-Length header.</param>
-        public async Task SendWithoutCloseAsync(long contentLength)
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        public async Task SendWithoutCloseAsync(long contentLength, CancellationToken token = default)
         {
             ContentLength = contentLength;
-            await SendInternalAsync(contentLength, null, false);
+            await SendInternalAsync(contentLength, null, false, token).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Send headers and data to the requestor but do not terminate the connection.
         /// </summary>
         /// <param name="data">Data.</param> 
-        public async Task SendWithoutCloseAsync(string data)
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        public async Task SendWithoutCloseAsync(string data, CancellationToken token = default)
         {
             if (String.IsNullOrEmpty(data))
             {
-                await SendInternalAsync(0, null, false);
+                await SendInternalAsync(0, null, false, token).ConfigureAwait(false);
                 return;
             }
             byte[] bytes = Encoding.UTF8.GetBytes(data);
             MemoryStream ms = new MemoryStream();
-            await ms.WriteAsync(bytes, 0, bytes.Length);
+            await ms.WriteAsync(bytes, 0, bytes.Length, token).ConfigureAwait(false);
             ms.Seek(0, SeekOrigin.Begin);
-            await SendInternalAsync(bytes.Length, ms, false);
+            await SendInternalAsync(bytes.Length, ms, false, token).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Send headers and data to the requestor but do not terminate the connection.
         /// </summary>
         /// <param name="data">Data.</param> 
-        public async Task SendWithoutCloseAsync(byte[] data)
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        public async Task SendWithoutCloseAsync(byte[] data, CancellationToken token = default)
         {
             if (data == null)
             {
-                await SendInternalAsync(0, null, false);
+                await SendInternalAsync(0, null, false, token).ConfigureAwait(false);
                 return;
             }
             MemoryStream ms = new MemoryStream();
-            await ms.WriteAsync(data, 0, data.Length);
+            await ms.WriteAsync(data, 0, data.Length, token).ConfigureAwait(false);
             ms.Seek(0, SeekOrigin.Begin);
-            await SendInternalAsync(data.Length, ms, false);
+            await SendInternalAsync(data.Length, ms, false, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -404,15 +377,16 @@ namespace HttpServerLite
         /// </summary>
         /// <param name="contentLength">Number of bytes to read from the stream.</param>
         /// <param name="stream">Stream containing response data.</param>
-        public async Task SendWithoutCloseAsync(long contentLength, Stream stream)
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        public async Task SendWithoutCloseAsync(long contentLength, Stream stream, CancellationToken token = default)
         {
             if (contentLength <= 0 || stream == null || !stream.CanRead)
             {
-                await SendInternalAsync(0, null, false);
+                await SendInternalAsync(0, null, false, token).ConfigureAwait(false);
                 return;
             }
 
-            await SendInternalAsync(contentLength, stream, false);
+            await SendInternalAsync(contentLength, stream, false, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -447,17 +421,7 @@ namespace HttpServerLite
             ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("\r\n"));
             return ret;
         }
-
-        private void SendHeaders()
-        {
-            if (HeadersSent) throw new IOException("Headers already sent.");
-            SetDefaultHeaders();
-            StatusDescription = GetStatusDescription();
-            byte[] headers = GetHeaderBytes();
-            _Stream.Write(headers, 0, headers.Length);
-            HeadersSent = true;
-        }
-
+         
         private string GetStatusDescription()
         {
             switch (StatusCode)
@@ -497,9 +461,9 @@ namespace HttpServerLite
 
         private void SetDefaultHeaders()
         {
-            if (_DefaultHeaders != null && _Headers != null)
+            if (_HeaderSettings != null && _Headers != null)
             {
-                if (!String.IsNullOrEmpty(_DefaultHeaders.AccessControlAllowOrigin))
+                if (!String.IsNullOrEmpty(_HeaderSettings.AccessControlAllowOrigin))
                 {
                     bool set = true;
                     foreach (KeyValuePair<string, string> curr in _Headers)
@@ -513,11 +477,11 @@ namespace HttpServerLite
 
                     if (set)
                     {
-                        _Headers.Add("Access-Control-Allow-Origin", _DefaultHeaders.AccessControlAllowOrigin);
+                        _Headers.Add("Access-Control-Allow-Origin", _HeaderSettings.AccessControlAllowOrigin);
                     }
                 }
 
-                if (!String.IsNullOrEmpty(_DefaultHeaders.AccessControlAllowMethods))
+                if (!String.IsNullOrEmpty(_HeaderSettings.AccessControlAllowMethods))
                 {
                     bool set = true;
                     foreach (KeyValuePair<string, string> curr in _Headers)
@@ -531,11 +495,11 @@ namespace HttpServerLite
 
                     if (set)
                     {
-                        _Headers.Add("Access-Control-Allow-Methods", _DefaultHeaders.AccessControlAllowMethods);
+                        _Headers.Add("Access-Control-Allow-Methods", _HeaderSettings.AccessControlAllowMethods);
                     }
                 }
 
-                if (!String.IsNullOrEmpty(_DefaultHeaders.AccessControlAllowHeaders))
+                if (!String.IsNullOrEmpty(_HeaderSettings.AccessControlAllowHeaders))
                 {
                     bool set = true;
                     foreach (KeyValuePair<string, string> curr in _Headers)
@@ -549,11 +513,11 @@ namespace HttpServerLite
 
                     if (set)
                     {
-                        _Headers.Add("Access-Control-Allow-Headers", _DefaultHeaders.AccessControlAllowHeaders);
+                        _Headers.Add("Access-Control-Allow-Headers", _HeaderSettings.AccessControlAllowHeaders);
                     }
                 }
 
-                if (!String.IsNullOrEmpty(_DefaultHeaders.AccessControlExposeHeaders))
+                if (!String.IsNullOrEmpty(_HeaderSettings.AccessControlExposeHeaders))
                 {
                     bool set = true;
                     foreach (KeyValuePair<string, string> curr in _Headers)
@@ -567,11 +531,11 @@ namespace HttpServerLite
 
                     if (set)
                     {
-                        _Headers.Add("Access-Control-Expose-Headers", _DefaultHeaders.AccessControlExposeHeaders);
+                        _Headers.Add("Access-Control-Expose-Headers", _HeaderSettings.AccessControlExposeHeaders);
                     }
                 }
 
-                if (!String.IsNullOrEmpty(_DefaultHeaders.Accept))
+                if (!String.IsNullOrEmpty(_HeaderSettings.Accept))
                 {
                     bool set = true;
                     foreach (KeyValuePair<string, string> curr in _Headers)
@@ -585,11 +549,11 @@ namespace HttpServerLite
 
                     if (set)
                     {
-                        _Headers.Add("Accept", _DefaultHeaders.Accept);
+                        _Headers.Add("Accept", _HeaderSettings.Accept);
                     }
                 }
 
-                if (!String.IsNullOrEmpty(_DefaultHeaders.AcceptLanguage))
+                if (!String.IsNullOrEmpty(_HeaderSettings.AcceptLanguage))
                 {
                     bool set = true;
                     foreach (KeyValuePair<string, string> curr in _Headers)
@@ -603,11 +567,11 @@ namespace HttpServerLite
 
                     if (set)
                     {
-                        _Headers.Add("Accept-Language", _DefaultHeaders.AcceptLanguage);
+                        _Headers.Add("Accept-Language", _HeaderSettings.AcceptLanguage);
                     }
                 }
 
-                if (!String.IsNullOrEmpty(_DefaultHeaders.AcceptCharset))
+                if (!String.IsNullOrEmpty(_HeaderSettings.AcceptCharset))
                 {
                     bool set = true;
                     foreach (KeyValuePair<string, string> curr in _Headers)
@@ -621,11 +585,11 @@ namespace HttpServerLite
 
                     if (set)
                     {
-                        _Headers.Add("Accept-Charset", _DefaultHeaders.AcceptCharset);
+                        _Headers.Add("Accept-Charset", _HeaderSettings.AcceptCharset);
                     }
                 }
 
-                if (!String.IsNullOrEmpty(_DefaultHeaders.Connection))
+                if (!String.IsNullOrEmpty(_HeaderSettings.Connection))
                 {
                     bool set = true;
                     foreach (KeyValuePair<string, string> curr in _Headers)
@@ -639,11 +603,11 @@ namespace HttpServerLite
 
                     if (set)
                     {
-                        _Headers.Add("Connection", _DefaultHeaders.Connection);
+                        _Headers.Add("Connection", _HeaderSettings.Connection);
                     }
                 }
 
-                if (!String.IsNullOrEmpty(_DefaultHeaders.Host))
+                if (!String.IsNullOrEmpty(_HeaderSettings.Host))
                 {
                     bool set = true;
                     foreach (KeyValuePair<string, string> curr in _Headers)
@@ -657,9 +621,27 @@ namespace HttpServerLite
 
                     if (set)
                     {
-                        _Headers.Add("Host", _DefaultHeaders.Host);
+                        _Headers.Add("Host", _HeaderSettings.Host);
                     }
                 }
+            }
+        }
+
+        private void SetContentLength(long contentLength)
+        {
+            if (_HeaderSettings.IncludeContentLength)
+            {
+                if (_Headers.Count > 0)
+                {
+                    if (_Headers.Any(h =>
+                        !String.IsNullOrEmpty(h.Key)
+                        && h.Key.ToLower().Equals("content-length")))
+                    {
+                        return;
+                    }
+                }
+
+                _Headers.Add("Content-Length", contentLength.ToString());
             }
         }
 
@@ -668,6 +650,7 @@ namespace HttpServerLite
             if (!HeadersSent)
             {
                 SetDefaultHeaders();
+                SetContentLength(contentLength);
                 byte[] headers = GetHeaderBytes();
                 _Stream.Write(headers, 0, headers.Length);
                 _Stream.Flush();
@@ -701,15 +684,16 @@ namespace HttpServerLite
             }
         }
 
-        private async Task SendInternalAsync(long contentLength, Stream stream, bool close)
+        private async Task SendInternalAsync(long contentLength, Stream stream, bool close, CancellationToken token)
         { 
             byte[] resp = new byte[0];
             if (!HeadersSent)
             {
-                SetDefaultHeaders(); 
+                SetDefaultHeaders();
+                SetContentLength(contentLength);
                 byte[] headers = GetHeaderBytes(); 
-                await _Stream.WriteAsync(headers, 0, headers.Length);
-                await _Stream.FlushAsync();
+                await _Stream.WriteAsync(headers, 0, headers.Length, token).ConfigureAwait(false);
+                await _Stream.FlushAsync(token).ConfigureAwait(false);
                 HeadersSent = true;
             }
 
@@ -723,15 +707,15 @@ namespace HttpServerLite
                     if (bytesRemaining >= _StreamBufferSize) buffer = new byte[_StreamBufferSize];
                     else buffer = new byte[contentLength];
 
-                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
                     if (bytesRead > 0)
                     { 
-                        await _Stream.WriteAsync(buffer, 0, bytesRead);
+                        await _Stream.WriteAsync(buffer, 0, bytesRead, token).ConfigureAwait(false);
                         bytesRemaining -= bytesRead;
                     }
                 }
                  
-                await _Stream.FlushAsync();
+                await _Stream.FlushAsync(token).ConfigureAwait(false);
             }
 
             if (close)

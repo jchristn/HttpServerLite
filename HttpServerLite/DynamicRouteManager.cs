@@ -94,16 +94,16 @@ namespace HttpServerLite
         /// Match a request method and URL to a handler method.
         /// </summary>
         /// <param name="method">The HTTP method.</param>
-        /// <param name="rawUrl">URL path.</param>
+        /// <param name="path">URL path.</param>
         /// <returns>Method to invoke.</returns>
-        public Func<HttpContext, Task> Match(HttpMethod method, string rawUrl)
+        public Func<HttpContext, Task> Match(HttpMethod method, string path)
         {
-            if (String.IsNullOrEmpty(rawUrl)) throw new ArgumentNullException(nameof(rawUrl));
-
+            if (String.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+             
             object val;
             Func<HttpContext, Task> handler;
             if (_Matcher.Match(
-                BuildConsolidatedRegex(method, rawUrl),
+                BuildConsolidatedRegex(method, path),
                 out val))
             {
                 if (val == null) return null;

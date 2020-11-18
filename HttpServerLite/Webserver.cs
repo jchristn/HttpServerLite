@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CavemanTcp;
@@ -26,73 +29,6 @@ namespace HttpServerLite
                 return false;
             }
         }
-         
-        /// <summary>
-        /// For SSL, accept or deny invalid or otherwise unverifiable SSL certificates.
-        /// </summary>
-        public bool AcceptInvalidCertificates
-        {
-            get
-            {
-                return _TcpServer.Settings.AcceptInvalidCertificates;
-            }
-            set
-            {
-                _TcpServer.Settings.AcceptInvalidCertificates = value;
-            }
-        }
-
-        /// <summary>
-        /// For SSL, enable to require mutual authentication.
-        /// </summary>
-        public bool MutuallyAuthenticate
-        {
-            get
-            {
-                return _TcpServer.Settings.MutuallyAuthenticate;
-            }
-            set
-            {
-                _TcpServer.Settings.MutuallyAuthenticate = value;
-            }
-        }
-         
-        /// <summary>
-        /// Buffer size to use when interacting with streams.
-        /// </summary>
-        public int StreamReadBufferSize
-        {
-            get
-            {
-                return _StreamReadBufferSize;
-            }
-            set
-            {
-                if (value < 1) throw new ArgumentException("StreamReadBufferSize must be greater than zero.");
-                _StreamReadBufferSize = value;
-            }
-        }
-
-        /// <summary>
-        /// Number of milliseconds to await a read response prior to considering the connection to have timed out.
-        /// </summary>
-        public int ReadTimeoutMs
-        {
-            get
-            {
-                return _ReadTimeoutMs;
-            }
-            set
-            {
-                if (value < 1) throw new ArgumentException("Read timeout must be greater than zero.");
-                _ReadTimeoutMs = value;
-            }
-        }
-        
-        /// <summary>
-        /// Set specific actions/callbacks to use when events are raised.
-        /// </summary>
-        public EventCallbacks Events = new EventCallbacks();
 
         /// <summary>
         /// List connections by requestor IP:port.
@@ -107,105 +43,77 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Webserver settings.
+        /// </summary>
+        public WebserverSettings Settings
+        {
+            get
+            {
+                return _Settings;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(Settings));
+                _Settings = value;
+            }
+        }
+           
+        /// <summary>
+        /// Event handlers for webserver events.
+        /// </summary>
+        public WebserverEvents Events
+        {
+            get
+            {
+                return _Events;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(Events));
+                _Events = value;
+            }
+        }
+
+        /// <summary>
+        /// Webserver routes.
+        /// </summary>
+        public WebserverRoutes Routes
+        {
+            get
+            {
+                return _Routes;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(Routes));
+                _Routes = value;
+            }
+        }
+
+        /// <summary>
+        /// Default pages served by the webserver.
+        /// </summary>
+        public WebserverPages Pages
+        {
+            get
+            {
+                return _Pages;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(Pages));
+                _Pages = value;
+            }
+        }
+
+        /// <summary>
         /// Webserver statistics.
         /// </summary>
-        public Statistics Stats
+        public WebserverStatistics Statistics
         {
             get
             {
-                return _Stats;
-            }
-        }
-
-        /// <summary>
-        /// Headers that will be added to every response unless previously set.
-        /// </summary>
-        public DefaultHeaderValues DefaultHeaders
-        {
-            get
-            {
-                return _DefaultHeaders;
-            }
-            set
-            {
-                if (value == null) throw new ArgumentNullException(nameof(DefaultHeaders));
-                _DefaultHeaders = value;
-            }
-        }
-
-        /// <summary>
-        /// Access control manager, i.e. default mode of operation, permit list, and deny list.
-        /// </summary>
-        public AccessControlManager AccessControl
-        {
-            get
-            {
-                return _AccessControl;
-            }
-            set
-            {
-                if (value == null) throw new ArgumentNullException(nameof(AccessControl));
-                _AccessControl = value;
-            }
-        }
-
-        /// <summary>
-        /// Function to call prior to routing.  
-        /// Return 'true' if the connection should be terminated.
-        /// Return 'false' to allow the connection to continue routing.
-        /// </summary>
-        public Func<HttpContext, Task<bool>> PreRoutingHandler = null;
-
-        /// <summary>
-        /// Function to call when an OPTIONS request is received.  Often used to handle CORS.  Leave as 'null' to use the default OPTIONS handler.
-        /// </summary>
-        public Func<HttpContext, Task> OptionsRoute = null;
-
-        /// <summary>
-        /// Content routes; i.e. routes to specific files or folders for GET and HEAD requests.
-        /// </summary>
-        public ContentRouteManager ContentRoutes
-        {
-            get
-            {
-                return _ContentRoutes;
-            }
-            set
-            {
-                if (value == null) throw new ArgumentNullException(nameof(AccessControl));
-                _ContentRoutes = value;
-            }
-        }
-
-        /// <summary>
-        /// Static routes; i.e. routes with explicit matching and any HTTP method.
-        /// </summary>
-        public StaticRouteManager StaticRoutes
-        {
-            get
-            {
-                return _StaticRoutes;
-            }
-            set
-            {
-                if (value == null) throw new ArgumentNullException(nameof(AccessControl));
-                _StaticRoutes = value;
-            }
-        }
-
-        /// <summary>
-        /// Dynamic routes; i.e. routes with regex matching and any HTTP method.
-        /// </summary>
-        public DynamicRouteManager DynamicRoutes
-        {
-            get
-            {
-                return _DynamicRoutes;
-            }
-            set
-            {
-                if (value == null) throw new ArgumentNullException(nameof(AccessControl));
-                _DynamicRoutes = value;
+                return _Statistics;
             }
         }
 
@@ -213,31 +121,55 @@ namespace HttpServerLite
 
         #region Private-Members
 
-        private string _Hostname = null;
-        private int _Port = 0;
-        private bool _Ssl = false;
-        private string _PfxCertFilename = null;
-        private string _PfxCertPassword = null;
-        private CavemanTcpServer _TcpServer = null; 
-        private DefaultHeaderValues _DefaultHeaders = new DefaultHeaderValues();
-        private Func<HttpContext, Task> _DefaultRoute = null;
-        private ContentRouteProcessor _ContentRouteProcessor = null;
-
-        private int _StreamReadBufferSize = 65536;
-        private int _ReadTimeoutMs = 5000;
-        private Statistics _Stats = new Statistics();
+        private string _Header = "[HttpServerLite] ";
+        private Assembly _Assembly = Assembly.GetCallingAssembly();
+        private WebserverSettings _Settings = new WebserverSettings();
+        private WebserverEvents _Events = new WebserverEvents();
+        private WebserverRoutes _Routes = new WebserverRoutes();
+        private WebserverPages _Pages = new WebserverPages();
+        private WebserverStatistics _Statistics = new WebserverStatistics();
+        private CavemanTcpServer _TcpServer = null;  
          
         private CancellationTokenSource _TokenSource = new CancellationTokenSource();
         private CancellationToken _Token;
-
-        private AccessControlManager _AccessControl = new AccessControlManager(AccessControlMode.DefaultPermit);
-        private ContentRouteManager _ContentRoutes = new ContentRouteManager();
-        private StaticRouteManager _StaticRoutes = new StaticRouteManager();
-        private DynamicRouteManager _DynamicRoutes = new DynamicRouteManager();
-
+         
         #endregion
 
         #region Constructors-and-Factories
+
+        /// <summary>
+        /// Instantiate the webserver without SSL listening on localhost port 8080.
+        /// </summary>
+        public Webserver()
+        {
+            InitializeServer();
+        }
+
+        /// <summary>
+        /// Instantiate the webserver without SSL listening on localhost port 8080 and using the specified default route.
+        /// </summary>
+        /// <param name="defaultRoute">Default route.</param>
+        public Webserver(Func<HttpContext, Task> defaultRoute)
+        {
+            if (defaultRoute == null) throw new ArgumentNullException(nameof(defaultRoute));
+             
+            _Routes = new WebserverRoutes(defaultRoute);
+
+            InitializeServer();
+        }
+
+        /// <summary>
+        /// Instantiate the webserver using the specified settings.
+        /// </summary>
+        /// <param name="settings">Webserver settings.</param>
+        public Webserver(WebserverSettings settings)
+        {
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+
+            _Settings = settings;
+
+            InitializeServer();
+        }
 
         /// <summary>
         /// Instantiate the webserver without SSL.
@@ -247,13 +179,12 @@ namespace HttpServerLite
         /// <param name="defaultRoute">Default route.</param>
         public Webserver(string hostname, int port, Func<HttpContext, Task> defaultRoute)
         {
-            _Hostname = hostname ?? throw new ArgumentNullException(nameof(hostname));
-            _DefaultRoute = defaultRoute ?? throw new ArgumentNullException(nameof(defaultRoute));
+            if (String.IsNullOrEmpty(hostname)) hostname = "localhost";
+            if (port < 0) throw new ArgumentOutOfRangeException(nameof(port));
+            if (defaultRoute == null) throw new ArgumentNullException(nameof(defaultRoute));
 
-            _Port = port;
-            _Ssl = false;
-            _PfxCertFilename = null;
-            _PfxCertPassword = null;
+            _Settings = new WebserverSettings(hostname, port);
+            _Routes = new WebserverRoutes(defaultRoute);
 
             InitializeServer(); 
         }
@@ -269,19 +200,23 @@ namespace HttpServerLite
         /// <param name="defaultRoute">Default route.</param>
         public Webserver(string hostname, int port, bool ssl, string pfxCertFilename, string pfxCertPassword, Func<HttpContext, Task> defaultRoute)
         {
-            _Hostname = hostname ?? throw new ArgumentNullException(nameof(hostname));
-            _DefaultRoute = defaultRoute ?? throw new ArgumentNullException(nameof(defaultRoute));
+            if (String.IsNullOrEmpty(hostname)) hostname = "localhost";
+            if (port < 0) throw new ArgumentOutOfRangeException(nameof(port));
+            if (defaultRoute == null) throw new ArgumentNullException(nameof(defaultRoute));
 
-            _Port = port;
-            _Ssl = ssl;
-            _PfxCertFilename = pfxCertFilename;
-            _PfxCertPassword = pfxCertPassword;
+            _Settings = new WebserverSettings(hostname, port);
+            _Settings.Ssl.Enable = ssl;
+            _Settings.Ssl.PfxCertificateFile = pfxCertFilename;
+            _Settings.Ssl.PfxCertificatePassword = pfxCertPassword;
+
+            _Routes = new WebserverRoutes(defaultRoute);
 
             InitializeServer(); 
         }
 
         /// <summary>
         /// Dispose of the object.
+        /// Do not use the object after disposal.
         /// </summary>
         public void Dispose()
         {
@@ -301,12 +236,14 @@ namespace HttpServerLite
             if (_TcpServer == null) throw new ObjectDisposedException("Webserver has been disposed.");
             if (_TcpServer.IsListening) throw new InvalidOperationException("Webserver is already running.");
 
+            LoadRoutes();
+
             _TcpServer.Start();
 
             _TokenSource = new CancellationTokenSource();
             _Token = _TokenSource.Token;
 
-            Task.Run(() => Events.ServerStarted(), _Token);
+            Events.HandleServerStarted(this, EventArgs.Empty);
         }
          
         /// <summary>
@@ -319,7 +256,7 @@ namespace HttpServerLite
 
             _TcpServer.Stop();
 
-            Task.Run(() => Events.ServerStopped(), _Token);
+            Events.HandleServerStopped(this, EventArgs.Empty);
         }
 
         #endregion
@@ -328,12 +265,15 @@ namespace HttpServerLite
         
         /// <summary>
         /// Tear down the server and dispose of background workers.
+        /// Do not use the object after disposal.
         /// </summary>
         /// <param name="disposing">Indicate if resources should be disposed.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
             {
+                Events.HandleServerDisposing(this, EventArgs.Empty);
+
                 if (_TcpServer != null)
                 {
                     if (_TcpServer.IsListening) Stop();
@@ -342,36 +282,108 @@ namespace HttpServerLite
                     _TcpServer = null;
                 }
 
-                if (_TokenSource != null && _Token != null)
+                if (_TokenSource != null && !_Token.IsCancellationRequested)
                 {
                     _TokenSource.Cancel();
                 }
 
-                _Stats = null;
-                _DefaultHeaders = null;
-                _DefaultRoute = null; 
-                _AccessControl = null;
-                _ContentRoutes = null;
-                _StaticRoutes = null;
-                _DynamicRoutes = null;
-                
-                OptionsRoute = null;
+                _Statistics = null;
+                _Settings = null;
+                _Routes = null;
+                _Events = null;
+            }
+        }
+         
+        private void LoadRoutes()
+        {
+            var staticRoutes = _Assembly
+                .GetTypes() // Get all classes from assembly
+                .SelectMany(x => x.GetMethods()) // Get all methods from assembly
+                .Where(IsStaticRoute); // Only select methods that are valid routes
 
-                Task dispTask = Task.Run(() => Events.ServerDisposed());
+            var dynamicRoutes = _Assembly
+                .GetTypes() // Get all classes from assembly
+                .SelectMany(x => x.GetMethods()) // Get all methods from assembly
+                .Where(IsDynamicRoute); // Only select methods that are valid routes
+
+            foreach (var staticRoute in staticRoutes)
+            {
+                var attribute = staticRoute.GetCustomAttributes().OfType<StaticRouteAttribute>().First();
+                if (!_Routes.Static.Exists(attribute.Method, attribute.Path))
+                {
+                    _Routes.Static.Add(attribute.Method, attribute.Path, ToRouteMethod(staticRoute));
+                }
+            }
+
+            foreach (var dynamicRoute in dynamicRoutes)
+            {
+                var attribute = dynamicRoute.GetCustomAttributes().OfType<DynamicRouteAttribute>().First();
+                if (!_Routes.Dynamic.Exists(attribute.Method, attribute.Path))
+                {
+                    _Routes.Dynamic.Add(attribute.Method, attribute.Path, ToRouteMethod(dynamicRoute));
+                }
             }
         }
 
-        private void InitializeServer()
+        private bool IsStaticRoute(MethodInfo method)
         {
-            _TokenSource = new CancellationTokenSource();
-            _Token = _TokenSource.Token;
+            return method.GetCustomAttributes().OfType<StaticRouteAttribute>().Any()
+               && method.ReturnType == typeof(Task)
+               && method.GetParameters().Length == 1
+               && method.GetParameters().First().ParameterType == typeof(HttpContext);
+        }
 
-            _ContentRouteProcessor = new ContentRouteProcessor(_ContentRoutes);
+        private bool IsDynamicRoute(MethodInfo method)
+        {
+            return method.GetCustomAttributes().OfType<DynamicRouteAttribute>().Any()
+               && method.ReturnType == typeof(Task)
+               && method.GetParameters().Length == 1
+               && method.GetParameters().First().ParameterType == typeof(HttpContext);
+        }
 
-            _TcpServer = new CavemanTcpServer(_Hostname, _Port, _Ssl, _PfxCertFilename, _PfxCertPassword);
+        private Func<HttpContext, Task> ToRouteMethod(MethodInfo method)
+        {
+            if (method.IsStatic)
+            {
+                return (Func<HttpContext, Task>)Delegate.CreateDelegate(typeof(Func<HttpContext, Task>), method);
+            }
+            else
+            {
+                object instance = Activator.CreateInstance(method.DeclaringType ?? throw new Exception("Declaring class is null"));
+                return (Func<HttpContext, Task>)Delegate.CreateDelegate(typeof(Func<HttpContext, Task>), instance, method);
+            }
+        }
+         
+        private void InitializeServer()
+        { 
+            if (!_Settings.Ssl.Enable)
+            {
+                _TcpServer = new CavemanTcpServer(
+                    _Settings.Hostname,
+                    _Settings.Port);
+
+                _Header = "[HttpServerLite http://" + _Settings.Hostname + ":" + _Settings.Port + "] ";
+            }
+            else
+            {
+                _TcpServer = new CavemanTcpServer(
+                    _Settings.Hostname,
+                    _Settings.Port,
+                    _Settings.Ssl.Enable,
+                    _Settings.Ssl.PfxCertificateFile,
+                    _Settings.Ssl.PfxCertificatePassword);
+
+                _Header = "[HttpServerLite https://" + _Settings.Hostname + ":" + _Settings.Port + "] ";
+            }
+
             _TcpServer.Settings.MonitorClientConnections = false;
             _TcpServer.Events.ClientConnected += ClientConnected;
-            _TcpServer.Events.ClientDisconnected += ClientDisconnected; 
+            _TcpServer.Events.ClientDisconnected += ClientDisconnected;
+
+            if (_Settings.Debug.Tcp)
+            {
+                _TcpServer.Logger = _Events.Logger;
+            }
         }
 
         private async void ClientConnected(object sender, ClientConnectedEventArgs args)
@@ -386,7 +398,10 @@ namespace HttpServerLite
             Common.ParseIpPort(ipPort, out ip, out port);
             HttpContext ctx = null;
 
-            Task connRecvTask = Task.Run(() => Events.ConnectionReceived(ip, port), _Token);
+            _Events.HandleConnectionReceived(this, new ConnectionEventArgs(ip, port));
+            
+            if (_Settings.Debug.Connections) 
+                _Events.Logger?.Invoke(_Header + "connection from " + ip + ":" + port); 
 
             #endregion
 
@@ -396,43 +411,43 @@ namespace HttpServerLite
             {
                 #region Retrieve-Headers
 
-                byte[] headerTest = new byte[4];
-
+                StringBuilder sb = new StringBuilder();
+                 
                 //                           123456789012345 6 7 8
                 // minimum request 16 bytes: GET / HTTP/1.1\r\n\r\n
-                int preReadLen = 18;
-                byte[] headerBytes = new byte[preReadLen];
-                ReadResult rr = await _TcpServer.ReadWithTimeoutAsync(_ReadTimeoutMs, args.IpPort, preReadLen);
-                if (rr.Status != ReadResultStatus.Success 
-                    || rr.BytesRead != preReadLen 
-                    || rr.Data == null 
-                    || rr.Data.Length != preReadLen) return;
+                int preReadLen = 18; 
+                ReadResult preReadResult = await _TcpServer.ReadWithTimeoutAsync(
+                    _Settings.IO.ReadTimeoutMs, 
+                    args.IpPort, 
+                    preReadLen, 
+                    _Token).ConfigureAwait(false);
 
-                Buffer.BlockCopy(rr.Data, 0, headerBytes, 0, preReadLen);
-                headerTest[3] = headerBytes[(preReadLen - 1)];
-                headerTest[2] = headerBytes[(preReadLen - 2)];
-                headerTest[1] = headerBytes[(preReadLen - 3)];
-                headerTest[0] = headerBytes[(preReadLen - 4)];
+                if (preReadResult.Status != ReadResultStatus.Success 
+                    || preReadResult.BytesRead != preReadLen 
+                    || preReadResult.Data == null 
+                    || preReadResult.Data.Length != preReadLen) return;
+
+                sb.Append(Encoding.ASCII.GetString(preReadResult.Data));
 
                 bool retrievingHeaders = true;
                 while (retrievingHeaders)
                 {
-                    if (((int)headerTest[3]) == 10
-                        && ((int)headerTest[2]) == 13
-                        && ((int)headerTest[1]) == 10
-                        && ((int)headerTest[0]) == 13)
+                    if (sb.ToString().EndsWith("\r\n\r\n"))
                     {
                         // end of headers detected
                         retrievingHeaders = false;
                     }
                     else
                     { 
-                        rr = await _TcpServer.ReadWithTimeoutAsync(_ReadTimeoutMs, args.IpPort, 1);
-                        if (rr.Status == ReadResultStatus.Success)
+                        ReadResult addlReadResult = await _TcpServer.ReadWithTimeoutAsync(
+                            _Settings.IO.ReadTimeoutMs, 
+                            args.IpPort, 
+                            1, 
+                            _Token).ConfigureAwait(false);
+
+                        if (addlReadResult.Status == ReadResultStatus.Success)
                         {
-                            headerBytes = Common.AppendBytes(headerBytes, rr.Data);
-                            headerTest = Common.ByteArrayShiftLeft(headerTest);
-                            headerTest[3] = rr.Data[0];
+                            sb.Append(Encoding.ASCII.GetString(addlReadResult.Data));
                         }
                         else
                         {
@@ -448,32 +463,36 @@ namespace HttpServerLite
                 ctx = new HttpContext(
                     ipPort, 
                     _TcpServer.GetStream(ipPort), 
-                    headerBytes, 
+                    sb.ToString(), 
                     Events, 
-                    _DefaultHeaders);
+                    _Settings.Headers,
+                    _Settings.IO.StreamBufferSize);
 
-                _Stats.IncrementRequestCounter(ctx.Request.Method);
-                _Stats.ReceivedPayloadBytes += ctx.Request.ContentLength;
+                _Statistics.IncrementRequestCounter(ctx.Request.Method);
+                _Statistics.AddReceivedPayloadBytes(ctx.Request.ContentLength);
 
-                Task reqRecvTask = Task.Run(() => Events.RequestReceived(
-                    ctx.Request.SourceIp,
-                    ctx.Request.SourcePort,
-                    ctx.Request.Method.ToString(),
-                    ctx.Request.RawUrlWithQuery),
-                    _Token);
+                _Events.HandleRequestReceived(this, new RequestEventArgs(ctx));
+
+                if (_Settings.Debug.Requests)
+                {
+                    _Events.Logger?.Invoke(
+                        _Header + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
+                        ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery);
+                }
 
                 #endregion
                  
                 #region Check-Access-Control
 
-                if (!_AccessControl.Permit(ctx.Request.SourceIp))
+                if (!_Settings.AccessControl.Permit(ctx.Request.Source.IpAddress))
                 {
-                    Task aclDenied = Task.Run(() => Events.AccessControlDenied(
-                        ctx.Request.SourceIp,
-                        ctx.Request.SourcePort,
-                        ctx.Request.Method.ToString(),
-                        ctx.Request.FullUrl),
-                        _Token);
+                    _Events.HandleRequestDenied(this, new RequestEventArgs(ctx));
+
+                    if (_Settings.Debug.AccessControl)
+                    {
+                        _Events.Logger?.Invoke(_Header + "request from " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " denied due to access control");
+                    }
+
                     return;
                 }
 
@@ -483,14 +502,16 @@ namespace HttpServerLite
 
                 if (ctx.Request.Method == HttpMethod.OPTIONS)
                 {
-                    if (OptionsRoute != null)
+                    if (_Routes.Preflight != null)
                     {
-                        await OptionsRoute?.Invoke(ctx);
-                        return;
-                    }
-                    else
-                    {
-                        await OptionsProcessor(ctx);
+                        if (_Settings.Debug.Routing)
+                        {
+                            _Events.Logger?.Invoke(
+                                _Header + "preflight route for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " + 
+                                ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery);
+                        }
+
+                        await _Routes.Preflight(ctx).ConfigureAwait(false);
                         return;
                     }
                 }
@@ -500,10 +521,20 @@ namespace HttpServerLite
                 #region Pre-Routing-Handler
 
                 bool terminate = false;
-                if (PreRoutingHandler != null)
+                if (_Routes.PreRouting != null)
                 {
-                    terminate = await PreRoutingHandler(ctx);
-                    if (terminate) return;
+                    terminate = await _Routes.PreRouting(ctx).ConfigureAwait(false);
+                    if (terminate)
+                    {
+                        if (_Settings.Debug.Routing)
+                        {
+                            _Events.Logger?.Invoke(
+                                _Header + "prerouting terminated connection for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
+                                ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery);
+                        }
+
+                        return;
+                    }
                 }
 
                 #endregion
@@ -512,9 +543,16 @@ namespace HttpServerLite
 
                 if (ctx.Request.Method == HttpMethod.GET || ctx.Request.Method == HttpMethod.HEAD)
                 {
-                    if (_ContentRoutes.Exists(ctx.Request.RawUrlWithoutQuery))
+                    if (_Routes.Content.Exists(ctx.Request.Url.WithoutQuery))
                     {
-                        await _ContentRouteProcessor.Process(ctx);
+                        if (_Settings.Debug.Routing)
+                        {
+                            _Events.Logger?.Invoke(
+                                _Header + "content route for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
+                                ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery);
+                        }
+
+                        await _Routes.ContentHandler.Process(ctx, _Token).ConfigureAwait(false);
                         return;
                     }
                 }
@@ -522,22 +560,36 @@ namespace HttpServerLite
                 #endregion
 
                 #region Static-Routes
-
-                Func<HttpContext, Task> handler = _StaticRoutes.Match(ctx.Request.Method, ctx.Request.RawUrlWithoutQuery);
+                 
+                Func<HttpContext, Task> handler = _Routes.Static.Match(ctx.Request.Method, ctx.Request.Url.WithoutQuery);
                 if (handler != null)
                 {
-                    await handler(ctx);
+                    if (_Settings.Debug.Routing)
+                    {
+                        _Events.Logger?.Invoke(
+                            _Header + "static route for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
+                            ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithoutQuery);
+                    }
+
+                    await handler(ctx).ConfigureAwait(false);
                     return;
                 }
 
                 #endregion
 
                 #region Dynamic-Routes
-
-                handler = _DynamicRoutes.Match(ctx.Request.Method, ctx.Request.RawUrlWithoutQuery);
+                 
+                handler = _Routes.Dynamic.Match(ctx.Request.Method, ctx.Request.Url.WithoutQuery);
                 if (handler != null)
                 {
-                    await handler(ctx);
+                    if (_Settings.Debug.Routing)
+                    {
+                        _Events.Logger?.Invoke(
+                            _Header + "dynamic route for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
+                            ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery);
+                    }
+
+                    await handler(ctx).ConfigureAwait(false);
                     return;
                 }
 
@@ -545,7 +597,24 @@ namespace HttpServerLite
 
                 #region Default-Route
 
-                await _DefaultRoute?.Invoke(ctx);
+                if (_Settings.Debug.Routing)
+                {
+                    _Events.Logger?.Invoke(
+                        _Header + "default route for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
+                        ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery);
+                }
+
+                if (_Routes.Default != null)
+                {
+                    await _Routes.Default(ctx).ConfigureAwait(false);
+                    return;
+                }
+                else
+                {
+                    ctx.Response.StatusCode = 404;
+                    ctx.Response.ContentType = _Pages.Default404Page.ContentType;
+                    await ctx.Response.SendAsync(_Pages.Default404Page.Content, _Token).ConfigureAwait(false);
+                }
 
                 #endregion  
             }
@@ -559,7 +628,12 @@ namespace HttpServerLite
             }
             catch (Exception e)
             {
-                Task excTask = Task.Run(() => Events.ExceptionEncountered(ip, port, e), _Token);
+                ctx.Response.StatusCode = 500;
+                ctx.Response.ContentType = _Pages.Default500Page.ContentType;
+                await ctx.Response.SendAsync(_Pages.Default500Page.Content, _Token).ConfigureAwait(false);
+
+                _Events.Logger?.Invoke(_Header + "exception: " + Environment.NewLine + SerializationHelper.SerializeJson(e, true));
+                _Events.HandleException(this, new ExceptionEventArgs(ctx, e));
                 return;
             }
             finally
@@ -568,17 +642,22 @@ namespace HttpServerLite
 
                 if (ctx != null)
                 {
-                    Task respSentTask = Task.Run(() => Events.ResponseSent(
-                        ctx.Request.SourceIp,
-                        ctx.Request.SourcePort,
-                        ctx.Request.Method.ToString(),
-                        ctx.Request.FullUrl,
-                        ctx.Response.StatusCode,
-                        Common.TotalMsFrom(startTime)),
-                        _Token);
+                    double totalMs = TotalMsFrom(startTime);
+
+                    _Events.HandleResponseSent(this, new ResponseEventArgs(ctx, totalMs));
+
+                    if (_Settings.Debug.Responses)
+                    { 
+                        _Events.Logger?.Invoke(
+                            _Header + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
+                            ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery + ": " +
+                            ctx.Response.StatusCode + " [" + totalMs + "ms]");
+                    }
 
                     if (ctx.Response.ContentLength != null)
-                        _Stats.SentPayloadBytes += Convert.ToInt64(ctx.Response.ContentLength);
+                    {
+                        _Statistics.AddSentPayloadBytes(Convert.ToInt64(ctx.Response.ContentLength));
+                    }
                 }
             }
 
@@ -589,42 +668,19 @@ namespace HttpServerLite
         {
 
         }
-
-        private async Task OptionsProcessor(HttpContext ctx)
+        
+        private double TotalMsFrom(DateTime startTime)
         {
-            ctx.Response.StatusCode = 200;
-
-            string[] requestedHeaders = null;
-            if (ctx.Request.Headers != null)
+            try
             {
-                foreach (KeyValuePair<string, string> curr in ctx.Request.Headers)
-                {
-                    if (String.IsNullOrEmpty(curr.Key)) continue;
-                    if (String.IsNullOrEmpty(curr.Value)) continue;
-                    if (String.Compare(curr.Key.ToLower(), "access-control-request-headers") == 0)
-                    {
-                        requestedHeaders = curr.Value.Split(',');
-                        break;
-                    }
-                }
+                DateTime endTime = DateTime.Now;
+                TimeSpan totalTime = (endTime - startTime);
+                return totalTime.TotalMilliseconds;
             }
-
-            string headers = "";
-
-            if (requestedHeaders != null)
+            catch (Exception)
             {
-                int addedCount = 0;
-                foreach (string curr in requestedHeaders)
-                {
-                    if (String.IsNullOrEmpty(curr)) continue;
-                    if (addedCount > 0) headers += ", ";
-                    headers += ", " + curr;
-                    addedCount++;
-                }
+                return 0;
             }
-             
-            ctx.Response.ContentLength = 0;
-            await ctx.Response.SendAsync(0);
         }
 
         #endregion

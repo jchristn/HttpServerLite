@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Ssl", "Test.Ssl\Test.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Loopback", "Test.Loopback\Test.Loopback.csproj", "{708A67B3-47C5-4A20-BDF1-0765946F8C09}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Routes", "Test.Routes\Test.Routes.csproj", "{86958CB1-8ED7-4C4A-8DA7-118B626FCD2C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Latency", "Test.Latency\Test.Latency.csproj", "{21F301F9-F849-42DD-A45C-3484E46FDECA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{708A67B3-47C5-4A20-BDF1-0765946F8C09}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{708A67B3-47C5-4A20-BDF1-0765946F8C09}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{708A67B3-47C5-4A20-BDF1-0765946F8C09}.Release|Any CPU.Build.0 = Release|Any CPU
-		{86958CB1-8ED7-4C4A-8DA7-118B626FCD2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{86958CB1-8ED7-4C4A-8DA7-118B626FCD2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{86958CB1-8ED7-4C4A-8DA7-118B626FCD2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{86958CB1-8ED7-4C4A-8DA7-118B626FCD2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21F301F9-F849-42DD-A45C-3484E46FDECA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21F301F9-F849-42DD-A45C-3484E46FDECA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21F301F9-F849-42DD-A45C-3484E46FDECA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21F301F9-F849-42DD-A45C-3484E46FDECA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

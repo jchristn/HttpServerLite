@@ -81,6 +81,21 @@
             Indicates whether or not this is the final chunk, i.e. the chunk length received was zero.
             </summary>
         </member>
+        <member name="T:HttpServerLite.ConnectionEventArgs">
+            <summary>
+            Connection received event arguments.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ConnectionEventArgs.Ip">
+            <summary>
+            IP address.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ConnectionEventArgs.Port">
+            <summary>
+            Port number.
+            </summary>
+        </member>
         <member name="T:HttpServerLite.ContentRoute">
             <summary>
             Assign a method handler for when requests are received matching the supplied method and path.
@@ -145,80 +160,25 @@
             <param name="path">URL path.</param>
             <returns>True if exists.</returns>
         </member>
-        <member name="T:HttpServerLite.ContentRouteProcessor">
+        <member name="T:HttpServerLite.ContentRouteHandler">
             <summary>
-            Content route processor.  Handles GET and HEAD requests to content routes for files and directories. 
+            Content route handler.  Handles GET and HEAD requests to content routes for files and directories. 
             </summary>
         </member>
-        <member name="F:HttpServerLite.ContentRouteProcessor.ContentFileMode">
+        <member name="F:HttpServerLite.ContentRouteHandler.ContentFileMode">
             <summary>
             The FileMode value to use when accessing files within a content route via a FileStream.  Default is FileMode.Open.
             </summary>
         </member>
-        <member name="F:HttpServerLite.ContentRouteProcessor.ContentFileAccess">
+        <member name="F:HttpServerLite.ContentRouteHandler.ContentFileAccess">
             <summary>
             The FileAccess value to use when accessing files within a content route via a FileStream.  Default is FileAccess.Read.
             </summary>
         </member>
-        <member name="F:HttpServerLite.ContentRouteProcessor.ContentFileShare">
+        <member name="F:HttpServerLite.ContentRouteHandler.ContentFileShare">
             <summary>
             The FileShare value to use when accessing files within a content route via a FileStream.  Default is FileShare.Read.
             </summary>
-        </member>
-        <member name="T:HttpServerLite.DefaultHeaderValues">
-            <summary>
-            Headers that will be added to every response unless previously set.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.DefaultHeaderValues.AccessControlAllowOrigin">
-            <summary>
-            Access-Control-Allow-Origin header.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.DefaultHeaderValues.AccessControlAllowMethods">
-            <summary>
-            Access-Control-Allow-Methods header.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.DefaultHeaderValues.AccessControlAllowHeaders">
-            <summary>
-            Access-Control-Allow-Headers header.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.DefaultHeaderValues.AccessControlExposeHeaders">
-            <summary>
-            Access-Control-Expose-Headers header.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.DefaultHeaderValues.Accept">
-            <summary>
-            Accept header.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.DefaultHeaderValues.AcceptLanguage">
-            <summary>
-            Accept-Language header.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.DefaultHeaderValues.AcceptCharset">
-            <summary>
-            Accept-Charset header.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.DefaultHeaderValues.Connection">
-            <summary>
-            Connection header.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.DefaultHeaderValues.Host">
-            <summary>
-            Host header.
-            </summary>
-        </member>
-        <member name="M:HttpServerLite.DefaultHeaderValues.#ctor">
-            <summary>
-            Instantiate the object.
-            </summary> 
         </member>
         <member name="T:HttpServerLite.DynamicRoute">
             <summary>
@@ -314,76 +274,67 @@
             Match a request method and URL to a handler method.
             </summary>
             <param name="method">The HTTP method.</param>
-            <param name="rawUrl">URL path.</param>
+            <param name="path">URL path.</param>
             <returns>Method to invoke.</returns>
         </member>
-        <member name="T:HttpServerLite.EventCallbacks">
+        <member name="T:HttpServerLite.ExceptionEventArgs">
             <summary>
-            Callbacks/actions to use when various events are encountered.
+            Exception event arguments.
             </summary>
         </member>
-        <member name="P:HttpServerLite.EventCallbacks.ConnectionReceived">
+        <member name="P:HttpServerLite.ExceptionEventArgs.Ip">
             <summary>
-            Callback/action to call when a connection is received.
-            string: IP address of the client.
-            int: Source TCP port of the client.
+            IP address.
             </summary>
         </member>
-        <member name="P:HttpServerLite.EventCallbacks.RequestReceived">
+        <member name="P:HttpServerLite.ExceptionEventArgs.Port">
             <summary>
-            Callback/action to call when a request is received.
-            string: IP address of the client.
-            int: Source TCP port of the client.
-            string: HTTP method.
-            string: Full URL.
+            Port number.
             </summary>
         </member>
-        <member name="P:HttpServerLite.EventCallbacks.AccessControlDenied">
+        <member name="P:HttpServerLite.ExceptionEventArgs.Method">
             <summary>
-            Callback/action to call when a request is denied due to access control.
-            string: IP address of the client.
-            int: Source TCP port of the client.
-            string: HTTP method.
-            string: Full URL.
+            HTTP method.
             </summary>
         </member>
-        <member name="P:HttpServerLite.EventCallbacks.ResponseSent">
+        <member name="P:HttpServerLite.ExceptionEventArgs.Url">
             <summary>
-            Callback/action to call when a response is sent.
-            string: IP address of the client.
-            int: Source TCP port of the client.
-            string: HTTP method.
-            string: Full URL.
-            int: Response status code.
-            double: Number of milliseconds.
+            URL.
             </summary>
         </member>
-        <member name="P:HttpServerLite.EventCallbacks.ExceptionEncountered">
+        <member name="P:HttpServerLite.ExceptionEventArgs.Query">
             <summary>
-            Callback/action to call when an exception is encountered.
-            string: IP address of the client.
-            int: Source TCP port of the client.
-            Exception: Exception encountered.
+            Request query.
             </summary>
         </member>
-        <member name="P:HttpServerLite.EventCallbacks.ServerStarted">
+        <member name="P:HttpServerLite.ExceptionEventArgs.RequestHeaders">
             <summary>
-            Callback/action to call when the server is started.
+            Request headers.
             </summary>
         </member>
-        <member name="P:HttpServerLite.EventCallbacks.ServerStopped">
+        <member name="P:HttpServerLite.ExceptionEventArgs.RequestContentLength">
             <summary>
-            Callback/action to call when the server is stopped.
+            Content length.
             </summary>
         </member>
-        <member name="P:HttpServerLite.EventCallbacks.ServerDisposed">
+        <member name="P:HttpServerLite.ExceptionEventArgs.StatusCode">
             <summary>
-            Callback/action to call when the server is disposed.
+            Response status.
             </summary>
         </member>
-        <member name="M:HttpServerLite.EventCallbacks.#ctor">
+        <member name="P:HttpServerLite.ExceptionEventArgs.ResponseHeaders">
             <summary>
-            Instantiate the object.
+            Response headers.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ExceptionEventArgs.ResponseContentLength">
+            <summary>
+            Response content length.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ExceptionEventArgs.Exception">
+            <summary>
+            Exception.
             </summary>
         </member>
         <member name="T:HttpServerLite.HttpContext">
@@ -391,25 +342,27 @@
             HTTP context including both request and response.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpContext.Request">
+        <member name="P:HttpServerLite.HttpContext.Request">
             <summary>
             The HTTP request that was received.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpContext.Response">
+        <member name="P:HttpServerLite.HttpContext.Response">
             <summary>
             The HTTP response that will be sent.  This object is preconstructed on your behalf and can be modified directly.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.HttpContext.StreamBufferSize">
-            <summary>
-            Buffer size to use while writing the response from a supplied stream. 
             </summary>
         </member>
         <member name="M:HttpServerLite.HttpContext.#ctor">
             <summary>
             Instantiate the object.
             </summary>
+        </member>
+        <member name="M:HttpServerLite.HttpContext.ToJson(System.Boolean)">
+            <summary>
+            Retrieve a JSON-encoded version of the context object.
+            </summary>
+            <param name="pretty">True to enable pretty print.</param>
+            <returns>JSON string.</returns>
         </member>
         <member name="T:HttpServerLite.HttpMethod">
             <summary>
@@ -466,102 +419,62 @@
             Data extracted from an incoming HTTP request.
             </summary>
         </member>
-        <member name="P:HttpServerLite.HttpRequest.StreamBufferSize">
-            <summary>
-            Buffer size to use while writing the response from a supplied stream. 
-            </summary>
-        </member>
         <member name="F:HttpServerLite.HttpRequest.TimestampUtc">
             <summary>
             UTC timestamp from when the request was received.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpRequest.ThreadId">
+        <member name="P:HttpServerLite.HttpRequest.ThreadId">
             <summary>
             Thread ID on which the request exists.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpRequest.ProtocolVersion">
+        <member name="P:HttpServerLite.HttpRequest.ProtocolVersion">
             <summary>
             The protocol and version.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpRequest.SourceIp">
+        <member name="P:HttpServerLite.HttpRequest.Source">
             <summary>
-            IP address of the requestor (client).
+            Source (requestor) IP and port information.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpRequest.SourcePort">
-            <summary>
-            TCP port from which the request originated on the requestor (client).
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.HttpRequest.DestHostname">
-            <summary>
-            The destination hostname as found in the request line, if present.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.HttpRequest.DestHostPort">
-            <summary>
-            The destination host port as found in the request line, if present.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.HttpRequest.Keepalive">
+        <member name="P:HttpServerLite.HttpRequest.Keepalive">
             <summary>
             Specifies whether or not the client requested HTTP keepalives.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpRequest.Method">
+        <member name="P:HttpServerLite.HttpRequest.Method">
             <summary>
             The HTTP method used in the request.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpRequest.FullUrl">
+        <member name="P:HttpServerLite.HttpRequest.Url">
             <summary>
-            The full URL as sent by the requestor (client).
+            URL components.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpRequest.RawUrlWithQuery">
+        <member name="P:HttpServerLite.HttpRequest.Query">
             <summary>
-            The raw (relative) URL with the querystring attached.
+            Query components.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpRequest.RawUrlWithoutQuery">
-            <summary>
-            The raw (relative) URL without the querystring attached.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.HttpRequest.RawUrlEntries">
-            <summary>
-            List of items found in the raw URL.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.HttpRequest.Querystring">
-            <summary>
-            The querystring attached to the URL.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.HttpRequest.QuerystringEntries">
-            <summary>
-            Dictionary containing key-value pairs from items found in the querystring.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.HttpRequest.Useragent">
+        <member name="P:HttpServerLite.HttpRequest.Useragent">
             <summary>
             The useragent specified in the request.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpRequest.ContentLength">
+        <member name="P:HttpServerLite.HttpRequest.ContentLength">
             <summary>
             The number of bytes in the request body.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpRequest.ContentType">
+        <member name="P:HttpServerLite.HttpRequest.ContentType">
             <summary>
             The content type as specified by the requestor (client).
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpRequest.Headers">
+        <member name="P:HttpServerLite.HttpRequest.Headers">
             <summary>
             The headers found in the request.
             </summary>
@@ -581,20 +494,21 @@
             Instantiate the object.
             </summary>
         </member>
-        <member name="M:HttpServerLite.HttpRequest.#ctor(System.String,System.IO.Stream,System.Byte[])">
+        <member name="M:HttpServerLite.HttpRequest.#ctor(System.String,System.IO.Stream,System.String)">
             <summary>
-            Create an HttpRequest object from a byte array.
+            Create an HttpRequest.
             </summary>
             <param name="ipPort">IP:port of the requestor.</param>
             <param name="stream">Client stream.</param>
-            <param name="bytes">Bytes.</param>
+            <param name="requestHeader">Request header.</param>
             <returns>HttpRequest.</returns>
         </member>
-        <member name="M:HttpServerLite.HttpRequest.ToString">
+        <member name="M:HttpServerLite.HttpRequest.ToJson(System.Boolean)">
             <summary>
-            Retrieve a string-formatted, human-readable copy of the HttpRequest instance.
+            Retrieve a JSON-encoded version of the request object.
             </summary>
-            <returns>String-formatted, human-readable copy of the HttpRequest instance.</returns>
+            <param name="pretty">True to enable pretty print.</param>
+            <returns>JSON string.</returns>
         </member>
         <member name="M:HttpServerLite.HttpRequest.RetrieveHeaderValue(System.String)">
             <summary>
@@ -634,17 +548,96 @@
             <typeparam name="T">Type.</typeparam>
             <returns>Object of type specified.</returns>
         </member>
+        <member name="T:HttpServerLite.HttpRequest.SourceDetails">
+            <summary>
+            Source details.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpRequest.SourceDetails.IpAddress">
+            <summary>
+            IP address of the requestor.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpRequest.SourceDetails.Port">
+            <summary>
+            TCP port from which the request originated on the requestor.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.HttpRequest.SourceDetails.#ctor">
+            <summary>
+            Source details.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.HttpRequest.SourceDetails.#ctor(System.String,System.Int32)">
+            <summary>
+            Source details.
+            </summary>
+            <param name="ip">IP address of the requestor.</param>
+            <param name="port">TCP port from which the request originated on the requestor.</param>
+        </member>
+        <member name="T:HttpServerLite.HttpRequest.UrlComponents">
+            <summary>
+            URL components of the request.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpRequest.UrlComponents.WithQuery">
+            <summary>
+            URL including host and querystring (i.e. /root/child?foo=bar).
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpRequest.UrlComponents.WithoutQuery">
+            <summary>
+            URL without querystring (i.e. /root/child).
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpRequest.UrlComponents.Entries">
+            <summary>
+            URL entries (i.e. /root/child becomes [0]: root and [1]: child).
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.HttpRequest.UrlComponents.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.HttpRequest.UrlComponents.#ctor(System.String)">
+            <summary>
+            Instantiate the object.
+            </summary>
+            <param name="url">URL with query.</param>
+        </member>
+        <member name="T:HttpServerLite.HttpRequest.QueryComponents">
+            <summary>
+            Query components of the request.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpRequest.QueryComponents.Full">
+            <summary>
+            Full querystring.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpRequest.QueryComponents.Elements">
+            <summary>
+            Querystring entries.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.HttpRequest.QueryComponents.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.HttpRequest.QueryComponents.#ctor(System.String)">
+            <summary>
+            Instantiate the object.
+            </summary>
+            <param name="query"></param>
+        </member>
         <member name="T:HttpServerLite.HttpResponse">
             <summary>
             Response to an HTTP request.
             </summary>
         </member>
-        <member name="P:HttpServerLite.HttpResponse.StreamBufferSize">
-            <summary>
-            Buffer size to use while writing the response from a supplied stream. 
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.HttpResponse.ProtocolVersion">
+        <member name="P:HttpServerLite.HttpResponse.ProtocolVersion">
             <summary>
             The protocol and version.
             </summary>
@@ -674,21 +667,17 @@
             The length of the supplied response data.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpResponse.AccessControlAllowOriginHeader">
-            <summary>
-            Access-Control-Allow-Origin header value.
-            </summary>
-        </member>
         <member name="M:HttpServerLite.HttpResponse.#ctor">
             <summary>
             Instantiate the object.
             </summary>
         </member>
-        <member name="M:HttpServerLite.HttpResponse.ToString">
+        <member name="M:HttpServerLite.HttpResponse.ToJson(System.Boolean)">
             <summary>
-            Retrieve a string-formatted, human-readable copy of the HttpResponse instance.
+            Retrieve a JSON-encoded version of the response object.
             </summary>
-            <returns>String-formatted, human-readable copy of the HttpResponse instance.</returns>
+            <param name="pretty">True to enable pretty print.</param>
+            <returns>JSON string.</returns>
         </member>
         <member name="M:HttpServerLite.HttpResponse.Send(System.Boolean)">
             <summary>
@@ -720,30 +709,34 @@
             <param name="contentLength">Number of bytes to read from the stream.</param>
             <param name="stream">Stream containing response data.</param>
         </member>
-        <member name="M:HttpServerLite.HttpResponse.SendAsync(System.Int64)">
+        <member name="M:HttpServerLite.HttpResponse.SendAsync(System.Int64,System.Threading.CancellationToken)">
             <summary>
             Send headers with a specified content length and no data to the requestor and terminate the connection.  Useful for HEAD requests where the content length must be set.
             </summary> 
             <param name="contentLength">Value to set in Content-Length header.</param>
+            <param name="token">Cancellation token for canceling the request.</param>
         </member>
-        <member name="M:HttpServerLite.HttpResponse.SendAsync(System.String)">
+        <member name="M:HttpServerLite.HttpResponse.SendAsync(System.String,System.Threading.CancellationToken)">
             <summary>
             Send headers and data to the requestor and terminate the connection.
             </summary>
             <param name="data">Data.</param> 
+            <param name="token">Cancellation token for canceling the request.</param>
         </member>
-        <member name="M:HttpServerLite.HttpResponse.SendAsync(System.Byte[])">
+        <member name="M:HttpServerLite.HttpResponse.SendAsync(System.Byte[],System.Threading.CancellationToken)">
             <summary>
             Send headers and data to the requestor and terminate the connection.
             </summary>
             <param name="data">Data.</param> 
+            <param name="token">Cancellation token for canceling the request.</param>
         </member>
-        <member name="M:HttpServerLite.HttpResponse.SendAsync(System.Int64,System.IO.Stream)">
+        <member name="M:HttpServerLite.HttpResponse.SendAsync(System.Int64,System.IO.Stream,System.Threading.CancellationToken)">
             <summary>
             Send headers and data to the requestor and terminate the connection.
             </summary>
             <param name="contentLength">Number of bytes to read from the stream.</param>
             <param name="stream">Stream containing response data.</param>
+            <param name="token">Cancellation token for canceling the request.</param>
         </member>
         <member name="M:HttpServerLite.HttpResponse.SendWithoutClose(System.Int64)">
             <summary>
@@ -770,30 +763,34 @@
             <param name="contentLength">Number of bytes to read from the stream.</param>
             <param name="stream">Stream containing response data.</param>
         </member>
-        <member name="M:HttpServerLite.HttpResponse.SendWithoutCloseAsync(System.Int64)">
+        <member name="M:HttpServerLite.HttpResponse.SendWithoutCloseAsync(System.Int64,System.Threading.CancellationToken)">
             <summary>
             Send headers and data to the requestor but do not terminate the connection.
             </summary>
             <param name="contentLength">Value to set in Content-Length header.</param>
+            <param name="token">Cancellation token for canceling the request.</param>
         </member>
-        <member name="M:HttpServerLite.HttpResponse.SendWithoutCloseAsync(System.String)">
+        <member name="M:HttpServerLite.HttpResponse.SendWithoutCloseAsync(System.String,System.Threading.CancellationToken)">
             <summary>
             Send headers and data to the requestor but do not terminate the connection.
             </summary>
             <param name="data">Data.</param> 
+            <param name="token">Cancellation token for canceling the request.</param>
         </member>
-        <member name="M:HttpServerLite.HttpResponse.SendWithoutCloseAsync(System.Byte[])">
+        <member name="M:HttpServerLite.HttpResponse.SendWithoutCloseAsync(System.Byte[],System.Threading.CancellationToken)">
             <summary>
             Send headers and data to the requestor but do not terminate the connection.
             </summary>
             <param name="data">Data.</param> 
+            <param name="token">Cancellation token for canceling the request.</param>
         </member>
-        <member name="M:HttpServerLite.HttpResponse.SendWithoutCloseAsync(System.Int64,System.IO.Stream)">
+        <member name="M:HttpServerLite.HttpResponse.SendWithoutCloseAsync(System.Int64,System.IO.Stream,System.Threading.CancellationToken)">
             <summary>
             Send headers and data to the requestor but do not terminate the connection.
             </summary>
             <param name="contentLength">Number of bytes to read from the stream.</param>
             <param name="stream">Stream containing response data.</param>
+            <param name="token">Cancellation token for canceling the request.</param>
         </member>
         <member name="M:HttpServerLite.HttpResponse.Close">
             <summary>
@@ -817,19 +814,105 @@
             <param name="extension">File extension.</param>
             <returns>String containing MIME type.</returns>
         </member>
-        <member name="T:HttpServerLite.ReflectionCore">
+        <member name="T:HttpServerLite.RequestEventArgs">
             <summary>
-            Helper methods for reflection.
+            Request event arguments.
             </summary>
         </member>
-        <member name="M:HttpServerLite.ReflectionCore.LoadRoutes``1(``0,System.Reflection.Assembly)">
+        <member name="P:HttpServerLite.RequestEventArgs.Ip">
             <summary>
-            Load routes for the server.
+            IP address.
             </summary>
-            <typeparam name="T">Webserver.</typeparam>
-            <param name="server">Webserver.</param>
-            <param name="assembly">Assembly.</param>
-            <returns>Webserver.</returns>
+        </member>
+        <member name="P:HttpServerLite.RequestEventArgs.Port">
+            <summary>
+            Port number.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.RequestEventArgs.Method">
+            <summary>
+            HTTP method.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.RequestEventArgs.Url">
+            <summary>
+            URL.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.RequestEventArgs.Query">
+            <summary>
+            Query found in the URL.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.RequestEventArgs.Headers">
+            <summary>
+            Request headers.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.RequestEventArgs.ContentLength">
+            <summary>
+            Content length.
+            </summary>
+        </member>
+        <member name="T:HttpServerLite.ResponseEventArgs">
+            <summary>
+            Response event arguments.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ResponseEventArgs.Ip">
+            <summary>
+            IP address.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ResponseEventArgs.Port">
+            <summary>
+            Port number.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ResponseEventArgs.Method">
+            <summary>
+            HTTP method.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ResponseEventArgs.Url">
+            <summary>
+            URL.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ResponseEventArgs.Query">
+            <summary>
+            Request query.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ResponseEventArgs.RequestHeaders">
+            <summary>
+            Request headers.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ResponseEventArgs.RequestContentLength">
+            <summary>
+            Content length.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ResponseEventArgs.StatusCode">
+            <summary>
+            Response status.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ResponseEventArgs.ResponseHeaders">
+            <summary>
+            Response headers.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ResponseEventArgs.ResponseContentLength">
+            <summary>
+            Response content length.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ResponseEventArgs.TotalMs">
+            <summary>
+            Total time in processing the request and sending the response, in milliseconds.
+            </summary>
         </member>
         <member name="T:HttpServerLite.StaticRoute">
             <summary>
@@ -906,6 +989,12 @@
             <param name="method">The HTTP method.</param>
             <param name="path">URL path.</param>
         </member>
+        <member name="M:HttpServerLite.StaticRouteManager.All">
+            <summary>
+            Retrieve all static routes.
+            </summary>
+            <returns>List of StaticRoute.</returns>
+        </member>
         <member name="M:HttpServerLite.StaticRouteManager.Get(HttpServerLite.HttpMethod,System.String)">
             <summary>
             Retrieve a static route.
@@ -930,54 +1019,6 @@
             <param name="path">URL path.</param>
             <returns>Method to invoke.</returns>
         </member>
-        <member name="T:HttpServerLite.Statistics">
-            <summary>
-            Webserver statistics.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Statistics.StartTime">
-            <summary>
-            The time at which the client or server was started.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Statistics.UpTime">
-            <summary>
-            The amount of time which the client or server has been up.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Statistics.ReceivedPayloadBytes">
-            <summary>
-            The number of payload bytes received (incoming request body).
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Statistics.SentPayloadBytes">
-            <summary>
-            The number of payload bytes sent (outgoing request body).
-            </summary>
-        </member>
-        <member name="M:HttpServerLite.Statistics.#ctor">
-            <summary>
-            Initialize the statistics object.
-            </summary>
-        </member>
-        <member name="M:HttpServerLite.Statistics.ToString">
-            <summary>
-            Human-readable version of the object.
-            </summary>
-            <returns>String.</returns>
-        </member>
-        <member name="M:HttpServerLite.Statistics.Reset">
-            <summary>
-            Reset statistics other than StartTime and UpTime.
-            </summary>
-        </member>
-        <member name="M:HttpServerLite.Statistics.RequestCountByMethod(HttpServerLite.HttpMethod)">
-            <summary>
-            Retrieve the number of requests received using a specific HTTP method.
-            </summary>
-            <param name="method">HTTP method.</param>
-            <returns>Number of requests received using this method.</returns>
-        </member>
         <member name="T:HttpServerLite.Webserver">
             <summary>
             HttpServerLite web server.
@@ -988,77 +1029,52 @@
             Indicates if the server is listening for connections.
             </summary>
         </member>
-        <member name="P:HttpServerLite.Webserver.AcceptInvalidCertificates">
-            <summary>
-            For SSL, accept or deny invalid or otherwise unverifiable SSL certificates.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Webserver.MutuallyAuthenticate">
-            <summary>
-            For SSL, enable to require mutual authentication.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Webserver.StreamReadBufferSize">
-            <summary>
-            Buffer size to use when interacting with streams.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Webserver.ReadTimeoutMs">
-            <summary>
-            Number of milliseconds to await a read response prior to considering the connection to have timed out.
-            </summary>
-        </member>
-        <member name="F:HttpServerLite.Webserver.Events">
-            <summary>
-            Set specific actions/callbacks to use when events are raised.
-            </summary>
-        </member>
         <member name="P:HttpServerLite.Webserver.Connections">
             <summary>
             List connections by requestor IP:port.
             </summary>
         </member>
-        <member name="P:HttpServerLite.Webserver.Stats">
+        <member name="P:HttpServerLite.Webserver.Settings">
+            <summary>
+            Webserver settings.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.Webserver.Events">
+            <summary>
+            Event handlers for webserver events.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.Webserver.Routes">
+            <summary>
+            Webserver routes.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.Webserver.Pages">
+            <summary>
+            Default pages served by the webserver.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.Webserver.Statistics">
             <summary>
             Webserver statistics.
             </summary>
         </member>
-        <member name="P:HttpServerLite.Webserver.DefaultHeaders">
+        <member name="M:HttpServerLite.Webserver.#ctor">
             <summary>
-            Headers that will be added to every response unless previously set.
+            Instantiate the webserver without SSL listening on localhost port 8080.
             </summary>
         </member>
-        <member name="P:HttpServerLite.Webserver.AccessControl">
+        <member name="M:HttpServerLite.Webserver.#ctor(System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
             <summary>
-            Access control manager, i.e. default mode of operation, permit list, and deny list.
+            Instantiate the webserver without SSL listening on localhost port 8080 and using the specified default route.
             </summary>
+            <param name="defaultRoute">Default route.</param>
         </member>
-        <member name="F:HttpServerLite.Webserver.PreRoutingHandler">
+        <member name="M:HttpServerLite.Webserver.#ctor(HttpServerLite.WebserverSettings)">
             <summary>
-            Function to call prior to routing.  
-            Return 'true' if the connection should be terminated.
-            Return 'false' to allow the connection to continue routing.
+            Instantiate the webserver using the specified settings.
             </summary>
-        </member>
-        <member name="F:HttpServerLite.Webserver.OptionsRoute">
-            <summary>
-            Function to call when an OPTIONS request is received.  Often used to handle CORS.  Leave as 'null' to use the default OPTIONS handler.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Webserver.ContentRoutes">
-            <summary>
-            Content routes; i.e. routes to specific files or folders for GET and HEAD requests.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Webserver.StaticRoutes">
-            <summary>
-            Static routes; i.e. routes with explicit matching and any HTTP method.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.Webserver.DynamicRoutes">
-            <summary>
-            Dynamic routes; i.e. routes with regex matching and any HTTP method.
-            </summary>
+            <param name="settings">Webserver settings.</param>
         </member>
         <member name="M:HttpServerLite.Webserver.#ctor(System.String,System.Int32,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
             <summary>
@@ -1082,6 +1098,7 @@
         <member name="M:HttpServerLite.Webserver.Dispose">
             <summary>
             Dispose of the object.
+            Do not use the object after disposal.
             </summary>
         </member>
         <member name="M:HttpServerLite.Webserver.Start">
@@ -1097,8 +1114,432 @@
         <member name="M:HttpServerLite.Webserver.Dispose(System.Boolean)">
             <summary>
             Tear down the server and dispose of background workers.
+            Do not use the object after disposal.
             </summary>
             <param name="disposing">Indicate if resources should be disposed.</param>
+        </member>
+        <member name="T:HttpServerLite.WebserverEvents">
+            <summary>
+            Events to fire when various events are encountered.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverEvents.Logger">
+            <summary>
+            Method to use for sending log messages.
+            </summary>
+        </member>
+        <member name="E:HttpServerLite.WebserverEvents.ConnectionReceived">
+            <summary>
+            Event to fire when a connection is received.
+            string: IP address of the client.
+            int: Source TCP port of the client.
+            </summary>
+        </member>
+        <member name="E:HttpServerLite.WebserverEvents.RequestReceived">
+            <summary>
+            Event to fire when a request is received. 
+            </summary>
+        </member>
+        <member name="E:HttpServerLite.WebserverEvents.RequestDenied">
+            <summary>
+            Event to fire when a request is denied due to access control. 
+            </summary>
+        </member>
+        <member name="E:HttpServerLite.WebserverEvents.ResponseSent">
+            <summary>
+            Event to fire when a response is sent. 
+            </summary>
+        </member>
+        <member name="E:HttpServerLite.WebserverEvents.Exception">
+            <summary>
+            Event to fire when an exception is encountered. 
+            </summary>
+        </member>
+        <member name="E:HttpServerLite.WebserverEvents.ServerStarted">
+            <summary>
+            Event to fire when the server is started.
+            </summary>
+        </member>
+        <member name="E:HttpServerLite.WebserverEvents.ServerStopped">
+            <summary>
+            Event to fire when the server is stopped.
+            </summary>
+        </member>
+        <member name="E:HttpServerLite.WebserverEvents.ServerDisposing">
+            <summary>
+            Event to fire when the server is being disposed.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverEvents.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary>
+        </member>
+        <member name="T:HttpServerLite.WebserverPages">
+            <summary>
+            Default pages served by the webserver.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverPages.Default404Page">
+            <summary>
+            Page displayed when sending a 404 due to a lack of a route.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverPages.Default500Page">
+            <summary>
+            Page displayed when sending a 500 due to an exception is unhandled within your routes.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverPages.#ctor">
+            <summary>
+            Default pages served by the webserver.
+            </summary>
+        </member>
+        <member name="T:HttpServerLite.WebserverPages.Page">
+            <summary>
+            Page served by Watson webserver.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverPages.Page.ContentType">
+            <summary>
+            Content type.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverPages.Page.Content">
+            <summary>
+            Content.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverPages.Page.#ctor(System.String,System.String)">
+            <summary>
+            Page served by Watson webserver.
+            </summary>
+            <param name="contentType">Content type.</param>
+            <param name="content">Content.</param>
+        </member>
+        <member name="T:HttpServerLite.WebserverRoutes">
+            <summary>
+            Webserver routes.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverRoutes.Preflight">
+            <summary>
+            Function to call when a preflight (OPTIONS) request is received.  
+            Often used to handle CORS.  
+            Leave null to use the default OPTIONS handler.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverRoutes.PreRouting">
+            <summary>
+            Function to call prior to routing.  
+            Return 'true' if the connection should be terminated.
+            Return 'false' to allow the connection to continue routing.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverRoutes.Content">
+            <summary>
+            Content routes; i.e. routes to specific files or folders for GET and HEAD requests.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverRoutes.ContentHandler">
+            <summary>
+            Handler for content route requests.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverRoutes.Static">
+            <summary>
+            Static routes; i.e. routes with explicit matching and any HTTP method.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverRoutes.Dynamic">
+            <summary>
+            Dynamic routes; i.e. routes with regex matching and any HTTP method.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverRoutes.Default">
+            <summary>
+            Default route; used when no other routes match.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverRoutes.#ctor">
+            <summary>
+            Instantiate the object using default settings.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverRoutes.#ctor(System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
+            <summary>
+            Instantiate the object using default settings and the specified default route.
+            </summary>
+        </member>
+        <member name="T:HttpServerLite.WebserverSettings">
+            <summary>
+            Webserver settings.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverSettings.Hostname">
+            <summary>
+            The hostname or IP address on which to listen.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverSettings.Port">
+            <summary>
+            The port number on which to listen.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverSettings.IO">
+            <summary>
+            Input-output settings.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverSettings.Ssl">
+            <summary>
+            SSL settings.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverSettings.Headers">
+            <summary>
+            Headers that will be added to every response unless previously set.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverSettings.AccessControl">
+            <summary>
+            Access control manager, i.e. default mode of operation, permit list, and deny list.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverSettings.Debug">
+            <summary>
+            Debug logging settings.
+            Be sure to set Events.Logger in order to receive debug messages.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverSettings.#ctor">
+            <summary>
+            Instantiate the object using default settings.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverSettings.#ctor(System.String,System.Int32)">
+            <summary>
+            Instantiate the object.
+            </summary>
+            <param name="hostname">The hostname on which to listen.</param>
+            <param name="port">The port on which to listen.</param>
+        </member>
+        <member name="T:HttpServerLite.WebserverSettings.IOSettings">
+            <summary>
+            Input-output settings.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverSettings.IOSettings.StreamBufferSize">
+            <summary>
+            Buffer size to use when interacting with streams.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverSettings.IOSettings.ReadTimeoutMs">
+            <summary>
+            Number of milliseconds to await a read response prior to considering the connection to have timed out.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverSettings.IOSettings.#ctor">
+            <summary>
+            Instantiate the object using default values.
+            </summary>
+        </member>
+        <member name="T:HttpServerLite.WebserverSettings.SslSettings">
+            <summary>
+            SSL settings.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.SslSettings.Enable">
+            <summary>
+            Enable or disable SSL.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.SslSettings.PfxCertificateFile">
+            <summary>
+            PFX certificate filename.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.SslSettings.PfxCertificatePassword">
+            <summary>
+            PFX certificate password.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.SslSettings.MutuallyAuthenticate">
+            <summary>
+            Require mutual authentication.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.SslSettings.AcceptInvalidAcertificates">
+            <summary>
+            Accept invalid certificates including self-signed and those that are unable to be verified.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverSettings.SslSettings.#ctor">
+            <summary>
+            Instantiate the object using default settings.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverSettings.SslSettings.#ctor(System.String)">
+            <summary>
+            Enable SSL using a certificate file that doesn't require a password.
+            </summary>
+            <param name="pfxCertificateFile">PFX certificate filename.</param>
+        </member>
+        <member name="M:HttpServerLite.WebserverSettings.SslSettings.#ctor(System.String,System.String)">
+            <summary>
+            Enable SSL using a certificate file that requires a password.
+            </summary>
+            <param name="pfxCertificateFile">PFX certificate filename.</param>
+            <param name="pfxCertificatePassword">PFX certificate password.</param>
+        </member>
+        <member name="T:HttpServerLite.WebserverSettings.HeaderSettings">
+            <summary>
+            Headers that will be added to every response unless previously set.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.HeaderSettings.IncludeContentLength">
+            <summary>
+            Automatically set content length if not already set.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.HeaderSettings.AccessControlAllowOrigin">
+            <summary>
+            Access-Control-Allow-Origin header.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.HeaderSettings.AccessControlAllowMethods">
+            <summary>
+            Access-Control-Allow-Methods header.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.HeaderSettings.AccessControlAllowHeaders">
+            <summary>
+            Access-Control-Allow-Headers header.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.HeaderSettings.AccessControlExposeHeaders">
+            <summary>
+            Access-Control-Expose-Headers header.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.HeaderSettings.Accept">
+            <summary>
+            Accept header.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.HeaderSettings.AcceptLanguage">
+            <summary>
+            Accept-Language header.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.HeaderSettings.AcceptCharset">
+            <summary>
+            Accept-Charset header.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.HeaderSettings.Connection">
+            <summary>
+            Connection header.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.HeaderSettings.Host">
+            <summary>
+            Host header.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverSettings.HeaderSettings.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary> 
+        </member>
+        <member name="T:HttpServerLite.WebserverSettings.DebugSettings">
+            <summary>
+            Debug logging settings.
+            Be sure to set Events.Logger in order to receive debug messages.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.DebugSettings.AccessControl">
+            <summary>
+            Enable or disable debug logging of access control.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.DebugSettings.Routing">
+            <summary>
+            Enable or disable debug logging of routing.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.DebugSettings.Connections">
+            <summary>
+            Enable or disable debug logging of connections.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.DebugSettings.Tcp">
+            <summary>
+            Enable or disable debug logging of the underlying TCP library.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.DebugSettings.Requests">
+            <summary>
+            Enable or disable debug logging of requests.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.DebugSettings.Responses">
+            <summary>
+            Enable or disable debug logging of responses.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverSettings.DebugSettings.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary> 
+        </member>
+        <member name="T:HttpServerLite.WebserverStatistics">
+            <summary>
+            Webserver statistics.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverStatistics.StartTime">
+            <summary>
+            The time at which the client or server was started.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverStatistics.UpTime">
+            <summary>
+            The amount of time which the client or server has been up.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverStatistics.ReceivedPayloadBytes">
+            <summary>
+            The number of payload bytes received (incoming request body).
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverStatistics.SentPayloadBytes">
+            <summary>
+            The number of payload bytes sent (outgoing request body).
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverStatistics.#ctor">
+            <summary>
+            Initialize the statistics object.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverStatistics.ToString">
+            <summary>
+            Human-readable version of the object.
+            </summary>
+            <returns>String.</returns>
+        </member>
+        <member name="M:HttpServerLite.WebserverStatistics.Reset">
+            <summary>
+            Reset statistics other than StartTime and UpTime.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverStatistics.RequestCountByMethod(HttpServerLite.HttpMethod)">
+            <summary>
+            Retrieve the number of requests received using a specific HTTP method.
+            </summary>
+            <param name="method">HTTP method.</param>
+            <returns>Number of requests received using this method.</returns>
         </member>
     </members>
 </doc>
