@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using CavemanTcp;
+using Newtonsoft.Json;
 
 namespace HttpServerLite
 {
@@ -15,6 +16,7 @@ namespace HttpServerLite
         /// <summary>
         /// The HTTP request that was received.
         /// </summary>
+        [JsonProperty(Order = -1)]
         public HttpRequest Request { get; private set; } = null;
 
         /// <summary>

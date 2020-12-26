@@ -24,62 +24,49 @@ namespace HttpServerLite
         /// <summary>
         /// UTC timestamp from when the request was received.
         /// </summary>
+        [JsonProperty(Order = -8)]
         public DateTime TimestampUtc = DateTime.Now.ToUniversalTime();
 
         /// <summary>
         /// Thread ID on which the request exists.
         /// </summary>
+        [JsonProperty(Order = -7)]
         public int ThreadId { get; private set; } = 0;
 
         /// <summary>
         /// The protocol and version.
         /// </summary>
+        [JsonProperty(Order = -6)]
         public string ProtocolVersion { get; private set; } = null;
 
         /// <summary>
         /// Source (requestor) IP and port information.
         /// </summary>
-        [JsonProperty(Order = -7)]
+        [JsonProperty(Order = -5)]
         public SourceDetails Source { get; private set; } = new SourceDetails();
-
-        /// <summary>
-        /// Specifies whether or not the client requested HTTP keepalives.
-        /// </summary>
-        public bool Keepalive { get; private set; } = false;
 
         /// <summary>
         /// The HTTP method used in the request.
         /// </summary>
+        [JsonProperty(Order = -4)]
         public HttpMethod Method { get; private set; } = HttpMethod.GET;
 
         /// <summary>
         /// URL components.
         /// </summary>
+        [JsonProperty(Order = -3)]
         public UrlComponents Url { get; private set; } = new UrlComponents();
 
         /// <summary>
         /// Query components.
         /// </summary>
+        [JsonProperty(Order = -2)]
         public QueryComponents Query { get; private set; } = new QueryComponents();
-
-        /// <summary>
-        /// The useragent specified in the request.
-        /// </summary>
-        public string Useragent { get; private set; } = null;
-
-        /// <summary>
-        /// The number of bytes in the request body.
-        /// </summary>
-        public int ContentLength { get; private set; } = 0;
-
-        /// <summary>
-        /// The content type as specified by the requestor (client).
-        /// </summary>
-        public string ContentType { get; private set; } = null;
 
         /// <summary>
         /// The headers found in the request.
         /// </summary>
+        [JsonProperty(Order = -1)]
         public Dictionary<string, string> Headers
         {
             get
@@ -92,6 +79,28 @@ namespace HttpServerLite
                 else _Headers = value;
             }
         }
+
+        /// <summary>
+        /// Specifies whether or not the client requested HTTP keepalives.
+        /// </summary>
+        public bool Keepalive { get; private set; } = false;
+
+        /// <summary>
+        /// The useragent specified in the request.
+        /// </summary>
+        public string Useragent { get; private set; } = null;
+
+        /// <summary>
+        /// The content type as specified by the requestor (client).
+        /// </summary>
+        [JsonProperty(Order = 990)]
+        public string ContentType { get; private set; } = null;
+
+        /// <summary>
+        /// The number of bytes in the request body.
+        /// </summary>
+        [JsonProperty(Order = 991)]
+        public int ContentLength { get; private set; } = 0;
 
         /// <summary>
         /// Bytes from the DataStream property.  Using Data will fully read the DataStream property and thus it cannot be read again.
@@ -571,7 +580,7 @@ namespace HttpServerLite
 
                 Dictionary<string, string> ret = new Dictionary<string, string>();
 
-                string[] entries = query.Split('&');
+                string[] entries = query.Split(new char[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
 
                 if (entries != null && entries.Length > 0)
                 {
