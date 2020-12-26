@@ -2,6 +2,12 @@
 
 ## Current Version
 
+v1.2.0
+
+- Breaking changes to synchronize HttpRequest properties with Watson Webserver
+
+## Previous Versions
+
 v1.1.0
 
 - Breaking changes to improve simplicity and reliability
@@ -13,8 +19,6 @@ v1.1.0
 - Pages property to set how 404 and 500 responses should be sent, if not handled within your application
 - Attribute-based routes now loaded automatically, removed ```LoadRoutes``` method
 - Restructured ```HttpContext```, ```HttpRequest```, and ```HttpResponse``` for better usability
-
-## Previous Versions
 
 v1.0.4
 

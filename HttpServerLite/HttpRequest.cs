@@ -25,13 +25,13 @@ namespace HttpServerLite
         /// UTC timestamp from when the request was received.
         /// </summary>
         [JsonProperty(Order = -8)]
-        public DateTime TimestampUtc = DateTime.Now.ToUniversalTime();
+        public DateTime TimestampUtc { get; private set; } = DateTime.Now.ToUniversalTime();
 
         /// <summary>
         /// Thread ID on which the request exists.
         /// </summary>
         [JsonProperty(Order = -7)]
-        public int ThreadId { get; private set; } = 0;
+        public int ThreadId { get; private set; } = Thread.CurrentThread.ManagedThreadId;
 
         /// <summary>
         /// The protocol and version.
@@ -52,38 +52,42 @@ namespace HttpServerLite
         public HttpMethod Method { get; private set; } = HttpMethod.GET;
 
         /// <summary>
-        /// URL components.
+        /// URL details.
         /// </summary>
         [JsonProperty(Order = -3)]
-        public UrlComponents Url { get; private set; } = new UrlComponents();
+        public UrlDetails Url { get; private set; } = new UrlDetails();
 
         /// <summary>
-        /// Query components.
+        /// Query details.
         /// </summary>
         [JsonProperty(Order = -2)]
-        public QueryComponents Query { get; private set; } = new QueryComponents();
+        public QueryDetails Query { get; private set; } = new QueryDetails();
 
         /// <summary>
         /// The headers found in the request.
         /// </summary>
         [JsonProperty(Order = -1)]
-        public Dictionary<string, string> Headers
-        {
-            get
-            {
-                return _Headers;
-            }
-            set
-            {
-                if (value == null) _Headers = new Dictionary<string, string>();
-                else _Headers = value;
-            }
-        }
+        public Dictionary<string, string> Headers { get; private set; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Specifies whether or not the client requested HTTP keepalives.
         /// </summary>
         public bool Keepalive { get; private set; } = false;
+
+        /// <summary>
+        /// Indicates whether or not chunked transfer encoding was detected.
+        /// </summary>
+        public bool ChunkedTransfer { get; private set; } = false;
+
+        /// <summary>
+        /// Indicates whether or not the payload has been gzip compressed.
+        /// </summary>
+        public bool Gzip { get; private set; } = false;
+
+        /// <summary>
+        /// Indicates whether or not the payload has been deflate compressed.
+        /// </summary>
+        public bool Deflate { get; private set; } = false;
 
         /// <summary>
         /// The useragent specified in the request.
@@ -100,7 +104,7 @@ namespace HttpServerLite
         /// The number of bytes in the request body.
         /// </summary>
         [JsonProperty(Order = 991)]
-        public int ContentLength { get; private set; } = 0;
+        public long ContentLength { get; private set; } = 0;
 
         /// <summary>
         /// Bytes from the DataStream property.  Using Data will fully read the DataStream property and thus it cannot be read again.
@@ -147,8 +151,7 @@ namespace HttpServerLite
         private int _StreamBufferSize = 65536;
         private string _IpPort;
         private Stream _Stream = null;
-        private string _RequestHeader = null; 
-        private Dictionary<string, string> _Headers = new Dictionary<string, string>();
+        private string _RequestHeader = null;  
         private byte[] _Data = null;
         private Stream _DataStream = null;
 
@@ -207,9 +210,9 @@ namespace HttpServerLite
         public string RetrieveHeaderValue(string key)
         {
             if (String.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
-            if (_Headers != null && _Headers.Count > 0)
+            if (Headers != null && Headers.Count > 0)
             {
-                foreach (KeyValuePair<string, string> curr in _Headers)
+                foreach (KeyValuePair<string, string> curr in Headers)
                 {
                     if (String.IsNullOrEmpty(curr.Key)) continue;
                     if (String.Compare(curr.Key.ToLower(), key.ToLower()) == 0) return curr.Value;
@@ -240,13 +243,13 @@ namespace HttpServerLite
 
             if (caseSensitive)
             {
-                return _Headers.ContainsKey(key);
+                return Headers.ContainsKey(key);
             }
             else
             {
-                if (_Headers != null && _Headers.Count > 0)
+                if (Headers != null && Headers.Count > 0)
                 {
-                    foreach (KeyValuePair<string, string> header in _Headers)
+                    foreach (KeyValuePair<string, string> header in Headers)
                     {
                         if (String.IsNullOrEmpty(header.Key)) continue;
                         if (header.Key.ToLower().Trim().Equals(key)) return true;
@@ -342,8 +345,8 @@ namespace HttpServerLite
                     if (requestLine.Length < 3) throw new ArgumentException("Request line does not contain at least three parts (method, raw URL, protocol/version).");
 
                     Method = (HttpMethod)Enum.Parse(typeof(HttpMethod), requestLine[0], true); 
-                    Url = new UrlComponents(requestLine[1]);
-                    Query = new QueryComponents(ExtractQuery(Url.WithQuery));
+                    Url = new UrlDetails(requestLine[1]);
+                    Query = new QueryDetails(requestLine[1]);
                      
                     ProtocolVersion = requestLine[2]; 
                      
@@ -377,11 +380,9 @@ namespace HttpServerLite
                         else if (keyEval.Equals("content-type"))
                         {
                             ContentType = val;
-                        } 
-                        else
-                        {
-                            _Headers = Common.AddToDict(key, val, _Headers);
                         }
+
+                        Headers = Common.AddToDict(key, val, Headers);
                     }
 
                     #endregion
@@ -396,15 +397,35 @@ namespace HttpServerLite
 
             #endregion
         }
-
-        private string ExtractQuery(string full)
+         
+        private static Dictionary<string, string> AddToDict(string key, string val, Dictionary<string, string> existing)
         {
-            if (String.IsNullOrEmpty(full)) return null;
-            if (!full.Contains("?")) return null;
+            if (String.IsNullOrEmpty(key)) return existing;
 
-            int qsStartPos = full.IndexOf("?");
-            if (qsStartPos >= (full.Length - 1)) return null;
-            return full.Substring(qsStartPos + 1);
+            Dictionary<string, string> ret = new Dictionary<string, string>();
+
+            if (existing == null)
+            {
+                ret.Add(key, val);
+                return ret;
+            }
+            else
+            {
+                if (existing.ContainsKey(key))
+                {
+                    if (String.IsNullOrEmpty(val)) return existing;
+                    string tempVal = existing[key];
+                    tempVal += "," + val;
+                    existing.Remove(key);
+                    existing.Add(key, tempVal);
+                    return existing;
+                }
+                else
+                {
+                    existing.Add(key, val);
+                    return existing;
+                }
+            }
         }
 
         #endregion
@@ -450,161 +471,160 @@ namespace HttpServerLite
         }
 
         /// <summary>
-        /// URL components of the request.
+        /// URL details of the request.
         /// </summary>
-        public class UrlComponents
+        public class UrlDetails
         {
             /// <summary>
-            /// URL including host and querystring (i.e. /root/child?foo=bar).
+            /// Full URL.
             /// </summary>
-            public string WithQuery { get; private set; } = null;
-
+            public string Full { get; private set; } = null;
+             
             /// <summary>
-            /// URL without querystring (i.e. /root/child).
+            /// Raw URL without query.
             /// </summary>
-            public string WithoutQuery { get; private set; } = null;
-
-            /// <summary>
-            /// URL entries (i.e. /root/child becomes [0]: root and [1]: child).
-            /// </summary>
-            public string[] Entries { get; private set; } = null;
-
-            /// <summary>
-            /// Instantiate the object.
-            /// </summary>
-            public UrlComponents()
+            public string WithoutQuery
             {
-
-            }
-
-            /// <summary>
-            /// Instantiate the object.
-            /// </summary>
-            /// <param name="url">URL with query.</param>
-            public UrlComponents(string url)
-            {
-                WithQuery = url; 
-                WithoutQuery = UrlWithoutQuery(WithQuery);
-                Entries = ExtractElements(WithoutQuery);
-            }
-
-            private string UrlWithoutQuery(string full)
-            {
-                if (String.IsNullOrEmpty(full)) return null;
-                if (!full.Contains("?")) return full;
-                return full.Substring(0, full.IndexOf("?"));
-            }
-
-            private string[] ExtractElements(string withoutQuery)
-            {
-                if (String.IsNullOrEmpty(withoutQuery)) return null;
-
-                int position = 0;
-                string tempString = "";
-                List<string> ret = new List<string>();
-
-                foreach (char c in withoutQuery)
+                get
                 {
-                    if ((position == 0) &&
-                        (String.Compare(tempString, "") == 0) &&
-                        (c == '/'))
+                    if (!String.IsNullOrEmpty(Full))
                     {
-                        // skip the first slash
-                        continue;
+                        if (Full.Contains("?")) return Full.Substring(0, Full.IndexOf("?"));
+                        else return Full;
                     }
-
-                    if ((c != '/') && (c != '?'))
+                    else
                     {
-                        tempString += c;
+                        return null;
                     }
+                }
+            }
 
-                    if ((c == '/') || (c == '?'))
+            /// <summary>
+            /// Raw URL elements.
+            /// </summary>
+            public string[] Elements
+            {
+                get
+                {
+                    string rawUrl = WithoutQuery;
+
+                    if (!String.IsNullOrEmpty(rawUrl))
                     {
-                        if (!String.IsNullOrEmpty(tempString))
+                        while (rawUrl.Contains("//")) rawUrl = rawUrl.Replace("//", "/");
+                        while (rawUrl.StartsWith("/")) rawUrl = rawUrl.Substring(1);
+                        while (rawUrl.EndsWith("/")) rawUrl = rawUrl.Substring(0, rawUrl.Length - 1);
+                        string[] encoded = rawUrl.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (encoded != null && encoded.Length > 0)
                         {
-                            // add to raw URL entries list
-                            ret.Add(tempString);
+                            string[] decoded = new string[encoded.Length];
+                            for (int i = 0; i < encoded.Length; i++)
+                            {
+                                decoded[i] = WebUtility.UrlDecode(encoded[i]);
+                            }
+
+                            return decoded;
                         }
-
-                        position++;
-                        tempString = "";
                     }
-                }
 
-                if (!String.IsNullOrEmpty(tempString))
-                {
-                    // add to raw URL entries list
-                    ret.Add(tempString);
+                    return null;
                 }
+            }
 
-                return ret.ToArray();
-            } 
+            /// <summary>
+            /// URL details.
+            /// </summary>
+            public UrlDetails()
+            {
+
+            }
+
+            /// <summary>
+            /// URL details.
+            /// </summary>
+            /// <param name="fullUrl">Full URL.</param> 
+            public UrlDetails(string fullUrl)
+            {
+                if (String.IsNullOrEmpty(fullUrl)) throw new ArgumentNullException(nameof(fullUrl));  
+                Full = fullUrl; 
+            }
         }
 
         /// <summary>
-        /// Query components of the request.
+        /// Query details.
         /// </summary>
-        public class QueryComponents
+        public class QueryDetails
         {
             /// <summary>
-            /// Full querystring.
+            /// Querystring, excluding the leading '?'.
             /// </summary>
-            public string Full { get; private set; } = null;
-
-            /// <summary>
-            /// Querystring entries.
-            /// </summary>
-            public Dictionary<string, string> Elements { get; private set; } = new Dictionary<string, string>();
-
-            /// <summary>
-            /// Instantiate the object.
-            /// </summary>
-            public QueryComponents()
+            public string Querystring
             {
-
-            }
-
-            /// <summary>
-            /// Instantiate the object.
-            /// </summary>
-            /// <param name="query"></param>
-            public QueryComponents(string query)
-            {
-                Full = query;
-                Elements = ExtractEntries(query);
-            }
-             
-            private Dictionary<string, string> ExtractEntries(string query)
-            {
-                if (String.IsNullOrEmpty(query)) return new Dictionary<string, string>();
-
-                Dictionary<string, string> ret = new Dictionary<string, string>();
-
-                string[] entries = query.Split(new char[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (entries != null && entries.Length > 0)
+                get
                 {
-                    foreach (string entry in entries)
+                    if (_FullUrl.Contains("?"))
                     {
-                        string[] entryParts = entry.Split(new[] { '=' }, 2);
-
-                        if (entryParts != null && entryParts.Length > 0)
-                        {
-                            string key = entryParts[0];
-                            string val = null;
-
-                            if (entryParts.Length == 2)
-                            {
-                                val = entryParts[1];
-                            }
-
-                            ret = Common.AddToDict(key, val, ret);
-                        }
+                        return _FullUrl.Substring(_FullUrl.IndexOf("?") + 1, (_FullUrl.Length - _FullUrl.IndexOf("?") - 1));
+                    }
+                    else
+                    {
+                        return null;
                     }
                 }
-
-                return ret;
             }
+
+            /// <summary>
+            /// Query elements.
+            /// </summary>
+            public Dictionary<string, string> Elements
+            {
+                get
+                {
+                    Dictionary<string, string> ret = new Dictionary<string, string>();
+                    string qs = Querystring;
+                    if (!String.IsNullOrEmpty(qs))
+                    {
+                        string[] queries = qs.Split(new char[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (queries.Length > 0)
+                        {
+                            for (int i = 0; i < queries.Length; i++)
+                            {
+                                string[] queryParts = queries[i].Split('=');
+                                if (queryParts != null && queryParts.Length == 2)
+                                {
+                                    ret = AddToDict(queryParts[0], queryParts[1], ret);
+                                }
+                                else if (queryParts != null && queryParts.Length == 1)
+                                {
+                                    ret = AddToDict(queryParts[0], null, ret);
+                                }
+                            }
+                        }
+                    }
+
+                    return ret;
+                }
+            }
+
+            /// <summary>
+            /// Query details.
+            /// </summary>
+            public QueryDetails()
+            {
+
+            }
+
+            /// <summary>
+            /// Query details.
+            /// </summary>
+            /// <param name="fullUrl">Full URL.</param>
+            public QueryDetails(string fullUrl)
+            {
+                if (String.IsNullOrEmpty(fullUrl)) throw new ArgumentNullException(nameof(fullUrl));
+
+                _FullUrl = fullUrl;
+            }
+
+            private string _FullUrl = null;
         }
 
         #endregion

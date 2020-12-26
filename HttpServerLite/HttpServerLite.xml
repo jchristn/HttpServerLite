@@ -419,7 +419,7 @@
             Data extracted from an incoming HTTP request.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpRequest.TimestampUtc">
+        <member name="P:HttpServerLite.HttpRequest.TimestampUtc">
             <summary>
             UTC timestamp from when the request was received.
             </summary>
@@ -439,11 +439,6 @@
             Source (requestor) IP and port information.
             </summary>
         </member>
-        <member name="P:HttpServerLite.HttpRequest.Keepalive">
-            <summary>
-            Specifies whether or not the client requested HTTP keepalives.
-            </summary>
-        </member>
         <member name="P:HttpServerLite.HttpRequest.Method">
             <summary>
             The HTTP method used in the request.
@@ -451,12 +446,37 @@
         </member>
         <member name="P:HttpServerLite.HttpRequest.Url">
             <summary>
-            URL components.
+            URL details.
             </summary>
         </member>
         <member name="P:HttpServerLite.HttpRequest.Query">
             <summary>
-            Query components.
+            Query details.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpRequest.Headers">
+            <summary>
+            The headers found in the request.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpRequest.Keepalive">
+            <summary>
+            Specifies whether or not the client requested HTTP keepalives.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpRequest.ChunkedTransfer">
+            <summary>
+            Indicates whether or not chunked transfer encoding was detected.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpRequest.Gzip">
+            <summary>
+            Indicates whether or not the payload has been gzip compressed.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpRequest.Deflate">
+            <summary>
+            Indicates whether or not the payload has been deflate compressed.
             </summary>
         </member>
         <member name="P:HttpServerLite.HttpRequest.Useragent">
@@ -464,19 +484,14 @@
             The useragent specified in the request.
             </summary>
         </member>
-        <member name="P:HttpServerLite.HttpRequest.ContentLength">
-            <summary>
-            The number of bytes in the request body.
-            </summary>
-        </member>
         <member name="P:HttpServerLite.HttpRequest.ContentType">
             <summary>
             The content type as specified by the requestor (client).
             </summary>
         </member>
-        <member name="P:HttpServerLite.HttpRequest.Headers">
+        <member name="P:HttpServerLite.HttpRequest.ContentLength">
             <summary>
-            The headers found in the request.
+            The number of bytes in the request body.
             </summary>
         </member>
         <member name="P:HttpServerLite.HttpRequest.Data">
@@ -575,62 +590,62 @@
             <param name="ip">IP address of the requestor.</param>
             <param name="port">TCP port from which the request originated on the requestor.</param>
         </member>
-        <member name="T:HttpServerLite.HttpRequest.UrlComponents">
+        <member name="T:HttpServerLite.HttpRequest.UrlDetails">
             <summary>
-            URL components of the request.
+            URL details of the request.
             </summary>
         </member>
-        <member name="P:HttpServerLite.HttpRequest.UrlComponents.WithQuery">
+        <member name="P:HttpServerLite.HttpRequest.UrlDetails.Full">
             <summary>
-            URL including host and querystring (i.e. /root/child?foo=bar).
+            Full URL.
             </summary>
         </member>
-        <member name="P:HttpServerLite.HttpRequest.UrlComponents.WithoutQuery">
+        <member name="P:HttpServerLite.HttpRequest.UrlDetails.WithoutQuery">
             <summary>
-            URL without querystring (i.e. /root/child).
+            Raw URL without query.
             </summary>
         </member>
-        <member name="P:HttpServerLite.HttpRequest.UrlComponents.Entries">
+        <member name="P:HttpServerLite.HttpRequest.UrlDetails.Elements">
             <summary>
-            URL entries (i.e. /root/child becomes [0]: root and [1]: child).
+            Raw URL elements.
             </summary>
         </member>
-        <member name="M:HttpServerLite.HttpRequest.UrlComponents.#ctor">
+        <member name="M:HttpServerLite.HttpRequest.UrlDetails.#ctor">
             <summary>
-            Instantiate the object.
+            URL details.
             </summary>
         </member>
-        <member name="M:HttpServerLite.HttpRequest.UrlComponents.#ctor(System.String)">
+        <member name="M:HttpServerLite.HttpRequest.UrlDetails.#ctor(System.String)">
             <summary>
-            Instantiate the object.
+            URL details.
             </summary>
-            <param name="url">URL with query.</param>
+            <param name="fullUrl">Full URL.</param> 
         </member>
-        <member name="T:HttpServerLite.HttpRequest.QueryComponents">
+        <member name="T:HttpServerLite.HttpRequest.QueryDetails">
             <summary>
-            Query components of the request.
-            </summary>
-        </member>
-        <member name="P:HttpServerLite.HttpRequest.QueryComponents.Full">
-            <summary>
-            Full querystring.
+            Query details.
             </summary>
         </member>
-        <member name="P:HttpServerLite.HttpRequest.QueryComponents.Elements">
+        <member name="P:HttpServerLite.HttpRequest.QueryDetails.Querystring">
             <summary>
-            Querystring entries.
+            Querystring, excluding the leading '?'.
             </summary>
         </member>
-        <member name="M:HttpServerLite.HttpRequest.QueryComponents.#ctor">
+        <member name="P:HttpServerLite.HttpRequest.QueryDetails.Elements">
             <summary>
-            Instantiate the object.
+            Query elements.
             </summary>
         </member>
-        <member name="M:HttpServerLite.HttpRequest.QueryComponents.#ctor(System.String)">
+        <member name="M:HttpServerLite.HttpRequest.QueryDetails.#ctor">
             <summary>
-            Instantiate the object.
+            Query details.
             </summary>
-            <param name="query"></param>
+        </member>
+        <member name="M:HttpServerLite.HttpRequest.QueryDetails.#ctor(System.String)">
+            <summary>
+            Query details.
+            </summary>
+            <param name="fullUrl">Full URL.</param>
         </member>
         <member name="T:HttpServerLite.HttpResponse">
             <summary>

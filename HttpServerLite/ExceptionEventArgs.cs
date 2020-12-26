@@ -71,7 +71,7 @@ namespace HttpServerLite
                 Ip = ctx.Request.Source.IpAddress;
                 Port = ctx.Request.Source.Port;
                 Method = ctx.Request.Method;
-                Url = ctx.Request.Url.WithQuery;
+                Url = ctx.Request.Url.Full;
                 Query = ctx.Request.Query.Elements;
                 RequestHeaders = ctx.Request.Headers;
                 RequestContentLength = ctx.Request.ContentLength;

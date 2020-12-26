@@ -477,7 +477,7 @@ namespace HttpServerLite
                 {
                     _Events.Logger?.Invoke(
                         _Header + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
-                        ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery);
+                        ctx.Request.Method.ToString() + " " + ctx.Request.Url.Full);
                 }
 
                 #endregion
@@ -508,7 +508,7 @@ namespace HttpServerLite
                         {
                             _Events.Logger?.Invoke(
                                 _Header + "preflight route for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " + 
-                                ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery);
+                                ctx.Request.Method.ToString() + " " + ctx.Request.Url.Full);
                         }
 
                         await _Routes.Preflight(ctx).ConfigureAwait(false);
@@ -530,7 +530,7 @@ namespace HttpServerLite
                         {
                             _Events.Logger?.Invoke(
                                 _Header + "prerouting terminated connection for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
-                                ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery);
+                                ctx.Request.Method.ToString() + " " + ctx.Request.Url.Full);
                         }
 
                         return;
@@ -549,7 +549,7 @@ namespace HttpServerLite
                         {
                             _Events.Logger?.Invoke(
                                 _Header + "content route for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
-                                ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery);
+                                ctx.Request.Method.ToString() + " " + ctx.Request.Url.Full);
                         }
 
                         await _Routes.ContentHandler.Process(ctx, _Token).ConfigureAwait(false);
@@ -586,7 +586,7 @@ namespace HttpServerLite
                     {
                         _Events.Logger?.Invoke(
                             _Header + "dynamic route for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
-                            ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery);
+                            ctx.Request.Method.ToString() + " " + ctx.Request.Url.Full);
                     }
 
                     await handler(ctx).ConfigureAwait(false);
@@ -601,7 +601,7 @@ namespace HttpServerLite
                 {
                     _Events.Logger?.Invoke(
                         _Header + "default route for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
-                        ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery);
+                        ctx.Request.Method.ToString() + " " + ctx.Request.Url.Full);
                 }
 
                 if (_Routes.Default != null)
@@ -650,7 +650,7 @@ namespace HttpServerLite
                     { 
                         _Events.Logger?.Invoke(
                             _Header + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
-                            ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithQuery + ": " +
+                            ctx.Request.Method.ToString() + " " + ctx.Request.Url.Full + ": " +
                             ctx.Response.StatusCode + " [" + totalMs + "ms]");
                     }
 

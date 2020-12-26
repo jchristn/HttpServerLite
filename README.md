@@ -6,17 +6,9 @@
 
 TCP-based user-space HTTP and HTTPS server, written in C#.
 
-## New in v1.1.0
+## New in v1.2.0
 
-- Breaking changes to improve simplicity and reliability
-- Consolidated settings into the ```Settings``` property
-- Consolidated routing into the ```Routing``` property
-- Use of ```EventHandler``` for events instead of ```Action```
-- Use of ```ConfigureAwait``` for reliability within your application
-- Simplified constructors
-- Pages property to set how 404 and 500 responses should be sent, if not handled within your application
-- Attribute-based routes now loaded automatically, removed ```LoadRoutes``` method
-- Restructured ```HttpContext```, ```HttpRequest```, and ```HttpResponse``` for better usability
+- Breaking changes to synchronize HttpRequest properties with Watson Webserver
 
 ## Special Thanks
 
