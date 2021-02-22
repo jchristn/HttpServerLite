@@ -301,6 +301,11 @@ namespace HttpServerLite
                 .SelectMany(x => x.GetMethods()) // Get all methods from assembly
                 .Where(IsStaticRoute); // Only select methods that are valid routes
 
+            var parameterRoutes = _Assembly
+                .GetTypes() // Get all classes from assembly
+                .SelectMany(x => x.GetMethods()) // Get all methods from assembly
+                .Where(IsParameterRoute); // Only select methods that are valid routes
+
             var dynamicRoutes = _Assembly
                 .GetTypes() // Get all classes from assembly
                 .SelectMany(x => x.GetMethods()) // Get all methods from assembly
@@ -311,7 +316,18 @@ namespace HttpServerLite
                 var attribute = staticRoute.GetCustomAttributes().OfType<StaticRouteAttribute>().First();
                 if (!_Routes.Static.Exists(attribute.Method, attribute.Path))
                 {
+                    Events.Logger?.Invoke(_Header + "adding static route " + attribute.Method.ToString() + " " + attribute.Path);
                     _Routes.Static.Add(attribute.Method, attribute.Path, ToRouteMethod(staticRoute));
+                }
+            }
+
+            foreach (var parameterRoute in parameterRoutes)
+            {
+                var attribute = parameterRoute.GetCustomAttributes().OfType<ParameterRouteAttribute>().First();
+                if (!_Routes.Parameter.Exists(attribute.Method, attribute.Path))
+                {
+                    Events.Logger?.Invoke(_Header + "adding parameter route " + attribute.Method.ToString() + " " + attribute.Path);
+                    _Routes.Parameter.Add(attribute.Method, attribute.Path, ToRouteMethod(parameterRoute));
                 }
             }
 
@@ -320,6 +336,7 @@ namespace HttpServerLite
                 var attribute = dynamicRoute.GetCustomAttributes().OfType<DynamicRouteAttribute>().First();
                 if (!_Routes.Dynamic.Exists(attribute.Method, attribute.Path))
                 {
+                    Events.Logger?.Invoke(_Header + "adding dynamic route " + attribute.Method.ToString() + " " + attribute.Path);
                     _Routes.Dynamic.Add(attribute.Method, attribute.Path, ToRouteMethod(dynamicRoute));
                 }
             }
@@ -328,6 +345,14 @@ namespace HttpServerLite
         private bool IsStaticRoute(MethodInfo method)
         {
             return method.GetCustomAttributes().OfType<StaticRouteAttribute>().Any()
+               && method.ReturnType == typeof(Task)
+               && method.GetParameters().Length == 1
+               && method.GetParameters().First().ParameterType == typeof(HttpContext);
+        }
+
+        private bool IsParameterRoute(MethodInfo method)
+        {
+            return method.GetCustomAttributes().OfType<ParameterRouteAttribute>().Any()
                && method.ReturnType == typeof(Task)
                && method.GetParameters().Length == 1
                && method.GetParameters().First().ParameterType == typeof(HttpContext);
@@ -560,7 +585,7 @@ namespace HttpServerLite
                 #endregion
 
                 #region Static-Routes
-                 
+
                 Func<HttpContext, Task> handler = _Routes.Static.Match(ctx.Request.Method, ctx.Request.Url.WithoutQuery);
                 if (handler != null)
                 {
@@ -577,8 +602,29 @@ namespace HttpServerLite
 
                 #endregion
 
+                #region Parameter-Routes
+
+                Dictionary<string, string> parameters = null;
+                handler = _Routes.Parameter.Match(ctx.Request.Method, ctx.Request.Url.WithoutQuery, out parameters);
+                if (handler != null)
+                {
+                    ctx.Request.Url.Parameters = new Dictionary<string, string>(parameters);
+
+                    if (_Settings.Debug.Routing)
+                    {
+                        _Events.Logger?.Invoke(
+                            _Header + "parameter route for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
+                            ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithoutQuery);
+                    }
+
+                    await handler(ctx).ConfigureAwait(false);
+                    return;
+                }
+
+                #endregion
+
                 #region Dynamic-Routes
-                 
+
                 handler = _Routes.Dynamic.Match(ctx.Request.Method, ctx.Request.Url.WithoutQuery);
                 if (handler != null)
                 {

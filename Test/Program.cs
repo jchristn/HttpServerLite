@@ -236,7 +236,7 @@ namespace Test
                 "</html>";
         }
 
-        [StaticRoute(HttpMethod.GET, "static")]
+        [StaticRoute(HttpMethod.GET, "/static")]
         public static async Task MyStaticRoute(HttpContext ctx)
         {
             ctx.Response.StatusCode = 200;
@@ -245,7 +245,7 @@ namespace Test
             return;
         }
 
-        [StaticRoute(HttpMethod.GET, "static/1")]
+        [StaticRoute(HttpMethod.GET, "/static/1")]
         public static async Task MyStatic1Route(HttpContext ctx)
         {
             ctx.Response.StatusCode = 200;
@@ -254,7 +254,7 @@ namespace Test
             return;
         }
 
-        [StaticRoute(HttpMethod.GET, "static/2")]
+        [StaticRoute(HttpMethod.GET, "/static/2")]
         public static async Task MyStatic2Route(HttpContext ctx)
         {
             ctx.Response.StatusCode = 200;
@@ -263,7 +263,7 @@ namespace Test
             return;
         }
 
-        [StaticRoute(HttpMethod.GET, "mirror")]
+        [StaticRoute(HttpMethod.GET, "/mirror")]
         public static async Task MyMirrorRoute(HttpContext ctx)
         {
             ctx.Response.StatusCode = 200;
@@ -272,7 +272,7 @@ namespace Test
             return;
         }
 
-        [StaticRoute(HttpMethod.GET, "mirror/1")]
+        [StaticRoute(HttpMethod.GET, "/mirror/1")]
         public static async Task MyMirror1Route(HttpContext ctx)
         {
             ctx.Response.StatusCode = 200;
@@ -281,12 +281,21 @@ namespace Test
             return;
         }
 
-        [StaticRoute(HttpMethod.GET, "mirror/2")]
+        [StaticRoute(HttpMethod.GET, "/mirror/2")]
         public static async Task MyMirror2Route(HttpContext ctx)
         {
             ctx.Response.StatusCode = 200;
             ctx.Response.ContentType = "application/json";
             await ctx.Response.SendAsync(ctx.ToJson(true));
+            return;
+        }
+
+        [ParameterRoute(HttpMethod.GET, "/{version}/api/{id}")]
+        public static async Task MyParameterRoute(HttpContext ctx)
+        {
+            ctx.Response.StatusCode = 200;
+            ctx.Response.ContentType = "application/json";
+            await ctx.Response.SendAsync("Hello from the parameter route version " + ctx.Request.Url.Parameters["version"] + " ID " + ctx.Request.Url.Parameters["id"]);
             return;
         }
 

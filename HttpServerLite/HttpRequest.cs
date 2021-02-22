@@ -531,6 +531,11 @@ namespace HttpServerLite
             }
 
             /// <summary>
+            /// Parameters found within the URL, if using parameter routes.
+            /// </summary>
+            public Dictionary<string, string> Parameters { get; internal set; } = new Dictionary<string, string>();
+
+            /// <summary>
             /// URL details.
             /// </summary>
             public UrlDetails()

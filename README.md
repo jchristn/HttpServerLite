@@ -4,11 +4,11 @@
 
 [![NuGet Version](https://img.shields.io/nuget/v/HttpServerLite.svg?style=flat)](https://www.nuget.org/packages/HttpServerLite/) [![NuGet](https://img.shields.io/nuget/dt/HttpServerLite.svg)](https://www.nuget.org/packages/HttpServerLite) 
 
-TCP-based user-space HTTP and HTTPS server, written in C#.
+TCP-based user-space HTTP and HTTPS server, written in C#, with no dependency on http.sys.
 
-## New in v1.2.0
+## New in v1.2.1
 
-- Breaking changes to synchronize HttpRequest properties with Watson Webserver
+- Parameter routes
 
 ## Special Thanks
 
@@ -99,10 +99,12 @@ HttpServerLite includes the following routing capabilities.  These are listed in
   - Content will be read from the ```server.Routes.Content.BaseDirectory``` plus the URL path
   - An entire directory can be listed as a content route when adding the route
 - ```server.Routes.Static``` - invoke functions based on specific HTTP method and URL combinations
+- ```server.Routes.Parameter``` - invoke functions based on specific HTTP method and URLs with embedded parameters.  These values are returned in ```HttpContext.HttpRequest.Url.Parameters```
 - ```server.Routes.Dynamic``` - invoke functions based on specific HTTP method and a regular expression for the URL
 - ```server.Routes.Default``` - any request that did not match a content route, static route, or dynamic route, is routed here
 
-Additionally, you can annotate your own methods using the ```StaticRoute``` or ```DynamicRoute``` attribute.  
+Additionally, you can annotate your own methods using the ```StaticRoute```, ```ParameterRoute```, or ```DynamicRoute``` attributes.  Methods decorated with these attributes must be marked as ```public```.
+
 ```csharp
 Webserver server = new Webserver("localhost", 9000, false, null, null, DefaultRoute);
 server.Start();
@@ -110,23 +112,34 @@ server.Start();
 [StaticRoute(HttpMethod.GET, "/static")]
 public static async Task MyStaticRoute(HttpContext ctx)
 {
-    string resp = "Hello from the static route";
-    ctx.Response.StatusCode = 200;
-    ctx.Response.ContentType = "text/html";
-    ctx.Response.ContentLength = resp.Length;
-    await ctx.Response.SendAsync(resp);
-    return;
+  string resp = "Hello from the static route";
+  ctx.Response.StatusCode = 200;
+  ctx.Response.ContentType = "text/plain";
+  ctx.Response.ContentLength = resp.Length;
+  await ctx.Response.SendAsync(resp);
+  return;
+}
+
+[ParameterRoute(HttpMethod.GET, "/{version}/api/{id}")]
+public static async Task MyParameterRoute(HttpContext ctx)
+{
+  string resp = "Hello from parameter route version " + ctx.Request.Url.Parameters["version"] + " for ID " + ctx.Request.Url.Parameters["id"];
+  ctx.Response.StatusCode = 200;
+  ctx.Response.ContentType = "text/plain";
+  ctx.Response.ContentLength = resp.Length;
+  await ctx.Response.SendAsync(resp);
+  return;
 }
 
 [DynamicRoute(HttpMethod.GET, "^/dynamic/\\d+$")]
 public static async Task MyDynamicRoute(HttpContext ctx)
 {
-    string resp = "Hello from the dynamic route";
-    ctx.Response.StatusCode = 200;
-    ctx.Response.ContentType = "text/html";
-    ctx.Response.ContentLength = resp.Length;
-    await ctx.Response.SendAsync(resp);
-    return;
+  string resp = "Hello from the dynamic route";
+  ctx.Response.StatusCode = 200;
+  ctx.Response.ContentType = "text/plain";
+  ctx.Response.ContentLength = resp.Length;
+  await ctx.Response.SendAsync(resp);
+  return;
 }
 ```
 

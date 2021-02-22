@@ -2,11 +2,15 @@
 
 ## Current Version
 
+v1.2.1
+
+- Parameter routes
+
+## Previous Versions
+
 v1.2.0
 
 - Breaking changes to synchronize HttpRequest properties with Watson Webserver
-
-## Previous Versions
 
 v1.1.0
 

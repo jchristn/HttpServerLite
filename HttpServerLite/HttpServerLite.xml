@@ -610,6 +610,11 @@
             Raw URL elements.
             </summary>
         </member>
+        <member name="P:HttpServerLite.HttpRequest.UrlDetails.Parameters">
+            <summary>
+            Parameters found within the URL, if using parameter routes.
+            </summary>
+        </member>
         <member name="M:HttpServerLite.HttpRequest.UrlDetails.#ctor">
             <summary>
             URL details.
@@ -828,6 +833,107 @@
             </summary>
             <param name="extension">File extension.</param>
             <returns>String containing MIME type.</returns>
+        </member>
+        <member name="T:HttpServerLite.ParameterRoute">
+            <summary>
+            Assign a method handler for when requests are received matching the supplied method and path containing parameters.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.ParameterRoute.Method">
+            <summary>
+            The HTTP method, i.e. GET, PUT, POST, DELETE, etc.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.ParameterRoute.Path">
+            <summary>
+            The pattern against which the raw URL should be matched.  
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.ParameterRoute.Handler">
+            <summary>
+            The handler for the parameter route.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.ParameterRoute.#ctor(HttpServerLite.HttpMethod,System.String,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
+            <summary>
+            Create a new route object.
+            </summary>
+            <param name="method">The HTTP method, i.e. GET, PUT, POST, DELETE, etc.</param>
+            <param name="path">The pattern against which the raw URL should be matched.</param>
+            <param name="handler">The method that should be called to handle the request.</param>
+        </member>
+        <member name="T:HttpServerLite.ParameterRouteAttribute">
+            <summary>
+            Attribute that is used to mark methods as a parameter route.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.ParameterRouteAttribute.Path">
+            <summary>
+            The path to match, i.e. /{version}/api/{id}.
+            If a match is found, the Dictionary found in HttpRequest.Url.Parameters will contain keys for 'version' and 'id'.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.ParameterRouteAttribute.Method">
+            <summary>
+            The HTTP method, i.e. GET, PUT, POST, DELETE, etc.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.ParameterRouteAttribute.#ctor(HttpServerLite.HttpMethod,System.String)">
+            <summary>
+            Instantiate the object.
+            </summary>
+            <param name="method">The HTTP method, i.e. GET, PUT, POST, DELETE, etc.</param>
+            <param name="path">The path to match, i.e. /{version}/api/{id}.</param>
+        </member>
+        <member name="T:HttpServerLite.ParameterRouteManager">
+            <summary>
+            Parameter route manager.  Parameter routes are used for requests using any HTTP method to any path where parameters are defined in the URL.
+            For example, /{version}/api.
+            For a matching URL, the HttpRequest.Url.Parameters will contain a key called 'version' with the value found in the URL.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.ParameterRouteManager.Matcher">
+            <summary>
+            Directly access the underlying URL matching library.
+            This is helpful in case you want to specify the matching behavior should multiple matches exist.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.ParameterRouteManager.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary> 
+        </member>
+        <member name="M:HttpServerLite.ParameterRouteManager.Add(HttpServerLite.HttpMethod,System.String,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
+            <summary>
+            Add a route.
+            </summary>
+            <param name="method">The HTTP method.</param>
+            <param name="path">URL path, i.e. /path/to/resource.</param>
+            <param name="handler">Method to invoke.</param>
+        </member>
+        <member name="M:HttpServerLite.ParameterRouteManager.Remove(HttpServerLite.HttpMethod,System.String)">
+            <summary>
+            Remove a route.
+            </summary>
+            <param name="method">The HTTP method.</param>
+            <param name="path">URL path.</param>
+        </member>
+        <member name="M:HttpServerLite.ParameterRouteManager.Exists(HttpServerLite.HttpMethod,System.String)">
+            <summary>
+            Check if a content route exists.
+            </summary>
+            <param name="method">The HTTP method.</param>
+            <param name="path">URL path.</param>
+            <returns>True if exists.</returns>
+        </member>
+        <member name="M:HttpServerLite.ParameterRouteManager.Match(HttpServerLite.HttpMethod,System.String,System.Collections.Generic.Dictionary{System.String,System.String}@)">
+            <summary>
+            Match a request method and URL to a handler method.
+            </summary>
+            <param name="method">The HTTP method.</param>
+            <param name="path">URL path.</param>
+            <param name="vals">Values extracted from the URL.</param>
+            <returns>True if match exists.</returns>
         </member>
         <member name="T:HttpServerLite.RequestEventArgs">
             <summary>
@@ -1264,6 +1370,11 @@
         <member name="P:HttpServerLite.WebserverRoutes.Static">
             <summary>
             Static routes; i.e. routes with explicit matching and any HTTP method.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverRoutes.Parameter">
+            <summary>
+            Parameter routes; i.e. routes with parameters embedded in the URL, such as /{version}/api/{id}.
             </summary>
         </member>
         <member name="P:HttpServerLite.WebserverRoutes.Dynamic">
