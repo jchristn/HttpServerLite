@@ -347,6 +347,16 @@
             The HTTP request that was received.
             </summary>
         </member>
+        <member name="P:HttpServerLite.HttpContext.RouteType">
+            <summary>
+            Type of route.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpContext.Route">
+            <summary>
+            Matched route.
+            </summary>
+        </member>
         <member name="P:HttpServerLite.HttpContext.Response">
             <summary>
             The HTTP response that will be sent.  This object is preconstructed on your behalf and can be modified directly.
@@ -1035,6 +1045,36 @@
             Total time in processing the request and sending the response, in milliseconds.
             </summary>
         </member>
+        <member name="T:HttpServerLite.RouteTypeEnum">
+            <summary>
+            Route type.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.RouteTypeEnum.Default">
+            <summary>
+            Default route.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.RouteTypeEnum.Content">
+            <summary>
+            Content route.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.RouteTypeEnum.Static">
+            <summary>
+            Static route.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.RouteTypeEnum.Parameter">
+            <summary>
+            Parameter route.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.RouteTypeEnum.Dynamic">
+            <summary>
+            Dynamic route.
+            </summary>
+        </member>
         <member name="T:HttpServerLite.StaticRoute">
             <summary>
             Assign a method handler for when requests are received matching the supplied method and path.
@@ -1453,6 +1493,11 @@
         <member name="T:HttpServerLite.WebserverSettings.IOSettings">
             <summary>
             Input-output settings.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.WebserverSettings.IOSettings.MaxIncomingHeadersSize">
+            <summary>
+            Maximum number of bytes to read from the network in attempt to read incoming HTTP request headers.
             </summary>
         </member>
         <member name="P:HttpServerLite.WebserverSettings.IOSettings.StreamBufferSize">

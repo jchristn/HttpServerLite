@@ -459,11 +459,16 @@ namespace HttpServerLite
                 {
                     if (sb.ToString().EndsWith("\r\n\r\n"))
                     {
-                        // end of headers detected
                         retrievingHeaders = false;
                     }
                     else
-                    { 
+                    {
+                        if (sb.Length >= _Settings.IO.MaxIncomingHeadersSize)
+                        {
+                            _Events.Logger?.Invoke(_Header + "failed to read headers from " + ip + ":" + port + " within " + _Settings.IO.MaxIncomingHeadersSize + " bytes, closing connection");
+                            return;
+                        }
+
                         ReadResult addlReadResult = await _TcpServer.ReadWithTimeoutAsync(
                             _Settings.IO.ReadTimeoutMs, 
                             args.IpPort, 

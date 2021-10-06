@@ -171,6 +171,22 @@ namespace HttpServerLite
         public class IOSettings
         {
             /// <summary>
+            /// Maximum number of bytes to read from the network in attempt to read incoming HTTP request headers.
+            /// </summary>
+            public int MaxIncomingHeadersSize
+            {
+                get
+                {
+                    return _MaxIncomingHeadersSize;
+                }
+                set
+                {
+                    if (value < 1) throw new ArgumentOutOfRangeException(nameof(MaxIncomingHeadersSize));
+                    _MaxIncomingHeadersSize = value;
+                }
+            }
+
+            /// <summary>
             /// Buffer size to use when interacting with streams.
             /// </summary>
             public int StreamBufferSize
@@ -202,6 +218,7 @@ namespace HttpServerLite
                 }
             }
 
+            private int _MaxIncomingHeadersSize = 65536;
             private int _StreamBufferSize = 65536;
             private int _ReadTimeoutMs = 5000;
 
