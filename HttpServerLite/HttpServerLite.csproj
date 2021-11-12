@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;netstandard2.0;netstandard2.1;net461;net5.0</TargetFrameworks>
-    <Version>1.2.1.2</Version>
+    <TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net5.0;net6.0</TargetFrameworks>
+    <Version>1.2.1.3</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Product>HttpServerLite</Product>
@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/jchristn/httpserverlite</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>http https server rest restful api async</PackageTags>
-    <PackageReleaseNotes>Dependency update for security fix for SICK-2021-060</PackageReleaseNotes>
+    <PackageReleaseNotes>.NET 6 support</PackageReleaseNotes>
     <PackageIconUrl></PackageIconUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
@@ -79,11 +79,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CavemanTcp" Version="1.3.8" />
-    <PackageReference Include="IpMatcher" Version="1.0.4.2" />
+    <PackageReference Include="CavemanTcp" Version="1.3.8.1" />
+    <PackageReference Include="IpMatcher" Version="1.0.4.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="RegexMatcher" Version="1.0.7" />
-    <PackageReference Include="UrlMatcher" Version="1.0.0.1" />
+    <PackageReference Include="RegexMatcher" Version="1.0.7.1" />
+    <PackageReference Include="UrlMatcher" Version="1.0.0.2" />
   </ItemGroup>
 
   <ItemGroup>
