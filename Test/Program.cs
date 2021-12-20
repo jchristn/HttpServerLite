@@ -91,6 +91,8 @@ namespace Test
                 _Server.Events.ServerStopped += ServerStopped;
                 _Server.Events.ServerDisposing += ServerDisposing;
                 _Server.Events.Logger = Console.WriteLine;
+                _Server.Routes.Content.Add("./html/", true);
+                _Server.Routes.Content.Add("./img/", true);
                 _Server.Settings.Debug.Responses = true;
                 _Server.Settings.Debug.Routing = true;
                 _Server.Start();

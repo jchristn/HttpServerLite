@@ -343,9 +343,23 @@ namespace HttpServerLite
 
                     string[] requestLine = headers[i].Trim().Trim('\0').Split(' ');
                     if (requestLine.Length < 3) throw new ArgumentException("Request line does not contain at least three parts (method, raw URL, protocol/version).");
+                    
+                    string tempUrl = requestLine[1];
+                    string tempPath = "";
+                    if (tempUrl.ToLower().StartsWith("http"))
+                    {
+                        // absolute path
+                        var modifiedUri = new UriBuilder(tempUrl);
+                        tempPath = modifiedUri.Path;
+                    }
+                    else
+                    {
+                        // relative path
+                        tempPath = tempUrl;
+                    }
 
                     Method = (HttpMethod)Enum.Parse(typeof(HttpMethod), requestLine[0], true); 
-                    Url = new UrlDetails(requestLine[1]);
+                    Url = new UrlDetails(tempPath);
                     Query = new QueryDetails(requestLine[1]);
                      
                     ProtocolVersion = requestLine[2]; 

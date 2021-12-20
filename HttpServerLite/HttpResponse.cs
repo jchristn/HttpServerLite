@@ -415,14 +415,27 @@ namespace HttpServerLite
 
             ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes(ProtocolVersion + " " + StatusCode + " " + StatusDescription + "\r\n"));
 
+            bool contentTypeSet = false;
             if (!String.IsNullOrEmpty(ContentType))
+            {
                 ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("Content-Type: " + ContentType + "\r\n"));
+                contentTypeSet = true;
+            }
 
+            bool contentLengthSet = false;
             if (ContentLength != null && ContentLength >= 0)
+            {
                 ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("Content-Length: " + ContentLength + "\r\n"));
-             
+                contentLengthSet = true;
+            }
+
             foreach (KeyValuePair<string, string> header in _Headers)
+            {
+                if (String.IsNullOrEmpty(header.Key)) continue;
+                if (contentTypeSet && header.Key.ToLower().Equals("content-type")) continue;
+                if (contentLengthSet && header.Key.ToLower().Equals("content-length")) continue;
                 ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes(header.Key + ": " + header.Value + "\r\n"));
+            }
 
             ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("\r\n"));
             return ret;
