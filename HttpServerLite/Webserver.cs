@@ -285,6 +285,7 @@ namespace HttpServerLite
                 if (_TokenSource != null && !_Token.IsCancellationRequested)
                 {
                     _TokenSource.Cancel();
+                    _TokenSource.Dispose();
                 }
 
                 _Statistics = null;
