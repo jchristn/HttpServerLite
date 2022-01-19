@@ -427,7 +427,7 @@ namespace HttpServerLite
             _Events.HandleConnectionReceived(this, new ConnectionEventArgs(ip, port));
             
             if (_Settings.Debug.Connections) 
-                _Events.Logger?.Invoke(_Header + "connection from " + ip + ":" + port); 
+                _Events.Logger?.Invoke(_Header + "connection from " + ip + ":" + port);
 
             #endregion
 
@@ -438,19 +438,19 @@ namespace HttpServerLite
                 #region Retrieve-Headers
 
                 StringBuilder sb = new StringBuilder();
-                 
+
                 //                           123456789012345 6 7 8
                 // minimum request 16 bytes: GET / HTTP/1.1\r\n\r\n
-                int preReadLen = 18; 
+                int preReadLen = 18;
                 ReadResult preReadResult = await _TcpServer.ReadWithTimeoutAsync(
-                    _Settings.IO.ReadTimeoutMs, 
-                    args.IpPort, 
-                    preReadLen, 
+                    _Settings.IO.ReadTimeoutMs,
+                    args.IpPort,
+                    preReadLen,
                     _Token).ConfigureAwait(false);
 
-                if (preReadResult.Status != ReadResultStatus.Success 
-                    || preReadResult.BytesRead != preReadLen 
-                    || preReadResult.Data == null 
+                if (preReadResult.Status != ReadResultStatus.Success
+                    || preReadResult.BytesRead != preReadLen
+                    || preReadResult.Data == null
                     || preReadResult.Data.Length != preReadLen) return;
 
                 sb.Append(Encoding.ASCII.GetString(preReadResult.Data));
@@ -471,9 +471,9 @@ namespace HttpServerLite
                         }
 
                         ReadResult addlReadResult = await _TcpServer.ReadWithTimeoutAsync(
-                            _Settings.IO.ReadTimeoutMs, 
-                            args.IpPort, 
-                            1, 
+                            _Settings.IO.ReadTimeoutMs,
+                            args.IpPort,
+                            1,
                             _Token).ConfigureAwait(false);
 
                         if (addlReadResult.Status == ReadResultStatus.Success)
@@ -485,17 +485,17 @@ namespace HttpServerLite
                             return;
                         }
                     }
-                } 
+                }
 
                 #endregion
 
                 #region Build-Context
 
                 ctx = new HttpContext(
-                    ipPort, 
-                    _TcpServer.GetStream(ipPort), 
-                    sb.ToString(), 
-                    Events, 
+                    ipPort,
+                    _TcpServer.GetStream(ipPort),
+                    sb.ToString(),
+                    Events,
                     _Settings.Headers,
                     _Settings.IO.StreamBufferSize);
 
@@ -512,7 +512,7 @@ namespace HttpServerLite
                 }
 
                 #endregion
-                 
+
                 #region Check-Access-Control
 
                 if (!_Settings.AccessControl.Permit(ctx.Request.Source.IpAddress))
@@ -538,7 +538,7 @@ namespace HttpServerLite
                         if (_Settings.Debug.Routing)
                         {
                             _Events.Logger?.Invoke(
-                                _Header + "preflight route for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " + 
+                                _Header + "preflight route for " + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
                                 ctx.Request.Method.ToString() + " " + ctx.Request.Url.Full);
                         }
 
@@ -680,12 +680,16 @@ namespace HttpServerLite
             }
             catch (Exception e)
             {
-                ctx.Response.StatusCode = 500;
-                ctx.Response.ContentType = _Pages.Default500Page.ContentType;
-                await ctx.Response.SendAsync(_Pages.Default500Page.Content, _Token).ConfigureAwait(false);
+                if (ctx != null)
+                {
+                    ctx.Response.StatusCode = 500;
+                    ctx.Response.ContentType = _Pages.Default500Page.ContentType;
+                    await ctx.Response.SendAsync(_Pages.Default500Page.Content, _Token).ConfigureAwait(false);
 
-                _Events.Logger?.Invoke(_Header + "exception: " + Environment.NewLine + SerializationHelper.SerializeJson(e, true));
-                _Events.HandleException(this, new ExceptionEventArgs(ctx, e));
+                    _Events.Logger?.Invoke(_Header + "exception: " + Environment.NewLine + SerializationHelper.SerializeJson(e, true));
+                    _Events.HandleException(this, new ExceptionEventArgs(ctx, e));
+                }
+
                 return;
             }
             finally
