@@ -144,6 +144,23 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Try to send headers and no data to the requestor and terminate the connection.
+        /// </summary> 
+        /// <returns>True if successful.</returns>
+        public bool TrySend(bool close)
+        {
+            try
+            {
+                Send(close);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Send headers with a specified content length and no data to the requestor and terminate the connection.  Useful for HEAD requests where the content length must be set.
         /// </summary> 
         /// <param name="contentLength">Value to set in Content-Length header.</param>
@@ -151,6 +168,24 @@ namespace HttpServerLite
         {
             ContentLength = contentLength;
             SendInternal(0, null, true); 
+        }
+
+        /// <summary>
+        /// Try to send headers with a specified content length and no data to the requestor and terminate the connection.  Useful for HEAD requests where the content length must be set.
+        /// </summary> 
+        /// <param name="contentLength">Value to set in Content-Length header.</param>
+        /// <returns>True if successful.</returns>
+        public bool TrySend(long contentLength)
+        {
+            try
+            {
+                Send(contentLength);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -172,6 +207,24 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Try to send headers and data to the requestor and terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        /// <returns>True if successful.</returns>
+        public bool TrySend(string data)
+        {
+            try
+            {
+                Send(data);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Send headers and data to the requestor and terminate the connection.
         /// </summary>
         /// <param name="data">Data.</param> 
@@ -186,6 +239,24 @@ namespace HttpServerLite
             ms.Write(data, 0, data.Length);
             ms.Seek(0, SeekOrigin.Begin);
             SendInternal(data.Length, ms, true);
+        }
+
+        /// <summary>
+        /// Try to send headers and data to the requestor and terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        /// <returns>True if successful.</returns>
+        public bool TrySend(byte[] data)
+        {
+            try
+            {
+                Send(data);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -205,6 +276,25 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Try to send headers and data to the requestor and terminate the connection.
+        /// </summary>
+        /// <param name="contentLength">Number of bytes to read from the stream.</param>
+        /// <param name="stream">Stream containing response data.</param>
+        /// <returns>True if successful.</returns>
+        public bool TrySend(long contentLength, Stream stream)
+        {
+            try
+            {
+                Send(contentLength, stream);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Send headers with a specified content length and no data to the requestor and terminate the connection.  Useful for HEAD requests where the content length must be set.
         /// </summary> 
         /// <param name="contentLength">Value to set in Content-Length header.</param>
@@ -213,6 +303,25 @@ namespace HttpServerLite
         {
             ContentLength = contentLength;
             await SendInternalAsync(0, null, true, token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Try to send headers with a specified content length and no data to the requestor and terminate the connection.  Useful for HEAD requests where the content length must be set.
+        /// </summary> 
+        /// <param name="contentLength">Value to set in Content-Length header.</param>
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        /// <returns>True if successful.</returns>
+        public async Task<bool> TrySendAsync(long contentLength, CancellationToken token = default)
+        {
+            try
+            {
+                await SendAsync(contentLength, token);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -235,6 +344,25 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Try to send headers and data to the requestor and terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        /// <returns>True if successful.</returns>
+        public async Task<bool> TrySendAsync(string data, CancellationToken token = default)
+        {
+            try
+            {
+                await SendAsync(data, token);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Send headers and data to the requestor and terminate the connection.
         /// </summary>
         /// <param name="data">Data.</param> 
@@ -250,6 +378,25 @@ namespace HttpServerLite
             await ms.WriteAsync(data, 0, data.Length, token).ConfigureAwait(false);
             ms.Seek(0, SeekOrigin.Begin); 
             await SendInternalAsync(data.Length, ms, true, token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Try to send headers and data to the requestor and terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        /// <returns>True if successful.</returns>
+        public async Task<bool> TrySendAsync(byte[] data, CancellationToken token = default)
+        {
+            try
+            {
+                await SendAsync(data, token);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -270,6 +417,26 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Try to send headers and data to the requestor and terminate the connection.
+        /// </summary>
+        /// <param name="contentLength">Number of bytes to read from the stream.</param>
+        /// <param name="stream">Stream containing response data.</param>
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        /// <returns>True if successful.</returns>
+        public async Task<bool> TrySendAsync(long contentLength, Stream stream, CancellationToken token = default)
+        {
+            try
+            {
+                await SendAsync(contentLength, stream, token);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Send headers and data to the requestor but do not terminate the connection.
         /// </summary>
         /// <param name="contentLength">Value to set in Content-Length header.</param>
@@ -277,6 +444,24 @@ namespace HttpServerLite
         {
             ContentLength = contentLength;
             SendInternal(contentLength, null, false);
+        }
+
+        /// <summary>
+        /// Try to send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="contentLength">Value to set in Content-Length header.</param>
+        /// <returns>True if successful.</returns>
+        public bool TrySendWithoutClose(long contentLength)
+        {
+            try
+            {
+                SendWithoutClose(contentLength);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -298,6 +483,24 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Try to send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        /// <returns>True if successful.</returns>
+        public bool TrySendWithoutClose(string data)
+        {
+            try
+            {
+                SendWithoutClose(data);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Send headers and data to the requestor but do not terminate the connection.
         /// </summary>
         /// <param name="data">Data.</param> 
@@ -312,6 +515,24 @@ namespace HttpServerLite
             ms.Write(data, 0, data.Length);
             ms.Seek(0, SeekOrigin.Begin);
             SendInternal(data.Length, ms, false);
+        }
+
+        /// <summary>
+        /// Try to send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        /// <returns>True if successful.</returns>
+        public bool TrySendWithoutClose(byte[] data)
+        {
+            try
+            {
+                SendWithoutClose(data);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -331,6 +552,25 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Try to send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="contentLength">Number of bytes to read from the stream.</param>
+        /// <param name="stream">Stream containing response data.</param>
+        /// <returns>True if successful.</returns>
+        public bool TrySendWithoutClose(long contentLength, Stream stream)
+        {
+            try
+            {
+                SendWithoutClose(contentLength, stream);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Send headers and data to the requestor but do not terminate the connection.
         /// </summary>
         /// <param name="contentLength">Value to set in Content-Length header.</param>
@@ -339,6 +579,25 @@ namespace HttpServerLite
         {
             ContentLength = contentLength;
             await SendInternalAsync(contentLength, null, false, token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Try to send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="contentLength">Value to set in Content-Length header.</param>
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        /// <returns>True if successful.</returns>
+        public async Task<bool> TrySendWithoutCloseAsync(long contentLength, CancellationToken token = default)
+        {
+            try
+            {
+                await SendWithoutCloseAsync(contentLength, token);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -361,6 +620,25 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Try to send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        /// <returns>True if successful.</returns>
+        public async Task<bool> TrySendWithoutCloseAsync(string data, CancellationToken token = default)
+        {
+            try
+            {
+                await SendWithoutCloseAsync(data, token);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Send headers and data to the requestor but do not terminate the connection.
         /// </summary>
         /// <param name="data">Data.</param> 
@@ -379,6 +657,25 @@ namespace HttpServerLite
         }
 
         /// <summary>
+        /// Try to send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="data">Data.</param> 
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        /// <returns>True if successful.</returns>
+        public async Task<bool> TrySendWithoutCloseAsync(byte[] data, CancellationToken token = default)
+        {
+            try
+            {
+                await SendWithoutCloseAsync(data, token);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Send headers and data to the requestor but do not terminate the connection.
         /// </summary>
         /// <param name="contentLength">Number of bytes to read from the stream.</param>
@@ -393,6 +690,26 @@ namespace HttpServerLite
             }
 
             await SendInternalAsync(contentLength, stream, false, token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Try to send headers and data to the requestor but do not terminate the connection.
+        /// </summary>
+        /// <param name="contentLength">Number of bytes to read from the stream.</param>
+        /// <param name="stream">Stream containing response data.</param>
+        /// <param name="token">Cancellation token for canceling the request.</param>
+        /// <returns>True if successful.</returns>
+        public async Task<bool> TrySendWithoutCloseAsync(long contentLength, Stream stream, CancellationToken token = default)
+        {
+            try
+            {
+                await SendWithoutCloseAsync(contentLength, stream, token);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
         }
 
         /// <summary>

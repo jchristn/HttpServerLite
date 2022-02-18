@@ -714,11 +714,24 @@
             Send headers and no data to the requestor and terminate the connection.
             </summary> 
         </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySend(System.Boolean)">
+            <summary>
+            Try to send headers and no data to the requestor and terminate the connection.
+            </summary> 
+            <returns>True if successful.</returns>
+        </member>
         <member name="M:HttpServerLite.HttpResponse.Send(System.Int64)">
             <summary>
             Send headers with a specified content length and no data to the requestor and terminate the connection.  Useful for HEAD requests where the content length must be set.
             </summary> 
             <param name="contentLength">Value to set in Content-Length header.</param>
+        </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySend(System.Int64)">
+            <summary>
+            Try to send headers with a specified content length and no data to the requestor and terminate the connection.  Useful for HEAD requests where the content length must be set.
+            </summary> 
+            <param name="contentLength">Value to set in Content-Length header.</param>
+            <returns>True if successful.</returns>
         </member>
         <member name="M:HttpServerLite.HttpResponse.Send(System.String)">
             <summary>
@@ -726,11 +739,25 @@
             </summary>
             <param name="data">Data.</param> 
         </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySend(System.String)">
+            <summary>
+            Try to send headers and data to the requestor and terminate the connection.
+            </summary>
+            <param name="data">Data.</param> 
+            <returns>True if successful.</returns>
+        </member>
         <member name="M:HttpServerLite.HttpResponse.Send(System.Byte[])">
             <summary>
             Send headers and data to the requestor and terminate the connection.
             </summary>
             <param name="data">Data.</param> 
+        </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySend(System.Byte[])">
+            <summary>
+            Try to send headers and data to the requestor and terminate the connection.
+            </summary>
+            <param name="data">Data.</param> 
+            <returns>True if successful.</returns>
         </member>
         <member name="M:HttpServerLite.HttpResponse.Send(System.Int64,System.IO.Stream)">
             <summary>
@@ -739,12 +766,28 @@
             <param name="contentLength">Number of bytes to read from the stream.</param>
             <param name="stream">Stream containing response data.</param>
         </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySend(System.Int64,System.IO.Stream)">
+            <summary>
+            Try to send headers and data to the requestor and terminate the connection.
+            </summary>
+            <param name="contentLength">Number of bytes to read from the stream.</param>
+            <param name="stream">Stream containing response data.</param>
+            <returns>True if successful.</returns>
+        </member>
         <member name="M:HttpServerLite.HttpResponse.SendAsync(System.Int64,System.Threading.CancellationToken)">
             <summary>
             Send headers with a specified content length and no data to the requestor and terminate the connection.  Useful for HEAD requests where the content length must be set.
             </summary> 
             <param name="contentLength">Value to set in Content-Length header.</param>
             <param name="token">Cancellation token for canceling the request.</param>
+        </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySendAsync(System.Int64,System.Threading.CancellationToken)">
+            <summary>
+            Try to send headers with a specified content length and no data to the requestor and terminate the connection.  Useful for HEAD requests where the content length must be set.
+            </summary> 
+            <param name="contentLength">Value to set in Content-Length header.</param>
+            <param name="token">Cancellation token for canceling the request.</param>
+            <returns>True if successful.</returns>
         </member>
         <member name="M:HttpServerLite.HttpResponse.SendAsync(System.String,System.Threading.CancellationToken)">
             <summary>
@@ -753,12 +796,28 @@
             <param name="data">Data.</param> 
             <param name="token">Cancellation token for canceling the request.</param>
         </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySendAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Try to send headers and data to the requestor and terminate the connection.
+            </summary>
+            <param name="data">Data.</param> 
+            <param name="token">Cancellation token for canceling the request.</param>
+            <returns>True if successful.</returns>
+        </member>
         <member name="M:HttpServerLite.HttpResponse.SendAsync(System.Byte[],System.Threading.CancellationToken)">
             <summary>
             Send headers and data to the requestor and terminate the connection.
             </summary>
             <param name="data">Data.</param> 
             <param name="token">Cancellation token for canceling the request.</param>
+        </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySendAsync(System.Byte[],System.Threading.CancellationToken)">
+            <summary>
+            Try to send headers and data to the requestor and terminate the connection.
+            </summary>
+            <param name="data">Data.</param> 
+            <param name="token">Cancellation token for canceling the request.</param>
+            <returns>True if successful.</returns>
         </member>
         <member name="M:HttpServerLite.HttpResponse.SendAsync(System.Int64,System.IO.Stream,System.Threading.CancellationToken)">
             <summary>
@@ -768,11 +827,27 @@
             <param name="stream">Stream containing response data.</param>
             <param name="token">Cancellation token for canceling the request.</param>
         </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySendAsync(System.Int64,System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Try to send headers and data to the requestor and terminate the connection.
+            </summary>
+            <param name="contentLength">Number of bytes to read from the stream.</param>
+            <param name="stream">Stream containing response data.</param>
+            <param name="token">Cancellation token for canceling the request.</param>
+            <returns>True if successful.</returns>
+        </member>
         <member name="M:HttpServerLite.HttpResponse.SendWithoutClose(System.Int64)">
             <summary>
             Send headers and data to the requestor but do not terminate the connection.
             </summary>
             <param name="contentLength">Value to set in Content-Length header.</param>
+        </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySendWithoutClose(System.Int64)">
+            <summary>
+            Try to send headers and data to the requestor but do not terminate the connection.
+            </summary>
+            <param name="contentLength">Value to set in Content-Length header.</param>
+            <returns>True if successful.</returns>
         </member>
         <member name="M:HttpServerLite.HttpResponse.SendWithoutClose(System.String)">
             <summary>
@@ -780,11 +855,25 @@
             </summary>
             <param name="data">Data.</param> 
         </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySendWithoutClose(System.String)">
+            <summary>
+            Try to send headers and data to the requestor but do not terminate the connection.
+            </summary>
+            <param name="data">Data.</param> 
+            <returns>True if successful.</returns>
+        </member>
         <member name="M:HttpServerLite.HttpResponse.SendWithoutClose(System.Byte[])">
             <summary>
             Send headers and data to the requestor but do not terminate the connection.
             </summary>
             <param name="data">Data.</param> 
+        </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySendWithoutClose(System.Byte[])">
+            <summary>
+            Try to send headers and data to the requestor but do not terminate the connection.
+            </summary>
+            <param name="data">Data.</param> 
+            <returns>True if successful.</returns>
         </member>
         <member name="M:HttpServerLite.HttpResponse.SendWithoutClose(System.Int64,System.IO.Stream)">
             <summary>
@@ -793,12 +882,28 @@
             <param name="contentLength">Number of bytes to read from the stream.</param>
             <param name="stream">Stream containing response data.</param>
         </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySendWithoutClose(System.Int64,System.IO.Stream)">
+            <summary>
+            Try to send headers and data to the requestor but do not terminate the connection.
+            </summary>
+            <param name="contentLength">Number of bytes to read from the stream.</param>
+            <param name="stream">Stream containing response data.</param>
+            <returns>True if successful.</returns>
+        </member>
         <member name="M:HttpServerLite.HttpResponse.SendWithoutCloseAsync(System.Int64,System.Threading.CancellationToken)">
             <summary>
             Send headers and data to the requestor but do not terminate the connection.
             </summary>
             <param name="contentLength">Value to set in Content-Length header.</param>
             <param name="token">Cancellation token for canceling the request.</param>
+        </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySendWithoutCloseAsync(System.Int64,System.Threading.CancellationToken)">
+            <summary>
+            Try to send headers and data to the requestor but do not terminate the connection.
+            </summary>
+            <param name="contentLength">Value to set in Content-Length header.</param>
+            <param name="token">Cancellation token for canceling the request.</param>
+            <returns>True if successful.</returns>
         </member>
         <member name="M:HttpServerLite.HttpResponse.SendWithoutCloseAsync(System.String,System.Threading.CancellationToken)">
             <summary>
@@ -807,12 +912,28 @@
             <param name="data">Data.</param> 
             <param name="token">Cancellation token for canceling the request.</param>
         </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySendWithoutCloseAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Try to send headers and data to the requestor but do not terminate the connection.
+            </summary>
+            <param name="data">Data.</param> 
+            <param name="token">Cancellation token for canceling the request.</param>
+            <returns>True if successful.</returns>
+        </member>
         <member name="M:HttpServerLite.HttpResponse.SendWithoutCloseAsync(System.Byte[],System.Threading.CancellationToken)">
             <summary>
             Send headers and data to the requestor but do not terminate the connection.
             </summary>
             <param name="data">Data.</param> 
             <param name="token">Cancellation token for canceling the request.</param>
+        </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySendWithoutCloseAsync(System.Byte[],System.Threading.CancellationToken)">
+            <summary>
+            Try to send headers and data to the requestor but do not terminate the connection.
+            </summary>
+            <param name="data">Data.</param> 
+            <param name="token">Cancellation token for canceling the request.</param>
+            <returns>True if successful.</returns>
         </member>
         <member name="M:HttpServerLite.HttpResponse.SendWithoutCloseAsync(System.Int64,System.IO.Stream,System.Threading.CancellationToken)">
             <summary>
@@ -821,6 +942,15 @@
             <param name="contentLength">Number of bytes to read from the stream.</param>
             <param name="stream">Stream containing response data.</param>
             <param name="token">Cancellation token for canceling the request.</param>
+        </member>
+        <member name="M:HttpServerLite.HttpResponse.TrySendWithoutCloseAsync(System.Int64,System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Try to send headers and data to the requestor but do not terminate the connection.
+            </summary>
+            <param name="contentLength">Number of bytes to read from the stream.</param>
+            <param name="stream">Stream containing response data.</param>
+            <param name="token">Cancellation token for canceling the request.</param>
+            <returns>True if successful.</returns>
         </member>
         <member name="M:HttpServerLite.HttpResponse.Close">
             <summary>
