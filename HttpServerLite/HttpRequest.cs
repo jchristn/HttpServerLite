@@ -37,68 +37,68 @@ namespace HttpServerLite
         /// The protocol and version.
         /// </summary>
         [JsonProperty(Order = -6)]
-        public string ProtocolVersion { get; private set; } = null;
+        public string ProtocolVersion { get; set; } = null;
 
         /// <summary>
         /// Source (requestor) IP and port information.
         /// </summary>
         [JsonProperty(Order = -5)]
-        public SourceDetails Source { get; private set; } = new SourceDetails();
+        public SourceDetails Source { get; set; } = new SourceDetails();
 
         /// <summary>
         /// The HTTP method used in the request.
         /// </summary>
         [JsonProperty(Order = -4)]
-        public HttpMethod Method { get; private set; } = HttpMethod.GET;
+        public HttpMethod Method { get; set; } = HttpMethod.GET;
 
         /// <summary>
         /// URL details.
         /// </summary>
         [JsonProperty(Order = -3)]
-        public UrlDetails Url { get; private set; } = new UrlDetails();
+        public UrlDetails Url { get; set; } = new UrlDetails();
 
         /// <summary>
         /// Query details.
         /// </summary>
         [JsonProperty(Order = -2)]
-        public QueryDetails Query { get; private set; } = new QueryDetails();
+        public QueryDetails Query { get; set; } = new QueryDetails();
 
         /// <summary>
         /// The headers found in the request.
         /// </summary>
         [JsonProperty(Order = -1)]
-        public Dictionary<string, string> Headers { get; private set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Specifies whether or not the client requested HTTP keepalives.
         /// </summary>
-        public bool Keepalive { get; private set; } = false;
+        public bool Keepalive { get; set; } = false;
 
         /// <summary>
         /// Indicates whether or not chunked transfer encoding was detected.
         /// </summary>
-        public bool ChunkedTransfer { get; private set; } = false;
+        public bool ChunkedTransfer { get; set; } = false;
 
         /// <summary>
         /// Indicates whether or not the payload has been gzip compressed.
         /// </summary>
-        public bool Gzip { get; private set; } = false;
+        public bool Gzip { get; set; } = false;
 
         /// <summary>
         /// Indicates whether or not the payload has been deflate compressed.
         /// </summary>
-        public bool Deflate { get; private set; } = false;
+        public bool Deflate { get; set; } = false;
 
         /// <summary>
         /// The useragent specified in the request.
         /// </summary>
-        public string Useragent { get; private set; } = null;
+        public string Useragent { get; set; } = null;
 
         /// <summary>
         /// The content type as specified by the requestor (client).
         /// </summary>
         [JsonProperty(Order = 990)]
-        public string ContentType { get; private set; } = null;
+        public string ContentType { get; set; } = null;
 
         /// <summary>
         /// The number of bytes in the request body.
@@ -107,40 +107,52 @@ namespace HttpServerLite
         public long ContentLength { get; private set; } = 0;
 
         /// <summary>
+        /// The stream containing request data.
+        /// </summary>
+        [JsonIgnore]
+        public Stream Data;
+
+        /// <summary>
         /// Bytes from the DataStream property.  Using Data will fully read the DataStream property and thus it cannot be read again.
         /// </summary>
-        public byte[] Data
+        public byte[] DataAsBytes
         {
             get
             {
-                if (_Data == null)
+                if (_DataAsBytes == null)
                 {
-                    if (_DataStream != null && _DataStream.CanRead && ContentLength > 0)
+                    if (Data != null && Data.CanRead && ContentLength > 0)
                     {
-                        _Data = Common.ReadStream(_StreamBufferSize, ContentLength, _DataStream);
-                        return _Data;
+                        _DataAsBytes = Common.ReadStream(_StreamBufferSize, ContentLength, Data);
+                        return _DataAsBytes;
                     }
                     else
                     {
-                        return _Data;
+                        return _DataAsBytes;
                     }
                 }
                 else
                 {
-                    return _Data;
+                    return _DataAsBytes;
                 }
             }
         }
 
         /// <summary>
-        /// The stream containing request data.
+        /// Retrieve the request body as a string.  This will fully read the stream.
         /// </summary>
         [JsonIgnore]
-        public Stream DataStream
+        public string DataAsString
         {
             get
             {
-                return _DataStream;
+                if (_DataAsBytes != null) return Encoding.UTF8.GetString(_DataAsBytes);
+                if (Data != null && ContentLength > 0)
+                {
+                    _DataAsBytes = ReadStreamFully(Data);
+                    if (_DataAsBytes != null) return Encoding.UTF8.GetString(_DataAsBytes);
+                }
+                return null;
             }
         }
 
@@ -150,10 +162,8 @@ namespace HttpServerLite
 
         private int _StreamBufferSize = 65536;
         private string _IpPort;
-        private Stream _Stream = null;
         private string _RequestHeader = null;  
-        private byte[] _Data = null;
-        private Stream _DataStream = null;
+        private byte[] _DataAsBytes = null;
 
         #endregion
 
@@ -183,7 +193,7 @@ namespace HttpServerLite
 
             _IpPort = ipPort;
             _RequestHeader = requestHeader;
-            _Stream = stream;
+            Data = stream;
 
             Build();
         }
@@ -290,14 +300,95 @@ namespace HttpServerLite
         }
 
         /// <summary>
-        /// Read the data stream fully and retrieve the string data contained within.
-        /// Note: if you use this method, you will not be able to read from the data stream afterward.
+        /// For chunked transfer-encoded requests, read the next chunk.
+        /// It is strongly recommended that you use the ChunkedTransfer parameter before invoking this method.
         /// </summary>
-        /// <returns>String.</returns>
-        public string DataAsString()
+        /// <param name="token">Cancellation token useful for canceling the request.</param>
+        /// <returns>Chunk.</returns>
+        public async Task<Chunk> ReadChunk(CancellationToken token = default)
         {
-            if (Data == null) return null;
-            return Encoding.UTF8.GetString(Data);
+            Chunk chunk = new Chunk();
+
+            #region Get-Length-and-Metadata
+
+            byte[] buffer = new byte[1];
+            byte[] lenBytes = null;
+            int bytesRead = 0;
+
+            while (true)
+            {
+                bytesRead = await Data.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
+                if (bytesRead > 0)
+                {
+                    lenBytes = AppendBytes(lenBytes, buffer);
+                    string lenStr = Encoding.UTF8.GetString(lenBytes);
+
+                    if (lenBytes[lenBytes.Length - 1] == 10)
+                    {
+                        lenStr = lenStr.Trim();
+
+                        if (lenStr.Contains(";"))
+                        {
+                            string[] lenStrParts = lenStr.Split(new char[] { ';' }, 2);
+                            lenStr = lenStrParts[0];
+
+                            if (lenStrParts.Length == 2)
+                            {
+                                chunk.Metadata = lenStrParts[1];
+                            }
+                        }
+                        else
+                        {
+                            chunk.Length = int.Parse(lenStr, NumberStyles.HexNumber);
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            #endregion
+
+            #region Get-Data
+
+            if (chunk.Length > 0)
+            {
+                chunk.IsFinalChunk = false;
+                buffer = new byte[chunk.Length];
+                bytesRead = await Data.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
+                if (bytesRead == chunk.Length)
+                {
+                    chunk.Data = new byte[chunk.Length];
+                    Buffer.BlockCopy(buffer, 0, chunk.Data, 0, chunk.Length);
+                }
+                else
+                {
+                    throw new IOException("Expected " + chunk.Length + " bytes but only read " + bytesRead + " bytes in chunk.");
+                }
+            }
+            else
+            {
+                chunk.IsFinalChunk = true;
+            }
+
+            #endregion
+
+            #region Get-Trailing-CRLF
+
+            buffer = new byte[1];
+
+            while (true)
+            {
+                bytesRead = await Data.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
+                if (bytesRead > 0)
+                {
+                    if (buffer[0] == 10) break;
+                }
+            }
+
+            #endregion
+
+            return chunk;
         }
 
         /// <summary>
@@ -308,9 +399,8 @@ namespace HttpServerLite
         /// <returns>Object of type specified.</returns>
         public T DataAsJsonObject<T>()where T : class
         {
-            string json = DataAsString();
-            if (String.IsNullOrEmpty(json)) return null;
-            return SerializationHelper.DeserializeJson<T>(json);
+            if (String.IsNullOrEmpty(DataAsString)) return null;
+            return SerializationHelper.DeserializeJson<T>(DataAsString);
         }
 
         #endregion
@@ -404,12 +494,6 @@ namespace HttpServerLite
             }
 
             #endregion
-
-            #region Payload
-
-            _DataStream = _Stream;
-
-            #endregion
         }
          
         private static Dictionary<string, string> AddToDict(string key, string val, Dictionary<string, string> existing)
@@ -442,6 +526,52 @@ namespace HttpServerLite
             }
         }
 
+        private byte[] AppendBytes(byte[] orig, byte[] append)
+        {
+            if (orig == null && append == null) return null;
+
+            byte[] ret = null;
+
+            if (append == null)
+            {
+                ret = new byte[orig.Length];
+                Buffer.BlockCopy(orig, 0, ret, 0, orig.Length);
+                return ret;
+            }
+
+            if (orig == null)
+            {
+                ret = new byte[append.Length];
+                Buffer.BlockCopy(append, 0, ret, 0, append.Length);
+                return ret;
+            }
+
+            ret = new byte[orig.Length + append.Length];
+            Buffer.BlockCopy(orig, 0, ret, 0, orig.Length);
+            Buffer.BlockCopy(append, 0, ret, orig.Length, append.Length);
+            return ret;
+        }
+
+        private byte[] ReadStreamFully(Stream input)
+        {
+            if (input == null) throw new ArgumentNullException(nameof(input));
+            if (!input.CanRead) throw new InvalidOperationException("Input stream is not readable");
+
+            byte[] buffer = new byte[16 * 1024];
+            using (MemoryStream ms = new MemoryStream())
+            {
+                int read;
+
+                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    ms.Write(buffer, 0, read);
+                }
+
+                byte[] ret = ms.ToArray();
+                return ret;
+            }
+        }
+
         #endregion
 
         #region Public-Classes
@@ -454,12 +584,12 @@ namespace HttpServerLite
             /// <summary>
             /// IP address of the requestor.
             /// </summary>
-            public string IpAddress { get; private set; } = null;
+            public string IpAddress { get; set; } = null;
 
             /// <summary>
             /// TCP port from which the request originated on the requestor.
             /// </summary>
-            public int Port { get; private set; } = 0;
+            public int Port { get; set; } = 0;
 
             /// <summary>
             /// Source details.
@@ -492,7 +622,7 @@ namespace HttpServerLite
             /// <summary>
             /// Full URL.
             /// </summary>
-            public string Full { get; private set; } = null;
+            public string Full { get; set; } = null;
              
             /// <summary>
             /// Raw URL without query.
@@ -547,7 +677,7 @@ namespace HttpServerLite
             /// <summary>
             /// Parameters found within the URL, if using parameter routes.
             /// </summary>
-            public Dictionary<string, string> Parameters { get; internal set; } = new Dictionary<string, string>();
+            public Dictionary<string, string> Parameters { get; set; } = new Dictionary<string, string>();
 
             /// <summary>
             /// URL details.

@@ -119,7 +119,7 @@ namespace Test.Ssl
 
             try
             {
-                byte[] reqData = ctx.Request.Data;
+                byte[] reqData = ctx.Request.DataAsBytes;
 
                 if (ctx.Request.Url.WithoutQuery.Equals("/"))
                 {

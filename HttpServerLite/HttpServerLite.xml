@@ -504,14 +504,19 @@
             The number of bytes in the request body.
             </summary>
         </member>
-        <member name="P:HttpServerLite.HttpRequest.Data">
+        <member name="F:HttpServerLite.HttpRequest.Data">
+            <summary>
+            The stream containing request data.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.HttpRequest.DataAsBytes">
             <summary>
             Bytes from the DataStream property.  Using Data will fully read the DataStream property and thus it cannot be read again.
             </summary>
         </member>
-        <member name="P:HttpServerLite.HttpRequest.DataStream">
+        <member name="P:HttpServerLite.HttpRequest.DataAsString">
             <summary>
-            The stream containing request data.
+            Retrieve the request body as a string.  This will fully read the stream.
             </summary>
         </member>
         <member name="M:HttpServerLite.HttpRequest.#ctor">
@@ -558,12 +563,13 @@
             <param name="caseSensitive">Specify whether a case sensitive search should be used.</param>
             <returns>True if exists.</returns>
         </member>
-        <member name="M:HttpServerLite.HttpRequest.DataAsString">
+        <member name="M:HttpServerLite.HttpRequest.ReadChunk(System.Threading.CancellationToken)">
             <summary>
-            Read the data stream fully and retrieve the string data contained within.
-            Note: if you use this method, you will not be able to read from the data stream afterward.
+            For chunked transfer-encoded requests, read the next chunk.
+            It is strongly recommended that you use the ChunkedTransfer parameter before invoking this method.
             </summary>
-            <returns>String.</returns>
+            <param name="token">Cancellation token useful for canceling the request.</param>
+            <returns>Chunk.</returns>
         </member>
         <member name="M:HttpServerLite.HttpRequest.DataAsJsonObject``1">
             <summary>
