@@ -78,7 +78,7 @@ namespace HttpServerLite
         /// Indicates whether or not chunked transfer encoding was detected.
         /// </summary>
         public bool ChunkedTransfer { get; set; } = false;
-
+ 
         /// <summary>
         /// Indicates whether or not the payload has been gzip compressed.
         /// </summary>
@@ -329,13 +329,9 @@ namespace HttpServerLite
 
                         if (lenStr.Contains(";"))
                         {
-                            string[] lenStrParts = lenStr.Split(new char[] { ';' }, 2);
-                            lenStr = lenStrParts[0];
-
-                            if (lenStrParts.Length == 2)
-                            {
-                                chunk.Metadata = lenStrParts[1];
-                            }
+                            string[] lenParts = lenStr.Split(new char[] { ';' }, 2);
+                            chunk.Length = int.Parse(lenParts[0], NumberStyles.HexNumber);
+                            if (lenParts.Length >= 2) chunk.Metadata = lenParts[1];
                         }
                         else
                         {
@@ -484,6 +480,13 @@ namespace HttpServerLite
                         else if (keyEval.Equals("content-type"))
                         {
                             ContentType = val;
+                        }
+                        else if (keyEval.ToLower().Equals("x-amz-content-sha256"))
+                        {
+                            if (val.ToLower().Contains("streaming"))
+                            {
+                                ChunkedTransfer = true;
+                            }
                         }
 
                         Headers = Common.AddToDict(key, val, Headers);
