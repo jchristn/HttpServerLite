@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29411.108
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpServerLite", "HttpServerLite\HttpServerLite.csproj", "{3D3CE3DA-D3BF-4FCB-8FB9-827881C85AE4}"
 EndProject
@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Ssl", "Test.Ssl\Test.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Loopback", "Test.Loopback\Test.Loopback.csproj", "{708A67B3-47C5-4A20-BDF1-0765946F8C09}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Latency", "Test.Latency\Test.Latency.csproj", "{21F301F9-F849-42DD-A45C-3484E46FDECA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Latency", "Test.Latency\Test.Latency.csproj", "{21F301F9-F849-42DD-A45C-3484E46FDECA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.ConnectionAuthorization", "Test.ConnectionAuthorization\Test.ConnectionAuthorization.csproj", "{C1C29A81-F358-468F-977E-FF6B16E1B59C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{21F301F9-F849-42DD-A45C-3484E46FDECA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21F301F9-F849-42DD-A45C-3484E46FDECA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21F301F9-F849-42DD-A45C-3484E46FDECA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1C29A81-F358-468F-977E-FF6B16E1B59C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1C29A81-F358-468F-977E-FF6B16E1B59C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1C29A81-F358-468F-977E-FF6B16E1B59C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1C29A81-F358-468F-977E-FF6B16E1B59C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

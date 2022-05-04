@@ -2,11 +2,15 @@
 
 ## Current Version
 
+v1.2.2
+
+- Added ```Callbacks``` object with callback ```AuthorizeConnection```
+
+## Previous Versions
+
 v1.2.1
 
 - Parameter routes
-
-## Previous Versions
 
 v1.2.0
 

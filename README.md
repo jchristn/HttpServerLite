@@ -6,15 +6,15 @@
 
 TCP-based user-space HTTP and HTTPS server, written in C#, with no dependency on http.sys.
 
-## New in v1.2.1
+## New in v1.2.2
 
-- Parameter routes
+- Added ```Callbacks``` object with callback ```AuthorizeConnection```
 
 ## Special Thanks
 
 I'd like to extend a special thanks to those that have provided motivation or otherwise directly helped make HttpServerLite better.
 
-- @winkmichael @Job79 @MartyIX @sqlnew @SaintedPsycho
+- @winkmichael @Job79 @MartyIX @sqlnew @SaintedPsycho @Return25
 
 ## Performance
 
@@ -138,6 +138,18 @@ public static async Task MyDynamicRoute(HttpContext ctx)
   ctx.Response.ContentLength = resp.Length;
   await ctx.Response.SendAsync(resp);
   return;
+}
+```
+
+## Authorizing or Declining a Connection
+```
+server.Callbacks.AuthorizeConnection = AuthorizeConnection;
+
+private static bool AuthorizeConnection(string ipAddress, int port)
+{
+  // evaluate the IP address and port
+  return true;  // permit
+  return false; // deny
 }
 ```
 

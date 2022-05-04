@@ -1336,6 +1336,11 @@
             Webserver settings.
             </summary>
         </member>
+        <member name="P:HttpServerLite.Webserver.Callbacks">
+            <summary>
+            Callbacks to invoke under various conditions.
+            </summary>
+        </member>
         <member name="P:HttpServerLite.Webserver.Events">
             <summary>
             Event handlers for webserver events.
@@ -1414,6 +1419,21 @@
             Do not use the object after disposal.
             </summary>
             <param name="disposing">Indicate if resources should be disposed.</param>
+        </member>
+        <member name="T:HttpServerLite.WebserverCallbacks">
+            <summary>
+            Callbacks to invoke under various conditions.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverCallbacks.AuthorizeConnection">
+            <summary>
+            Method to invoke when a connection is received to authorize further processing.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.WebserverCallbacks.#ctor">
+            <summary>
+            Instantiate the object.
+            </summary>
         </member>
         <member name="T:HttpServerLite.WebserverEvents">
             <summary>

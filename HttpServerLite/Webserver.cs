@@ -57,7 +57,23 @@ namespace HttpServerLite
                 _Settings = value;
             }
         }
-           
+
+        /// <summary>
+        /// Callbacks to invoke under various conditions.
+        /// </summary>
+        public WebserverCallbacks Callbacks
+        {
+            get
+            {
+                return _Callbacks;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(Callbacks));
+                _Callbacks = value;
+            }
+        }
+
         /// <summary>
         /// Event handlers for webserver events.
         /// </summary>
@@ -124,6 +140,7 @@ namespace HttpServerLite
         private string _Header = "[HttpServerLite] ";
         private Assembly _Assembly = Assembly.GetCallingAssembly();
         private WebserverSettings _Settings = new WebserverSettings();
+        private WebserverCallbacks _Callbacks = new WebserverCallbacks();
         private WebserverEvents _Events = new WebserverEvents();
         private WebserverRoutes _Routes = new WebserverRoutes();
         private WebserverPages _Pages = new WebserverPages();
@@ -423,6 +440,16 @@ namespace HttpServerLite
             int port = 0;
             Common.ParseIpPort(ipPort, out ip, out port);
             HttpContext ctx = null;
+
+            if (_Callbacks != null && _Callbacks.AuthorizeConnection != null)
+            {
+                bool authorized = _Callbacks.AuthorizeConnection(ip, port);
+                if (!authorized)
+                {
+                    _TcpServer.DisconnectClient(ipPort);
+                    return;
+                }
+            }
 
             _Events.HandleConnectionReceived(this, new ConnectionEventArgs(ip, port));
             
