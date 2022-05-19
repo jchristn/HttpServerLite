@@ -6,7 +6,7 @@
 
 TCP-based user-space HTTP and HTTPS server, written in C#, with no dependency on http.sys.
 
-## New in v1.2.2
+## New in v1.2.3
 
 - Added ```Callbacks``` object with callback ```AuthorizeConnection```
 
@@ -14,7 +14,7 @@ TCP-based user-space HTTP and HTTPS server, written in C#, with no dependency on
 
 I'd like to extend a special thanks to those that have provided motivation or otherwise directly helped make HttpServerLite better.
 
-- @winkmichael @Job79 @MartyIX @sqlnew @SaintedPsycho @Return25
+- @winkmichael @Job79 @MartyIX @sqlnew @SaintedPsycho @Return25 @marcussacana
 
 ## Performance
 

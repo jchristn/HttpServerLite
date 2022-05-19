@@ -997,9 +997,9 @@ namespace HttpServerLite
             {
                 long bytesRemaining = contentLength;
 
+                byte[] buffer = null;
                 while (bytesRemaining > 0)
                 {
-                    byte[] buffer = null;
                     if (bytesRemaining >= _StreamBufferSize) buffer = new byte[_StreamBufferSize];
                     else buffer = new byte[contentLength];
 
@@ -1037,9 +1037,9 @@ namespace HttpServerLite
             {
                 long bytesRemaining = contentLength;
 
+                byte[] buffer = null;
                 while (bytesRemaining > 0)
                 {
-                    byte[] buffer = null;
                     if (bytesRemaining >= _StreamBufferSize) buffer = new byte[_StreamBufferSize];
                     else buffer = new byte[contentLength];
 
