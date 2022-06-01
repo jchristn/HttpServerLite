@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CavemanTcp;
+using System.Security.Cryptography.X509Certificates;
 
 namespace HttpServerLite
 {
@@ -189,12 +190,13 @@ namespace HttpServerLite
         }
 
         /// <summary>
-        /// Instantiate the webserver without SSL.
+        /// Instantiate the webserver with or without SSL.
         /// </summary>
         /// <param name="hostname">Hostname or IP address on which to listen.</param>
         /// <param name="port">TCP port on which to listen.</param>
         /// <param name="defaultRoute">Default route.</param>
-        public Webserver(string hostname, int port, Func<HttpContext, Task> defaultRoute)
+        /// <param name="sslCertificate">For SSL, the certificate.</param>
+        public Webserver(string hostname, int port, Func<HttpContext, Task> defaultRoute, X509Certificate2 sslCertificate = null)
         {
             if (String.IsNullOrEmpty(hostname)) hostname = "localhost";
             if (port < 0) throw new ArgumentOutOfRangeException(nameof(port));
@@ -202,6 +204,12 @@ namespace HttpServerLite
 
             _Settings = new WebserverSettings(hostname, port);
             _Routes = new WebserverRoutes(defaultRoute);
+
+            if (sslCertificate != null)
+            {
+                _Settings.Ssl.Enable = true;
+                _Settings.Ssl.sslCertificate = sslCertificate;
+            }
 
             InitializeServer(); 
         }
@@ -409,12 +417,17 @@ namespace HttpServerLite
             }
             else
             {
-                _TcpServer = new CavemanTcpServer(
-                    _Settings.Hostname,
-                    _Settings.Port,
-                    _Settings.Ssl.Enable,
-                    _Settings.Ssl.PfxCertificateFile,
-                    _Settings.Ssl.PfxCertificatePassword);
+                _TcpServer = _Settings.Ssl.sslCertificate != null
+                    ? new CavemanTcpServer(
+                        _Settings.Hostname,
+                        _Settings.Port,
+                        _Settings.Ssl.sslCertificate)
+                    : new CavemanTcpServer(
+                        _Settings.Hostname,
+                        _Settings.Port,
+                        _Settings.Ssl.Enable,
+                        _Settings.Ssl.PfxCertificateFile,
+                        _Settings.Ssl.PfxCertificatePassword);
 
                 _Header = "[HttpServerLite https://" + _Settings.Hostname + ":" + _Settings.Port + "] ";
             }
