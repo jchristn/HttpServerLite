@@ -245,7 +245,7 @@ namespace HttpServerLite
             /// <summary>
             /// Certifcate for SSL.
             /// </summary>
-            public X509Certificate2 sslCertificate = null;
+            public X509Certificate2 SslCertificate = null;
 
             /// <summary>
             /// PFX certificate filename.

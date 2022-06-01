@@ -208,7 +208,7 @@ namespace HttpServerLite
             if (sslCertificate != null)
             {
                 _Settings.Ssl.Enable = true;
-                _Settings.Ssl.sslCertificate = sslCertificate;
+                _Settings.Ssl.SslCertificate = sslCertificate;
             }
 
             InitializeServer(); 
@@ -417,11 +417,11 @@ namespace HttpServerLite
             }
             else
             {
-                _TcpServer = _Settings.Ssl.sslCertificate != null
+                _TcpServer = _Settings.Ssl.SslCertificate != null
                     ? new CavemanTcpServer(
                         _Settings.Hostname,
                         _Settings.Port,
-                        _Settings.Ssl.sslCertificate)
+                        _Settings.Ssl.SslCertificate)
                     : new CavemanTcpServer(
                         _Settings.Hostname,
                         _Settings.Port,

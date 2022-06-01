@@ -2,11 +2,19 @@
 
 ## Current Version
 
+v1.2.4
+
+- Added constructor with X509Certificate2, thank you @samisil
+
+## Previous Versions
+
+v1.2.3
+
+- Added Callbacks object with callback AuthorizeConnection
+
 v1.2.2
 
 - Added ```Callbacks``` object with callback ```AuthorizeConnection```
-
-## Previous Versions
 
 v1.2.1
 

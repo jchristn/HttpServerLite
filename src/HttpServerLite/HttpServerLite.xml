@@ -1682,7 +1682,7 @@
             Enable or disable SSL.
             </summary>
         </member>
-        <member name="F:HttpServerLite.WebserverSettings.SslSettings.sslCertificate">
+        <member name="F:HttpServerLite.WebserverSettings.SslSettings.SslCertificate">
             <summary>
             Certifcate for SSL.
             </summary>
