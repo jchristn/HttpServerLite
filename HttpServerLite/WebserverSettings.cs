@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Security.Cryptography.X509Certificates;
 
 namespace HttpServerLite
 {
@@ -240,6 +241,11 @@ namespace HttpServerLite
             /// Enable or disable SSL.
             /// </summary>
             public bool Enable = false;
+
+            /// <summary>
+            /// Certifcate for SSL.
+            /// </summary>
+            public X509Certificate2 sslCertificate = null;
 
             /// <summary>
             /// PFX certificate filename.

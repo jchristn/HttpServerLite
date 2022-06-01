@@ -1378,13 +1378,14 @@
             </summary>
             <param name="settings">Webserver settings.</param>
         </member>
-        <member name="M:HttpServerLite.Webserver.#ctor(System.String,System.Int32,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
+        <member name="M:HttpServerLite.Webserver.#ctor(System.String,System.Int32,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task},System.Security.Cryptography.X509Certificates.X509Certificate2)">
             <summary>
-            Instantiate the webserver without SSL.
+            Instantiate the webserver with or without SSL.
             </summary>
             <param name="hostname">Hostname or IP address on which to listen.</param>
             <param name="port">TCP port on which to listen.</param>
             <param name="defaultRoute">Default route.</param>
+            <param name="sslCertificate">For SSL, the certificate.</param>
         </member>
         <member name="M:HttpServerLite.Webserver.#ctor(System.String,System.Int32,System.Boolean,System.String,System.String,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task})">
             <summary>
@@ -1679,6 +1680,11 @@
         <member name="F:HttpServerLite.WebserverSettings.SslSettings.Enable">
             <summary>
             Enable or disable SSL.
+            </summary>
+        </member>
+        <member name="F:HttpServerLite.WebserverSettings.SslSettings.sslCertificate">
+            <summary>
+            Certifcate for SSL.
             </summary>
         </member>
         <member name="F:HttpServerLite.WebserverSettings.SslSettings.PfxCertificateFile">
