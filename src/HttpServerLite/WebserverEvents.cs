@@ -24,6 +24,13 @@ namespace HttpServerLite
         public event EventHandler ConnectionReceived = delegate { }; 
 
         /// <summary>
+        /// Event to fire when a connection is denied.
+        /// string: IP address of the client
+        /// int: Source TCP port of the client
+        /// </summary>
+        public event EventHandler ConnectionDenied = delegate { };
+
+        /// <summary>
         /// Event to fire when a request is received. 
         /// </summary>
         public event EventHandler<RequestEventArgs> RequestReceived = delegate { };
@@ -85,6 +92,11 @@ namespace HttpServerLite
         internal void HandleConnectionReceived(object sender, ConnectionEventArgs args)
         {
             WrappedEventHandler(() => ConnectionReceived?.Invoke(sender, args), "ConnectionReceived", sender);
+        }
+
+        internal void HandleConnectionDenied(object sender, ConnectionEventArgs args)
+        {
+            WrappedEventHandler(() => ConnectionDenied?.Invoke(sender, args), "ConnectionDenied", sender);
         }
 
         internal void HandleRequestReceived(object sender, RequestEventArgs args)
