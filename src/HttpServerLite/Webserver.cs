@@ -506,6 +506,7 @@ namespace HttpServerLite
                     {
                         if (sb.Length >= _Settings.IO.MaxIncomingHeadersSize)
                         {
+                            _Events.HandleConnectionDenied(this, new ConnectionEventArgs(ip, port));
                             _Events.Logger?.Invoke(_Header + "failed to read headers from " + ip + ":" + port + " within " + _Settings.IO.MaxIncomingHeadersSize + " bytes, closing connection");
                             return;
                         }
