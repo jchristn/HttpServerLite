@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net5.0;net6.0</TargetFrameworks>
-    <Version>1.2.5</Version>
+    <Version>1.2.6</Version>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Product>HttpServerLite</Product>
@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/jchristn/httpserverlite</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>http https server rest restful api async</PackageTags>
-    <PackageReleaseNotes>Added constructor with optional X509Certificate2, thank you @samisil.</PackageReleaseNotes>
+    <PackageReleaseNotes>ConnectionDenied event, thank you @Return25.</PackageReleaseNotes>
     <PackageIconUrl></PackageIconUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>

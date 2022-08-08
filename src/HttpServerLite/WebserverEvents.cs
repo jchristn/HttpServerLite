@@ -21,14 +21,14 @@ namespace HttpServerLite
         /// string: IP address of the client.
         /// int: Source TCP port of the client.
         /// </summary>
-        public event EventHandler ConnectionReceived = delegate { }; 
+        public event EventHandler<ConnectionEventArgs> ConnectionReceived = delegate { }; 
 
         /// <summary>
         /// Event to fire when a connection is denied.
         /// string: IP address of the client
         /// int: Source TCP port of the client
         /// </summary>
-        public event EventHandler ConnectionDenied = delegate { };
+        public event EventHandler<ConnectionEventArgs> ConnectionDenied = delegate { };
 
         /// <summary>
         /// Event to fire when a request is received. 
