@@ -6,9 +6,15 @@
 
 TCP-based user-space HTTP and HTTPS server, written in C#, with no dependency on http.sys.
 
-## New in v1.2.4
+## New in v1.2.x
 
+- Less restrictive handling of reading chunks
 - Added constructor with X509Certificate2, thank you @samisil
+- Add a event WebserverEvents.ConnectionDenied
+- Added Callbacks object with callback AuthorizeConnection
+- Added ```Callbacks``` object with callback ```AuthorizeConnection```
+- Parameter routes
+- Breaking changes to synchronize HttpRequest properties with Watson Webserver
 
 ## Special Thanks
 

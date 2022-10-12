@@ -2,6 +2,12 @@
 
 ## Current Version
 
+v1.2.7
+
+- Less restrictive handling of reading chunks
+
+## Previous Versions
+
 v1.2.5
 
 - Add a event WebserverEvents.ConnectionDenied
@@ -9,8 +15,6 @@ v1.2.5
 v1.2.4
 
 - Added constructor with X509Certificate2, thank you @samisil
-
-## Previous Versions
 
 v1.2.3
 
