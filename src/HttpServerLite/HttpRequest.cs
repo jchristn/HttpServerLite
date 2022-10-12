@@ -347,14 +347,32 @@ namespace HttpServerLite
 
             #region Get-Data
 
+            int bytesRemaining = chunk.Length;
+
             if (chunk.Length > 0)
             {
                 chunk.IsFinalChunk = false;
-                buffer = new byte[chunk.Length];
-                bytesRead = await Data.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
-                chunk.Data = new byte[bytesRead];
-                chunk.Length = bytesRead; // may be different
-                if (bytesRead > 0) Buffer.BlockCopy(buffer, 0, chunk.Data, 0, bytesRead);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    while (true)
+                    {
+                        if (bytesRemaining > _StreamBufferSize) buffer = new byte[_StreamBufferSize];
+                        else buffer = new byte[bytesRemaining];
+
+                        bytesRead = await Data.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
+
+                        if (bytesRead > 0)
+                        {
+                            await ms.WriteAsync(buffer, 0, bytesRead);
+                            bytesRemaining -= bytesRead;
+                        }
+
+                        if (bytesRemaining == 0) break;
+                    }
+
+                    ms.Seek(0, SeekOrigin.Begin);
+                    chunk.Data = ms.ToArray();
+                }
             }
             else
             {
