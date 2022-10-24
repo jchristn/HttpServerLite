@@ -15,6 +15,7 @@ TCP-based user-space HTTP and HTTPS server, written in C#, with no dependency on
 - Added ```Callbacks``` object with callback ```AuthorizeConnection```
 - Parameter routes
 - Breaking changes to synchronize HttpRequest properties with Watson Webserver
+- More efficiency in internal send methods, thank you @marcussacana
 
 ## Special Thanks
 

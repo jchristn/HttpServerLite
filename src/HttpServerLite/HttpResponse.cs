@@ -1037,13 +1037,16 @@ namespace HttpServerLite
             {
                 long bytesRemaining = contentLength;
 
-                byte[] buffer = null;
+                byte[] buffer = new byte[_StreamBufferSize];
+                int bytesToRead = _StreamBufferSize;
+                int bytesRead = 0;
+
                 while (bytesRemaining > 0)
                 {
-                    if (bytesRemaining >= _StreamBufferSize) buffer = new byte[_StreamBufferSize];
-                    else buffer = new byte[contentLength];
+                    if (bytesRemaining > _StreamBufferSize) bytesToRead = _StreamBufferSize;
+                    else bytesToRead = (int)bytesRemaining;
 
-                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
+                    bytesRead = await stream.ReadAsync(buffer, 0, bytesToRead, token).ConfigureAwait(false);
                     if (bytesRead > 0)
                     { 
                         await _Stream.WriteAsync(buffer, 0, bytesRead, token).ConfigureAwait(false);

@@ -2,11 +2,15 @@
 
 ## Current Version
 
+v1.2.9
+
+- More efficiency in internal send methods, thank you @marcussacana
+
+## Previous Versions
+
 v1.2.7
 
 - Less restrictive handling of reading chunks
-
-## Previous Versions
 
 v1.2.5
 
