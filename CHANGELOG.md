@@ -2,9 +2,11 @@
 
 ## Current Version
 
-v1.2.9
+v1.2.x
 
 - More efficiency in internal send methods, thank you @marcussacana
+- Removal of Newtonsoft.Json
+- Dependency update
 
 ## Previous Versions
 

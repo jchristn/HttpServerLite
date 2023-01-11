@@ -16,6 +16,8 @@ TCP-based user-space HTTP and HTTPS server, written in C#, with no dependency on
 - Parameter routes
 - Breaking changes to synchronize HttpRequest properties with Watson Webserver
 - More efficiency in internal send methods, thank you @marcussacana
+- Removal of Newtonsoft.Json
+- Dependency update
 
 ## Special Thanks
 

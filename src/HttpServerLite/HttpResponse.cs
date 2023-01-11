@@ -6,11 +6,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using CavemanTcp;
-using Newtonsoft.Json;
-
 namespace HttpServerLite
 {
     /// <summary>
@@ -23,19 +22,19 @@ namespace HttpServerLite
         /// <summary>
         /// The protocol and version.
         /// </summary>
-        [JsonProperty(Order = -3)]
+        [JsonPropertyOrder(-3)]
         public string ProtocolVersion { get; private set; } = null;
 
         /// <summary>
         /// The HTTP status code to return to the requestor (client).
         /// </summary>
-        [JsonProperty(Order = -2)]
+        [JsonPropertyOrder(-2)]
         public int StatusCode = 200;
 
         /// <summary>
         /// The HTTP status description to return to the requestor (client).
         /// </summary>
-        [JsonProperty(Order = -1)]
+        [JsonPropertyOrder(-1)]
         public string StatusDescription = "OK";
 
         /// <summary>
@@ -57,13 +56,13 @@ namespace HttpServerLite
         /// <summary>
         /// User-supplied content-type to include in the response.
         /// </summary>
-        [JsonProperty(Order = 990)]
+        [JsonPropertyOrder(990)]
         public string ContentType = null;
 
         /// <summary>
         /// The length of the supplied response data.
         /// </summary>
-        [JsonProperty(Order = 991)]
+        [JsonPropertyOrder(991)]
         public long? ContentLength = null;
 
         #endregion

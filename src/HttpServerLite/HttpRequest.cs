@@ -7,10 +7,11 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using CavemanTcp;
-using Newtonsoft.Json;
 
 namespace HttpServerLite
 {
@@ -24,49 +25,49 @@ namespace HttpServerLite
         /// <summary>
         /// UTC timestamp from when the request was received.
         /// </summary>
-        [JsonProperty(Order = -8)]
+        [JsonPropertyOrder(-8)]
         public DateTime TimestampUtc { get; private set; } = DateTime.Now.ToUniversalTime();
 
         /// <summary>
         /// Thread ID on which the request exists.
         /// </summary>
-        [JsonProperty(Order = -7)]
+        [JsonPropertyOrder(-7)]
         public int ThreadId { get; private set; } = Thread.CurrentThread.ManagedThreadId;
 
         /// <summary>
         /// The protocol and version.
         /// </summary>
-        [JsonProperty(Order = -6)]
+        [JsonPropertyOrder(-6)]
         public string ProtocolVersion { get; set; } = null;
 
         /// <summary>
         /// Source (requestor) IP and port information.
         /// </summary>
-        [JsonProperty(Order = -5)]
+        [JsonPropertyOrder(-5)]
         public SourceDetails Source { get; set; } = new SourceDetails();
 
         /// <summary>
         /// The HTTP method used in the request.
         /// </summary>
-        [JsonProperty(Order = -4)]
+        [JsonPropertyOrder(-4)]
         public HttpMethod Method { get; set; } = HttpMethod.GET;
 
         /// <summary>
         /// URL details.
         /// </summary>
-        [JsonProperty(Order = -3)]
+        [JsonPropertyOrder(-3)]
         public UrlDetails Url { get; set; } = new UrlDetails();
 
         /// <summary>
         /// Query details.
         /// </summary>
-        [JsonProperty(Order = -2)]
+        [JsonPropertyOrder(-2)]
         public QueryDetails Query { get; set; } = new QueryDetails();
 
         /// <summary>
         /// The headers found in the request.
         /// </summary>
-        [JsonProperty(Order = -1)]
+        [JsonPropertyOrder(-1)]
         public Dictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
@@ -97,13 +98,13 @@ namespace HttpServerLite
         /// <summary>
         /// The content type as specified by the requestor (client).
         /// </summary>
-        [JsonProperty(Order = 990)]
+        [JsonPropertyOrder(990)]
         public string ContentType { get; set; } = null;
 
         /// <summary>
         /// The number of bytes in the request body.
         /// </summary>
-        [JsonProperty(Order = 991)]
+        [JsonPropertyOrder(991)]
         public long ContentLength { get; private set; } = 0;
 
         /// <summary>

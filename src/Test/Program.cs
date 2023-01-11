@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CavemanTcp;
 using HttpServerLite; 
 
 namespace Test
@@ -101,12 +102,12 @@ namespace Test
 
         static void ListConnections()
         {
-            IEnumerable<string> conns = _Server.Connections;
+            IEnumerable<ClientMetadata> conns = _Server.Connections;
             Console.WriteLine("Connections:");
 
             if (conns != null && conns.Count() > 0)
             { 
-                foreach (string conn in conns) Console.WriteLine("  " + conn);
+                foreach (ClientMetadata conn in conns) Console.WriteLine("  " + conn.IpPort);
             }
             else
             {

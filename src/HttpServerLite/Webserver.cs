@@ -34,12 +34,12 @@ namespace HttpServerLite
         /// <summary>
         /// List connections by requestor IP:port.
         /// </summary>
-        public IEnumerable<string> Connections
+        public IEnumerable<ClientMetadata> Connections
         {
             get
             {
                 if (_TcpServer != null) return _TcpServer.GetClients();
-                return new List<string>();
+                return new List<ClientMetadata>();
             }
         }
 
@@ -448,7 +448,7 @@ namespace HttpServerLite
 
             #region Parse-IP-Port
 
-            string ipPort = args.IpPort;
+            string ipPort = args.Client.IpPort;
             string ip = null;
             int port = 0;
             Common.ParseIpPort(ipPort, out ip, out port);
@@ -459,7 +459,7 @@ namespace HttpServerLite
                 bool authorized = _Callbacks.AuthorizeConnection(ip, port);
                 if (!authorized)
                 {
-                    _TcpServer.DisconnectClient(ipPort);
+                    _TcpServer.DisconnectClient(args.Client.Guid);
                     return;
                 }
             }
@@ -484,7 +484,7 @@ namespace HttpServerLite
                 int preReadLen = 18;
                 ReadResult preReadResult = await _TcpServer.ReadWithTimeoutAsync(
                     _Settings.IO.ReadTimeoutMs,
-                    args.IpPort,
+                    args.Client.Guid,
                     preReadLen,
                     _Token).ConfigureAwait(false);
 
@@ -513,7 +513,7 @@ namespace HttpServerLite
 
                         ReadResult addlReadResult = await _TcpServer.ReadWithTimeoutAsync(
                             _Settings.IO.ReadTimeoutMs,
-                            args.IpPort,
+                            args.Client.Guid,
                             1,
                             _Token).ConfigureAwait(false);
 
@@ -534,7 +534,7 @@ namespace HttpServerLite
 
                 ctx = new HttpContext(
                     ipPort,
-                    _TcpServer.GetStream(ipPort),
+                    _TcpServer.GetStream(args.Client.Guid),
                     sb.ToString(),
                     Events,
                     _Settings.Headers,
@@ -735,7 +735,7 @@ namespace HttpServerLite
             }
             finally
             { 
-                _TcpServer.DisconnectClient(ipPort);
+                _TcpServer.DisconnectClient(args.Client.Guid);
 
                 if (ctx != null)
                 {

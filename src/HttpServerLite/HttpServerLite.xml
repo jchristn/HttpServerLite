@@ -1211,6 +1211,43 @@
             Dynamic route.
             </summary>
         </member>
+        <member name="T:HttpServerLite.SerializationHelper">
+            <summary>
+            Serialization helper.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.SerializationHelper.CopyObject``1(``0)">
+            <summary>
+            Copy an object.
+            </summary>
+            <typeparam name="T">Type.</typeparam>
+            <param name="source">Source object.</param>
+            <returns>Copy.</returns>
+        </member>
+        <member name="M:HttpServerLite.SerializationHelper.SerializeJson(System.Object,System.Boolean)">
+            <summary>
+            Serialize JSON.
+            </summary>
+            <param name="obj">Object.</param>
+            <param name="pretty">Pretty print.</param>
+            <returns>JSON string.</returns>
+        </member>
+        <member name="M:HttpServerLite.SerializationHelper.DeserializeJson``1(System.String)">
+            <summary>
+            Deserialize JSON. 
+            </summary>
+            <typeparam name="T">Type.</typeparam>
+            <param name="json">JSON string.</param>
+            <returns>Instance.</returns>
+        </member>
+        <member name="M:HttpServerLite.SerializationHelper.DeserializeJson``1(System.Byte[])">
+            <summary>
+            Deserialize JSON. 
+            </summary>
+            <typeparam name="T">Type.</typeparam>
+            <param name="data">JSON data.</param>
+            <returns>Instance.</returns>
+        </member>
         <member name="T:HttpServerLite.StaticRoute">
             <summary>
             Assign a method handler for when requests are received matching the supplied method and path.
