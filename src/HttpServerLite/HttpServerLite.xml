@@ -545,7 +545,7 @@
             Retrieve a specified header value from either the headers or the querystring (case insensitive).
             </summary>
             <param name="key"></param>
-            <returns></returns>
+            <returns></returns>        
         </member>
         <member name="M:HttpServerLite.HttpRequest.HeaderExists(System.String,System.Boolean)">
             <summary>

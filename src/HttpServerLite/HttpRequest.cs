@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -68,7 +69,18 @@ namespace HttpServerLite
         /// The headers found in the request.
         /// </summary>
         [JsonPropertyOrder(-1)]
-        public Dictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Headers
+        {
+            get
+            {
+                return _Headers;
+            }
+            set
+            {
+                if (value == null) _Headers = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+                else _Headers = value;
+            }
+        }
 
         /// <summary>
         /// Specifies whether or not the client requested HTTP keepalives.
@@ -164,7 +176,8 @@ namespace HttpServerLite
         private int _StreamBufferSize = 65536;
         private string _IpPort;
         private string _RequestHeader = null;  
-        private byte[] _DataAsBytes = null;
+        private byte[] _DataAsBytes = null; 
+        private Dictionary<string, string> _Headers = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
         #endregion
 
@@ -217,7 +230,8 @@ namespace HttpServerLite
         /// Retrieve a specified header value from either the headers or the querystring (case insensitive).
         /// </summary>
         /// <param name="key"></param>
-        /// <returns></returns>
+        /// <returns></returns>        
+        [Obsolete("This API will be deprecated in a future release.  Header dictionary is now case insensitive.")]
         public string RetrieveHeaderValue(string key)
         {
             if (String.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
@@ -248,6 +262,7 @@ namespace HttpServerLite
         /// <param name="key">Header key.</param>
         /// <param name="caseSensitive">Specify whether a case sensitive search should be used.</param>
         /// <returns>True if exists.</returns>
+        [Obsolete("This API will be deprecated in a future release.  Header dictionary is now case insensitive.")]
         public bool HeaderExists(string key, bool caseSensitive)
         {
             if (String.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
@@ -277,6 +292,7 @@ namespace HttpServerLite
         /// <param name="key">Querystring key.</param>
         /// <param name="caseSensitive">Specify whether a case sensitive search should be used.</param>
         /// <returns>True if exists.</returns>
+        [Obsolete("This API will be deprecated in a future release.  Query elements dictionary is now case insensitive.")]
         public bool QuerystringExists(string key, bool caseSensitive)
         {
             if (String.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
@@ -693,7 +709,18 @@ namespace HttpServerLite
             /// <summary>
             /// Parameters found within the URL, if using parameter routes.
             /// </summary>
-            public Dictionary<string, string> Parameters { get; set; } = new Dictionary<string, string>();
+            public Dictionary<string, string> Parameters
+            {
+                get
+                {
+                    return _Parameters;
+                }
+                set
+                {
+                    if (value == null) _Parameters = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+                    else _Parameters = value;
+                }
+            }
 
             /// <summary>
             /// URL details.
@@ -712,6 +739,8 @@ namespace HttpServerLite
                 if (String.IsNullOrEmpty(fullUrl)) throw new ArgumentNullException(nameof(fullUrl));  
                 Full = fullUrl; 
             }
+
+            private Dictionary<string, string> _Parameters = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
         }
 
         /// <summary>
@@ -744,7 +773,7 @@ namespace HttpServerLite
             {
                 get
                 {
-                    Dictionary<string, string> ret = new Dictionary<string, string>();
+                    Dictionary<string, string> ret = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
                     string qs = Querystring;
                     if (!String.IsNullOrEmpty(qs))
                     {

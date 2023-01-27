@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net48;net5.0;net6.0;net7.0</TargetFrameworks>
-		<Version>1.2.11</Version>
+		<Version>1.2.12</Version>
 		<Authors>Joel Christner</Authors>
 		<Company>Joel Christner</Company>
 		<Product>HttpServerLite</Product>
@@ -12,7 +12,7 @@
 		<RepositoryUrl>https://github.com/jchristn/httpserverlite</RepositoryUrl>
 		<RepositoryType>Github</RepositoryType>
 		<PackageTags>http https server rest restful api async</PackageTags>
-		<PackageReleaseNotes>Dependency update, remove Newtonsoft.Json.</PackageReleaseNotes>
+		<PackageReleaseNotes>Case insensitive dictionaries</PackageReleaseNotes>
 		<PackageIconUrl></PackageIconUrl>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageIcon>icon.png</PackageIcon>

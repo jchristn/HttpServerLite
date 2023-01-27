@@ -18,6 +18,7 @@ TCP-based user-space HTTP and HTTPS server, written in C#, with no dependency on
 - More efficiency in internal send methods, thank you @marcussacana
 - Removal of Newtonsoft.Json
 - Dependency update
+- Case insensitive dictionaries
 
 ## Special Thanks
 
