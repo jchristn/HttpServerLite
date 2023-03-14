@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Text;
 
 namespace HttpServerLite
@@ -32,12 +33,12 @@ namespace HttpServerLite
         /// <summary>
         /// Request query.
         /// </summary>
-        public Dictionary<string, string> Query { get; private set; } = new Dictionary<string, string>();
+        public NameValueCollection Query { get; private set; } = new NameValueCollection(StringComparer.InvariantCultureIgnoreCase);
 
         /// <summary>
         /// Request headers.
         /// </summary>
-        public Dictionary<string, string> RequestHeaders { get; private set; } = new Dictionary<string, string>();
+        public NameValueCollection RequestHeaders { get; private set; } = new NameValueCollection(StringComparer.InvariantCultureIgnoreCase);
 
         /// <summary>
         /// Content length.

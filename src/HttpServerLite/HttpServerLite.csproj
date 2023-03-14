@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net48;net5.0;net6.0;net7.0</TargetFrameworks>
-		<Version>1.2.12</Version>
+		<Version>2.0.0</Version>
 		<Authors>Joel Christner</Authors>
 		<Company>Joel Christner</Company>
 		<Product>HttpServerLite</Product>
@@ -12,7 +12,7 @@
 		<RepositoryUrl>https://github.com/jchristn/httpserverlite</RepositoryUrl>
 		<RepositoryType>Github</RepositoryType>
 		<PackageTags>http https server rest restful api async</PackageTags>
-		<PackageReleaseNotes>Case insensitive dictionaries</PackageReleaseNotes>
+		<PackageReleaseNotes>Breaking change moving to name value collections</PackageReleaseNotes>
 		<PackageIconUrl></PackageIconUrl>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -82,8 +82,8 @@
 		<PackageReference Include="CavemanTcp" Version="2.0.0" />
 		<PackageReference Include="IpMatcher" Version="1.0.4.4" />
 		<PackageReference Include="RegexMatcher" Version="1.0.7.2" />
-		<PackageReference Include="System.Text.Json" Version="7.0.1" />
-		<PackageReference Include="UrlMatcher" Version="1.0.0.3" />
+		<PackageReference Include="System.Text.Json" Version="7.0.2" />
+		<PackageReference Include="UrlMatcher" Version="2.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

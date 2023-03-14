@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -111,7 +112,7 @@ namespace HttpServerLite
         /// <param name="path">URL path.</param>
         /// <param name="vals">Values extracted from the URL.</param>
         /// <returns>True if match exists.</returns>
-        public Func<HttpContext, Task> Match(HttpMethod method, string path, out Dictionary<string, string> vals)
+        public Func<HttpContext, Task> Match(HttpMethod method, string path, out NameValueCollection vals)
         {
             vals = null;
             if (String.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));

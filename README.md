@@ -6,25 +6,16 @@
 
 TCP-based user-space HTTP and HTTPS server, written in C#, with no dependency on http.sys.
 
-## New in v1.2.x
+## New in v2.0.x
 
-- Less restrictive handling of reading chunks
-- Added constructor with X509Certificate2, thank you @samisil
-- Add a event WebserverEvents.ConnectionDenied
-- Added Callbacks object with callback AuthorizeConnection
-- Added ```Callbacks``` object with callback ```AuthorizeConnection```
-- Parameter routes
-- Breaking changes to synchronize HttpRequest properties with Watson Webserver
-- More efficiency in internal send methods, thank you @marcussacana
-- Removal of Newtonsoft.Json
-- Dependency update
-- Case insensitive dictionaries
+- Breaking changes to migrate dictionaries to ```NameValueCollection```
+- Retarget to include .NET Framework 4.8 and .NET 7.0
 
 ## Special Thanks
 
 I'd like to extend a special thanks to those that have provided motivation or otherwise directly helped make HttpServerLite better.
 
-- @winkmichael @Job79 @MartyIX @sqlnew @SaintedPsycho @Return25 @marcussacana @samisil
+- @winkmichael @Job79 @MartyIX @sqlnew @SaintedPsycho @Return25 @marcussacana @samisil @Jump-Suit
 
 ## Performance
 

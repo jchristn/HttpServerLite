@@ -540,29 +540,6 @@
             <param name="pretty">True to enable pretty print.</param>
             <returns>JSON string.</returns>
         </member>
-        <member name="M:HttpServerLite.HttpRequest.RetrieveHeaderValue(System.String)">
-            <summary>
-            Retrieve a specified header value from either the headers or the querystring (case insensitive).
-            </summary>
-            <param name="key"></param>
-            <returns></returns>        
-        </member>
-        <member name="M:HttpServerLite.HttpRequest.HeaderExists(System.String,System.Boolean)">
-            <summary>
-            Determine if a header exists.
-            </summary>
-            <param name="key">Header key.</param>
-            <param name="caseSensitive">Specify whether a case sensitive search should be used.</param>
-            <returns>True if exists.</returns>
-        </member>
-        <member name="M:HttpServerLite.HttpRequest.QuerystringExists(System.String,System.Boolean)">
-            <summary>
-            Determine if a querystring entry exists.
-            </summary>
-            <param name="key">Querystring key.</param>
-            <param name="caseSensitive">Specify whether a case sensitive search should be used.</param>
-            <returns>True if exists.</returns>
-        </member>
         <member name="M:HttpServerLite.HttpRequest.ReadChunk(System.Threading.CancellationToken)">
             <summary>
             For chunked transfer-encoded requests, read the next chunk.
@@ -1072,7 +1049,7 @@
             <param name="path">URL path.</param>
             <returns>True if exists.</returns>
         </member>
-        <member name="M:HttpServerLite.ParameterRouteManager.Match(HttpServerLite.HttpMethod,System.String,System.Collections.Generic.Dictionary{System.String,System.String}@)">
+        <member name="M:HttpServerLite.ParameterRouteManager.Match(HttpServerLite.HttpMethod,System.String,System.Collections.Specialized.NameValueCollection@)">
             <summary>
             Match a request method and URL to a handler method.
             </summary>

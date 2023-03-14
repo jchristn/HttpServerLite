@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -65,6 +66,7 @@ namespace HttpServerLite
 
             // see https://github.com/dotnet/runtime/issues/43026
             options.Converters.Add(new ExceptionConverter<Exception>());
+            options.Converters.Add(new NameValueCollectionConverter());
 
             if (pretty)
             {
@@ -149,6 +151,18 @@ namespace HttpServerLite
                 }
 
                 writer.WriteEndObject();
+            }
+        }
+
+        private class NameValueCollectionConverter : JsonConverter<NameValueCollection>
+        {
+            public override NameValueCollection Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => throw new NotImplementedException();
+
+            public override void Write(Utf8JsonWriter writer, NameValueCollection value, JsonSerializerOptions options)
+            {
+                var val = value.Keys.Cast<string>()
+                    .ToDictionary(k => k, k => string.Join(", ", value.GetValues(k)));
+                System.Text.Json.JsonSerializer.Serialize(writer, val);
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -651,11 +652,11 @@ namespace HttpServerLite
 
                 #region Parameter-Routes
 
-                Dictionary<string, string> parameters = null;
+                NameValueCollection parameters = null;
                 handler = _Routes.Parameter.Match(ctx.Request.Method, ctx.Request.Url.WithoutQuery, out parameters);
                 if (handler != null)
                 {
-                    ctx.Request.Url.Parameters = new Dictionary<string, string>(parameters);
+                    ctx.Request.Url.Parameters = new NameValueCollection(parameters);
 
                     if (_Settings.Debug.Routing)
                     {

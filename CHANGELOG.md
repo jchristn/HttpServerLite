@@ -2,41 +2,25 @@
 
 ## Current Version
 
+v2.0.x
+
+- Breaking changes to migrate dictionaries to ```NameValueCollection```
+- Retarget to include .NET Framework 4.8 and .NET 7.0
+
+## Previous Versions
+
 v1.2.x
 
 - More efficiency in internal send methods, thank you @marcussacana
 - Removal of Newtonsoft.Json
 - Dependency update
 - Case insensitive dictionaries
-
-## Previous Versions
-
-v1.2.7
-
 - Less restrictive handling of reading chunks
-
-v1.2.5
-
 - Add a event WebserverEvents.ConnectionDenied
-
-v1.2.4
-
 - Added constructor with X509Certificate2, thank you @samisil
-
-v1.2.3
-
 - Added Callbacks object with callback AuthorizeConnection
-
-v1.2.2
-
 - Added ```Callbacks``` object with callback ```AuthorizeConnection```
-
-v1.2.1
-
 - Parameter routes
-
-v1.2.0
-
 - Breaking changes to synchronize HttpRequest properties with Watson Webserver
 
 v1.1.0

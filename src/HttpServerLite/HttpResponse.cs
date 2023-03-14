@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -10,6 +12,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using CavemanTcp;
+
 namespace HttpServerLite
 {
     /// <summary>
@@ -40,7 +43,7 @@ namespace HttpServerLite
         /// <summary>
         /// User-supplied headers to include in the response.
         /// </summary>
-        public Dictionary<string, string> Headers
+        public NameValueCollection Headers
         {
             get
             {
@@ -48,7 +51,7 @@ namespace HttpServerLite
             }
             set
             {
-                if (value == null) _Headers = new Dictionary<string, string>();
+                if (value == null) _Headers = new NameValueCollection(StringComparer.InvariantCultureIgnoreCase);
                 else _Headers = value;
             }
         }
@@ -79,7 +82,7 @@ namespace HttpServerLite
         private string _IpPort;
         private WebserverSettings.HeaderSettings _HeaderSettings = null;
         private int _StreamBufferSize = 65536;
-        private Dictionary<string, string> _Headers = new Dictionary<string, string>();
+        private NameValueCollection _Headers = new NameValueCollection(StringComparer.InvariantCultureIgnoreCase);
         private Stream _Stream;
         private HttpRequest _Request;  
         private WebserverEvents _Events = new WebserverEvents();
@@ -745,12 +748,20 @@ namespace HttpServerLite
                 contentLengthSet = true;
             }
 
-            foreach (KeyValuePair<string, string> header in _Headers)
+            for (int i = 0; i < _Headers.Count; i++)
             {
-                if (String.IsNullOrEmpty(header.Key)) continue;
-                if (contentTypeSet && header.Key.ToLower().Equals("content-type")) continue;
-                if (contentLengthSet && header.Key.ToLower().Equals("content-length")) continue;
-                ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes(header.Key + ": " + header.Value + "\r\n"));
+                string header = _Headers.GetKey(i);
+                if (String.IsNullOrEmpty(header)) continue;
+                if (contentTypeSet && header.ToLower().Equals("content-type")) continue;
+                if (contentLengthSet && header.ToLower().Equals("content-length")) continue;
+                string[] vals = _Headers.GetValues(i);
+                if (vals != null && vals.Length > 0)
+                {
+                    foreach (string val in vals)
+                    {
+                        ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes(header + ": " + val + "\r\n"));
+                    }
+                }
             }
 
             ret = Common.AppendBytes(ret, Encoding.UTF8.GetBytes("\r\n"));
@@ -798,167 +809,75 @@ namespace HttpServerLite
         {
             if (_HeaderSettings != null && _Headers != null)
             {
-                if (!String.IsNullOrEmpty(_HeaderSettings.AccessControlAllowOrigin))
-                {
-                    bool set = true;
-                    foreach (KeyValuePair<string, string> curr in _Headers)
-                    {
-                        if (curr.Key.ToLower().Equals("access-control-allow-origin"))
-                        {
-                            set = false;
-                            break;
-                        }
-                    }
+                bool accessControlAllowOriginSet = false;
+                bool accessControlAllowMethodsSet = false;
+                bool accessControlAllowHeadersSet = false;
+                bool accessControlExposeHeadersSet = false;
+                bool acceptSet = false;
+                bool acceptLanguageSet = false;
+                bool acceptCharsetSet = false;
+                bool connectionSet = false;
+                bool hostSet = false;
 
-                    if (set)
-                    {
-                        _Headers.Add("Access-Control-Allow-Origin", _HeaderSettings.AccessControlAllowOrigin);
-                    }
+                for (int i = 0; i < _Headers.Count; i++)
+                {
+                    string key = _Headers.GetKey(i);
+
+                    if (!String.IsNullOrEmpty(_HeaderSettings.AccessControlAllowOrigin) && key.Equals("access-control-allow-origin"))
+                        accessControlAllowOriginSet = true;
+
+                    if (!String.IsNullOrEmpty(_HeaderSettings.AccessControlAllowMethods) && key.Equals("access-control-allow-methods"))
+                        accessControlAllowMethodsSet = true;
+
+                    if (!String.IsNullOrEmpty(_HeaderSettings.AccessControlAllowHeaders) && key.Equals("access-control-allow-headers"))
+                        accessControlAllowHeadersSet = true;
+
+                    if (!String.IsNullOrEmpty(_HeaderSettings.AccessControlAllowOrigin) && key.Equals("access-control-expose-headers"))
+                        accessControlExposeHeadersSet = true;
+
+                    if (!String.IsNullOrEmpty(_HeaderSettings.Accept) && key.Equals("accept"))
+                        acceptSet = true;
+
+                    if (!String.IsNullOrEmpty(_HeaderSettings.AcceptLanguage) && key.Equals("accept-language"))
+                        acceptLanguageSet = true;
+
+                    if (!String.IsNullOrEmpty(_HeaderSettings.AcceptCharset) && key.Equals("accept-charset"))
+                        acceptCharsetSet = true;
+
+                    if (!String.IsNullOrEmpty(_HeaderSettings.Connection) && key.Equals("connection"))
+                        connectionSet = true;
+
+                    if (!String.IsNullOrEmpty(_HeaderSettings.Host) && key.Equals("host"))
+                        hostSet = true;
+
                 }
 
-                if (!String.IsNullOrEmpty(_HeaderSettings.AccessControlAllowMethods))
-                {
-                    bool set = true;
-                    foreach (KeyValuePair<string, string> curr in _Headers)
-                    {
-                        if (curr.Key.ToLower().Equals("access-control-allow-methods"))
-                        {
-                            set = false;
-                            break;
-                        }
-                    }
+                if (!accessControlAllowOriginSet && !String.IsNullOrEmpty(_HeaderSettings.AccessControlAllowOrigin))
+                    _Headers.Add("Access-Control-Allow-Origin", _HeaderSettings.AccessControlAllowOrigin);
 
-                    if (set)
-                    {
-                        _Headers.Add("Access-Control-Allow-Methods", _HeaderSettings.AccessControlAllowMethods);
-                    }
-                }
+                if (!accessControlAllowMethodsSet && !String.IsNullOrEmpty(_HeaderSettings.AccessControlAllowMethods))
+                    _Headers.Add("Access-Control-Allow-Methods", _HeaderSettings.AccessControlAllowMethods);
 
-                if (!String.IsNullOrEmpty(_HeaderSettings.AccessControlAllowHeaders))
-                {
-                    bool set = true;
-                    foreach (KeyValuePair<string, string> curr in _Headers)
-                    {
-                        if (curr.Key.ToLower().Equals("access-control-allow-headers"))
-                        {
-                            set = false;
-                            break;
-                        }
-                    }
+                if (!accessControlAllowHeadersSet && !String.IsNullOrEmpty(_HeaderSettings.AccessControlAllowHeaders))
+                    _Headers.Add("Access-Control-Allow-Headers", _HeaderSettings.AccessControlAllowHeaders);
 
-                    if (set)
-                    {
-                        _Headers.Add("Access-Control-Allow-Headers", _HeaderSettings.AccessControlAllowHeaders);
-                    }
-                }
+                if (!accessControlExposeHeadersSet && !String.IsNullOrEmpty(_HeaderSettings.AccessControlExposeHeaders))
+                    _Headers.Add("Access-Control-Expose-Headers", _HeaderSettings.AccessControlExposeHeaders);
 
-                if (!String.IsNullOrEmpty(_HeaderSettings.AccessControlExposeHeaders))
-                {
-                    bool set = true;
-                    foreach (KeyValuePair<string, string> curr in _Headers)
-                    {
-                        if (curr.Key.ToLower().Equals("access-control-expose-headers"))
-                        {
-                            set = false;
-                            break;
-                        }
-                    }
+                if (!acceptSet && !String.IsNullOrEmpty(_HeaderSettings.Accept))
+                    _Headers.Add("Accept", _HeaderSettings.Accept);
 
-                    if (set)
-                    {
-                        _Headers.Add("Access-Control-Expose-Headers", _HeaderSettings.AccessControlExposeHeaders);
-                    }
-                }
+                if (!acceptLanguageSet && !String.IsNullOrEmpty(_HeaderSettings.AcceptLanguage))
+                    _Headers.Add("Accept-Language", _HeaderSettings.AcceptLanguage);
 
-                if (!String.IsNullOrEmpty(_HeaderSettings.Accept))
-                {
-                    bool set = true;
-                    foreach (KeyValuePair<string, string> curr in _Headers)
-                    {
-                        if (curr.Key.ToLower().Equals("accept"))
-                        {
-                            set = false;
-                            break;
-                        }
-                    }
+                if (!acceptCharsetSet && !String.IsNullOrEmpty(_HeaderSettings.AcceptCharset))
+                    _Headers.Add("Accept-Charset", _HeaderSettings.AcceptCharset);
 
-                    if (set)
-                    {
-                        _Headers.Add("Accept", _HeaderSettings.Accept);
-                    }
-                }
+                if (!connectionSet && !String.IsNullOrEmpty(_HeaderSettings.Connection))
+                    _Headers.Add("Connection", _HeaderSettings.Connection);
 
-                if (!String.IsNullOrEmpty(_HeaderSettings.AcceptLanguage))
-                {
-                    bool set = true;
-                    foreach (KeyValuePair<string, string> curr in _Headers)
-                    {
-                        if (curr.Key.ToLower().Equals("accept-language"))
-                        {
-                            set = false;
-                            break;
-                        }
-                    }
-
-                    if (set)
-                    {
-                        _Headers.Add("Accept-Language", _HeaderSettings.AcceptLanguage);
-                    }
-                }
-
-                if (!String.IsNullOrEmpty(_HeaderSettings.AcceptCharset))
-                {
-                    bool set = true;
-                    foreach (KeyValuePair<string, string> curr in _Headers)
-                    {
-                        if (curr.Key.ToLower().Equals("accept-charset"))
-                        {
-                            set = false;
-                            break;
-                        }
-                    }
-
-                    if (set)
-                    {
-                        _Headers.Add("Accept-Charset", _HeaderSettings.AcceptCharset);
-                    }
-                }
-
-                if (!String.IsNullOrEmpty(_HeaderSettings.Connection))
-                {
-                    bool set = true;
-                    foreach (KeyValuePair<string, string> curr in _Headers)
-                    {
-                        if (curr.Key.ToLower().Equals("connection"))
-                        {
-                            set = false;
-                            break;
-                        }
-                    }
-
-                    if (set)
-                    {
-                        _Headers.Add("Connection", _HeaderSettings.Connection);
-                    }
-                }
-
-                if (!String.IsNullOrEmpty(_HeaderSettings.Host))
-                {
-                    bool set = true;
-                    foreach (KeyValuePair<string, string> curr in _Headers)
-                    {
-                        if (curr.Key.ToLower().Equals("host"))
-                        {
-                            set = false;
-                            break;
-                        }
-                    }
-
-                    if (set)
-                    {
-                        _Headers.Add("Host", _HeaderSettings.Host);
-                    }
-                }
+                if (!hostSet && !String.IsNullOrEmpty(_HeaderSettings.Host))
+                    _Headers.Add("Host", _HeaderSettings.Host);
             }
         }
 
@@ -968,11 +887,14 @@ namespace HttpServerLite
             {
                 if (_Headers.Count > 0)
                 {
-                    if (_Headers.Any(h =>
-                        !String.IsNullOrEmpty(h.Key)
-                        && h.Key.ToLower().Equals("content-length")))
+                    for (int i = 0; i < _Headers.Count; i++)
                     {
-                        return;
+                        string val = _Headers.GetKey(i);
+                        if (!String.IsNullOrEmpty(val)
+                            && val.ToLower().Equals("content-length"))
+                        {
+                            return;
+                        }
                     }
                 }
 
