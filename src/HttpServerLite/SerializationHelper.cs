@@ -110,6 +110,10 @@ namespace HttpServerLite
 
         #region Private-Methods
 
+        #endregion
+
+        #region Private-Embedded-Classes
+
         private class ExceptionConverter<TExceptionType> : JsonConverter<TExceptionType>
         {
             public override bool CanConvert(Type typeToConvert)
