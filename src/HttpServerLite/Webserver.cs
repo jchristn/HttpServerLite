@@ -710,14 +710,6 @@ namespace HttpServerLite
 
                 #endregion  
             }
-            catch (TaskCanceledException)
-            {
-                return;
-            }
-            catch (ObjectDisposedException)
-            {
-                return;
-            }
             catch (Exception e)
             {
                 if (ctx != null)
@@ -726,7 +718,6 @@ namespace HttpServerLite
                     ctx.Response.ContentType = _Pages.Default500Page.ContentType;
                     await ctx.Response.SendAsync(_Pages.Default500Page.Content, _Token).ConfigureAwait(false);
 
-                    _Events.Logger?.Invoke(_Header + "exception: " + Environment.NewLine + SerializationHelper.SerializeJson(e, true));
                     _Events.HandleException(this, new ExceptionEventArgs(ctx, e));
                 }
 
