@@ -10,6 +10,7 @@ TCP-based user-space HTTP and HTTPS server, written in C#, with no dependency on
 
 - Breaking changes to migrate dictionaries to ```NameValueCollection```
 - Retarget to include .NET Framework 4.8 and .NET 7.0
+- Reintroduce ```HttpRequest``` methods for checking existence of and retrieving query or header values
 
 ## Special Thanks
 
