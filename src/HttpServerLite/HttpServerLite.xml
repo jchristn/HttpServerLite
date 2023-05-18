@@ -342,6 +342,11 @@
             HTTP context including both request and response.
             </summary>
         </member>
+        <member name="P:HttpServerLite.HttpContext.Timestamp">
+            <summary>
+            Time information for start, end, and total runtime.
+            </summary>
+        </member>
         <member name="P:HttpServerLite.HttpContext.Request">
             <summary>
             The HTTP request that was received.

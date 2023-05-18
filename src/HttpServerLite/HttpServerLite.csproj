@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net48;net5.0;net6.0;net7.0</TargetFrameworks>
-		<Version>2.0.1</Version>
+		<TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net48;net6.0;net7.0</TargetFrameworks>
+		<Version>2.0.2</Version>
 		<Authors>Joel Christner</Authors>
 		<Company>Joel Christner</Company>
 		<Product>HttpServerLite</Product>
@@ -81,8 +81,9 @@
 	<ItemGroup>
 		<PackageReference Include="CavemanTcp" Version="2.0.0" />
 		<PackageReference Include="IpMatcher" Version="1.0.4.4" />
-		<PackageReference Include="RegexMatcher" Version="1.0.7.2" />
+		<PackageReference Include="RegexMatcher" Version="1.0.8" />
 		<PackageReference Include="System.Text.Json" Version="7.0.2" />
+		<PackageReference Include="Timestamps" Version="1.0.2" />
 		<PackageReference Include="UrlMatcher" Version="2.0.1" />
 	</ItemGroup>
 

@@ -4,6 +4,7 @@ using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CavemanTcp;
+using Timestamps;
 
 namespace HttpServerLite
 {
@@ -13,6 +14,12 @@ namespace HttpServerLite
     public class HttpContext
     {
         #region Public-Members
+
+        /// <summary>
+        /// Time information for start, end, and total runtime.
+        /// </summary>
+        [JsonPropertyOrder(-2)]
+        public Timestamp Timestamp { get; set; } = new Timestamp();
 
         /// <summary>
         /// The HTTP request that was received.

@@ -445,8 +445,6 @@ namespace HttpServerLite
 
         private async void ClientConnected(object sender, ClientConnectedEventArgs args)
         { 
-            DateTime startTime = DateTime.Now;
-
             #region Parse-IP-Port
 
             string ipPort = args.Client.IpPort;
@@ -740,16 +738,16 @@ namespace HttpServerLite
 
                 if (ctx != null)
                 {
-                    double totalMs = TotalMsFrom(startTime);
+                    ctx.Timestamp.End = DateTime.UtcNow;
 
-                    _Events.HandleResponseSent(this, new ResponseEventArgs(ctx, totalMs));
+                    _Events.HandleResponseSent(this, new ResponseEventArgs(ctx, ctx.Timestamp.TotalMs.Value));
 
                     if (_Settings.Debug.Responses)
                     { 
                         _Events.Logger?.Invoke(
                             _Header + ctx.Request.Source.IpAddress + ":" + ctx.Request.Source.Port + " " +
                             ctx.Request.Method.ToString() + " " + ctx.Request.Url.Full + ": " +
-                            ctx.Response.StatusCode + " [" + totalMs + "ms]");
+                            ctx.Response.StatusCode + " [" + ctx.Timestamp.TotalMs.Value + "ms]");
                     }
 
                     if (ctx.Response.ContentLength != null)
