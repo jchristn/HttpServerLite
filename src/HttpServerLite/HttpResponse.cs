@@ -32,7 +32,18 @@ namespace HttpServerLite
         /// The HTTP status code to return to the requestor (client).
         /// </summary>
         [JsonPropertyOrder(-2)]
-        public int StatusCode = 200;
+        public int StatusCode
+        {
+            get
+            {
+                return _StatusCode;
+            }
+            set
+            {
+                if (value < 100 || value > 599) throw new ArgumentOutOfRangeException(nameof(StatusCode));
+                _StatusCode = value;
+            }
+        }
 
         /// <summary>
         /// The HTTP status description to return to the requestor (client).
@@ -86,6 +97,7 @@ namespace HttpServerLite
         private Stream _Stream;
         private HttpRequest _Request;  
         private WebserverEvents _Events = new WebserverEvents();
+        private int _StatusCode = 200;
 
         #endregion
 

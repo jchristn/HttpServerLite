@@ -337,6 +337,92 @@
             Exception.
             </summary>
         </member>
+        <member name="T:HttpServerLite.Extensions.HostBuilderExtension.HostBuilder">
+            <summary>
+            Host builder.
+            </summary>
+        </member>
+        <member name="P:HttpServerLite.Extensions.HostBuilderExtension.HostBuilder.Server">
+            <summary>
+            Webserver.
+            </summary>
+        </member>
+        <member name="M:HttpServerLite.Extensions.HostBuilderExtension.HostBuilder.#ctor(System.String,System.Int32,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task},System.Security.Cryptography.X509Certificates.X509Certificate2)">
+            <summary>
+            Instantiate.
+            </summary>
+            <param name="ip">IP address on which to listen.</param>
+            <param name="port">Port on which to listen.</param>
+            <param name="defaultRoute">Default route.</param>
+            <param name="sslCertificate">SSL certificate.</param>
+        </member>
+        <member name="M:HttpServerLite.Extensions.HostBuilderExtension.HostBuilder.MapDynamicRoute(HttpServerLite.HttpMethod,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task},System.Text.RegularExpressions.Regex)">
+            <summary>
+            Apply a dynamic route.
+            </summary>
+            <param name="method">HTTP method.</param>
+            <param name="action">Action.</param>
+            <param name="regex">Regular expression.</param>
+            <returns>Host builder.</returns>
+        </member>
+        <member name="M:HttpServerLite.Extensions.HostBuilderExtension.HostBuilder.MapParameteRoute(HttpServerLite.HttpMethod,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task},System.String)">
+            <summary>
+            Apply a parameter route.
+            </summary>
+            <param name="method">HTTP method.</param>
+            <param name="action">Action.</param>
+            <param name="routePath">Route path.</param>
+            <returns>Host builder.</returns>
+        </member>
+        <member name="M:HttpServerLite.Extensions.HostBuilderExtension.HostBuilder.MapStaticRoute(HttpServerLite.HttpMethod,System.Func{HttpServerLite.HttpContext,System.Threading.Tasks.Task},System.String)">
+            <summary>
+            Apply a static route.
+            </summary>
+            <param name="method">HTTP method.</param>
+            <param name="action">Action.</param>
+            <param name="routePath">Route path.</param>
+            <returns>Host builder.</returns>
+        </member>
+        <member name="M:HttpServerLite.Extensions.HostBuilderExtension.HostBuilder.Build">
+            <summary>
+            Build the server.
+            </summary>
+            <returns>Server.</returns>
+        </member>
+        <member name="T:HttpServerLite.Extensions.HostBuilderExtension.IHostBuilder`2">
+            <summary>
+            Host builder interface.
+            </summary>
+            <typeparam name="HostBuilder">Host builder.</typeparam>
+            <typeparam name="InputAction">Input action.</typeparam>
+        </member>
+        <member name="M:HttpServerLite.Extensions.HostBuilderExtension.IHostBuilder`2.MapStaticRoute(HttpServerLite.HttpMethod,`1,System.String)">
+            <summary>
+            Apply a static route.
+            </summary>
+            <param name="method">HTTP method.</param>
+            <param name="action">Action.</param>
+            <param name="routePath">Route path.</param>
+            <returns>Host builder.</returns>
+        </member>
+        <member name="M:HttpServerLite.Extensions.HostBuilderExtension.IHostBuilder`2.MapParameteRoute(HttpServerLite.HttpMethod,`1,System.String)">
+            <summary>
+            Apply a parameter route.
+            </summary>
+            <param name="method">HTTP method.</param>
+            <param name="action">Action.</param>
+            <param name="routePath">Route path.</param>
+            <returns>Host builder.</returns>
+        </member>
+        <member name="M:HttpServerLite.Extensions.HostBuilderExtension.IHostBuilder`2.MapDynamicRoute(HttpServerLite.HttpMethod,`1,System.Text.RegularExpressions.Regex)">
+            <summary>
+            Apply a dynamic route.
+            </summary>
+            <param name="method">HTTP method.</param>
+            <param name="action">Action.</param>
+            <param name="regex">Regular expression.</param>
+            <returns>Host builder.</returns>
+        </member>
         <member name="T:HttpServerLite.HttpContext">
             <summary>
             HTTP context including both request and response.
@@ -688,7 +774,7 @@
             The protocol and version.
             </summary>
         </member>
-        <member name="F:HttpServerLite.HttpResponse.StatusCode">
+        <member name="P:HttpServerLite.HttpResponse.StatusCode">
             <summary>
             The HTTP status code to return to the requestor (client).
             </summary>

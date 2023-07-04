@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net48;net6.0;net7.0</TargetFrameworks>
-		<Version>2.0.2</Version>
+		<Version>2.1.0</Version>
 		<Authors>Joel Christner</Authors>
 		<Company>Joel Christner</Company>
 		<Product>HttpServerLite</Product>
@@ -12,10 +12,14 @@
 		<RepositoryUrl>https://github.com/jchristn/httpserverlite</RepositoryUrl>
 		<RepositoryType>Github</RepositoryType>
 		<PackageTags>http https server rest restful api async</PackageTags>
-		<PackageReleaseNotes>Breaking change moving to name value collections</PackageReleaseNotes>
+		<PackageReleaseNotes>HostBuilder feature from @sapurtcomputer30</PackageReleaseNotes>
 		<PackageIconUrl></PackageIconUrl>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageIcon>icon.png</PackageIcon>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>C:\Code\Misc\HttpServerLite\httpserverlite.snk</AssemblyOriginatorKeyFile>
+		<Copyright>(c)2023 Joel Christner</Copyright>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netcoreapp3.1|AnyCPU'">
@@ -88,6 +92,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Include="..\..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 		<None Include="Assets\icon.png">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
@@ -100,13 +108,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="Assets\icon.ico">
+		<None Include="Assets\icon.ico">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<None Update="Assets\icon.png">
+		<None Include="Assets\icon.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<None Update="HttpServerLite.xml">
+		<None Include="HttpServerLite.xml">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>

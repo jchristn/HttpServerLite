@@ -212,7 +212,7 @@ namespace HttpServerLite
                 _Settings.Ssl.SslCertificate = sslCertificate;
             }
 
-            InitializeServer(); 
+            InitializeServer();
         }
 
         /// <summary>

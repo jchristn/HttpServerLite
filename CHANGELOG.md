@@ -2,13 +2,17 @@
 
 ## Current Version
 
+v2.1.x
+
+- ```HostBuilder``` feature to quickly build servers, thank you @sapurtcomputer30!
+
+## Previous Versions
+
 v2.0.x
 
 - Breaking changes to migrate dictionaries to ```NameValueCollection```
 - Retarget to include .NET Framework 4.8 and .NET 7.0
 - Reintroduce ```HttpRequest``` methods for checking existence of and retrieving query or header values
-
-## Previous Versions
 
 v1.2.x
 

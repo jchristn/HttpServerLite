@@ -6,17 +6,16 @@
 
 TCP-based user-space HTTP and HTTPS server, written in C#, with no dependency on http.sys.
 
-## New in v2.0.x
+## New in v2.1.x
 
-- Breaking changes to migrate dictionaries to ```NameValueCollection```
-- Retarget to include .NET Framework 4.8 and .NET 7.0
-- Reintroduce ```HttpRequest``` methods for checking existence of and retrieving query or header values
+- ```HostBuilder``` feature to quickly build servers, thank you @sapurtcomputer30!
 
 ## Special Thanks
 
 I'd like to extend a special thanks to those that have provided motivation or otherwise directly helped make HttpServerLite better.
 
-- @winkmichael @Job79 @MartyIX @sqlnew @SaintedPsycho @Return25 @marcussacana @samisil @Jump-Suit
+- @winkmichael @Job79 @MartyIX @sqlnew @SaintedPsycho @Return25 @marcussacana @samisil 
+- @Jump-Suit @sapurtcomputer30
 
 ## Performance
 
@@ -153,6 +152,37 @@ private static bool AuthorizeConnection(string ipAddress, int port)
   return true;  // permit
   return false; // deny
 }
+```
+
+## HostBuilder
+
+```HostBuilder``` helps you set up your server much more easily by introducing a chain of settings and routes instead of using the server class directly.
+
+```csharp
+using WatsonWebserver.Extensions.HostBuilderExtension;
+
+Server server = new HostBuilder("127.0.0.1", 8000, false, DefaultRoute)
+                .MapStaticRoute(WatsonWebserver.HttpMethod.GET, GetUrlsRoute, "/links")
+                .MapStaticRoute(WatsonWebserver.HttpMethod.POST, CheckLoginRoute, "/login")
+                .MapStaticRoute(WatsonWebserver.HttpMethod.POST, TestRoute, "/test")
+                .Build();
+
+server.Start();
+
+Console.WriteLine("Server started");
+Console.ReadKey();
+
+static async Task DefaultRoute(HttpContext ctx) => 
+    await ctx.Response.SendAsync("Hello from default route!"); 
+
+static async Task GetUrlsRoute(HttpContext ctx) => 
+    await ctx.Response.SendAsync("Here are your links!"); 
+
+static async Task CheckLoginRoute(HttpContext ctx) => 
+    await ctx.Response.SendAsync("Checking your login!"); 
+
+static async Task TestRoute(HttpContext ctx) => 
+    await ctx.Response.SendAsync("Hello from the test route!"); 
 ```
 
 ## Accessing from Outside Localhost
