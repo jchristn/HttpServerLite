@@ -18,6 +18,7 @@ namespace Test
         static bool _RunForever = true;
         static bool _Debug = false;
         static int _BufferSize = 65536;
+        static bool _UseStream = true;
 
         static void Main(string[] args)
         {
@@ -94,6 +95,7 @@ namespace Test
                 _Server.Events.Logger = Console.WriteLine;
                 _Server.Routes.Content.Add("./html/", true);
                 _Server.Routes.Content.Add("./img/", true);
+                _Server.Routes.PostRouting = PostRoutingHandler;
                 _Server.Settings.Debug.Responses = true;
                 _Server.Settings.Debug.Routing = true;
                 _Server.Start();
@@ -121,7 +123,46 @@ namespace Test
 
             try
             {
-                byte[] reqData = ctx.Request.DataAsBytes;
+                byte[] data = null;
+
+                if (_UseStream)
+                {
+                    if (ctx.Request.ContentLength > 0)
+                    {
+                        long bytesRemaining = ctx.Request.ContentLength;
+                        int read = 0;
+                        byte[] buffer = null;
+
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            while (bytesRemaining > 0)
+                            {
+                                if (bytesRemaining > 4096) buffer = new byte[4096];
+                                else buffer = new byte[(int)bytesRemaining];
+
+                                read = ctx.Request.Data.Read(buffer, 0, buffer.Length);
+                                if (read > 0)
+                                {
+                                    ms.Write(buffer, 0, read);
+                                    bytesRemaining -= read;
+                                }
+                            }
+
+                            ms.Seek(0, SeekOrigin.Begin);
+                            data = ms.ToArray();
+                        }
+
+                        Console.WriteLine("Read " + ctx.Request.ContentLength + " bytes from stream: " + Encoding.UTF8.GetString(data));
+                    }
+                }
+                else
+                {
+                    if (ctx.Request.ContentLength > 0)
+                    {
+                        data = ctx.Request.DataAsBytes;
+                        Console.WriteLine("Read " + ctx.Request.ContentLength + " bytes from request: " + Encoding.UTF8.GetString(data));
+                    }
+                }
 
                 if (ctx.Request.Url.WithoutQuery.Equals("/"))
                 {
@@ -213,7 +254,9 @@ namespace Test
         }
 
         static void ServerStarted(object sender, EventArgs args) => Console.WriteLine("Server started");
+
         static void ServerStopped(object sender, EventArgs args) => Console.WriteLine("Server stopped");
+
         static void ServerDisposing(object sender, EventArgs args) => Console.WriteLine("Server disposing");
 
         static void SendFile(HttpContext ctx, string file, string contentType, int bufferSize)
@@ -310,6 +353,11 @@ namespace Test
             ctx.Response.ContentType = "text/plain"; 
             await ctx.Response.SendAsync(resp);
             return;
+        }
+
+        private static async Task PostRoutingHandler(HttpContext ctx)
+        {
+            Console.WriteLine(ctx.Request.Method.ToString() + " " + ctx.Request.Url.WithoutQuery + ": " + ctx.Response.StatusCode + " (" + ctx.Timestamp.TotalMs + ")");
         }
     }
 }

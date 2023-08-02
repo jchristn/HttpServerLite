@@ -39,6 +39,11 @@ namespace HttpServerLite
         public Func<HttpContext, Task<bool>> PreRouting = null;
 
         /// <summary>
+        /// Function to call after routing.  
+        /// </summary>
+        public Func<HttpContext, Task> PostRouting = null;
+
+        /// <summary>
         /// Content routes; i.e. routes to specific files or folders for GET and HEAD requests.
         /// </summary>
         public ContentRouteManager Content

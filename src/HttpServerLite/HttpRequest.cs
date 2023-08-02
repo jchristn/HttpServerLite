@@ -159,7 +159,7 @@ namespace HttpServerLite
                 if (_DataAsBytes != null) return Encoding.UTF8.GetString(_DataAsBytes);
                 if (Data != null && ContentLength > 0)
                 {
-                    _DataAsBytes = ReadStreamFully(Data);
+                    _DataAsBytes = ReadStream(Data, ContentLength);
                     if (_DataAsBytes != null) return Encoding.UTF8.GetString(_DataAsBytes);
                 }
                 return null;
@@ -537,19 +537,27 @@ namespace HttpServerLite
             return ret;
         }
 
-        private byte[] ReadStreamFully(Stream input)
+        private byte[] ReadStream(Stream input, long contentLength)
         {
             if (input == null) throw new ArgumentNullException(nameof(input));
             if (!input.CanRead) throw new InvalidOperationException("Input stream is not readable");
+            if (contentLength < 1) return new byte[0];
 
             byte[] buffer = new byte[16 * 1024];
+            long bytesRemaining = contentLength;
+
             using (MemoryStream ms = new MemoryStream())
             {
                 int read;
 
-                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+                while (bytesRemaining > 0)
                 {
-                    ms.Write(buffer, 0, read);
+                    read = input.Read(buffer, 0, buffer.Length);
+                    if (read > 0)
+                    {
+                        ms.Write(buffer, 0, read);
+                        bytesRemaining -= read;
+                    }
                 }
 
                 byte[] ret = ms.ToArray();

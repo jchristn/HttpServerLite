@@ -604,6 +604,8 @@ namespace HttpServerLite
                                 ctx.Request.Method.ToString() + " " + ctx.Request.Url.Full);
                         }
 
+                        ctx.Timestamp.End = DateTime.UtcNow;
+                        _Routes.PostRouting?.Invoke(ctx);
                         return;
                     }
                 }
@@ -624,6 +626,8 @@ namespace HttpServerLite
                         }
 
                         await _Routes.ContentHandler.Process(ctx, _Token).ConfigureAwait(false);
+                        ctx.Timestamp.End = DateTime.UtcNow;
+                        _Routes.PostRouting?.Invoke(ctx);
                         return;
                     }
                 }
@@ -643,6 +647,8 @@ namespace HttpServerLite
                     }
 
                     await handler(ctx).ConfigureAwait(false);
+                    ctx.Timestamp.End = DateTime.UtcNow;
+                    _Routes.PostRouting?.Invoke(ctx);
                     return;
                 }
 
@@ -664,6 +670,8 @@ namespace HttpServerLite
                     }
 
                     await handler(ctx).ConfigureAwait(false);
+                    ctx.Timestamp.End = DateTime.UtcNow;
+                    _Routes.PostRouting?.Invoke(ctx);
                     return;
                 }
 
@@ -682,6 +690,8 @@ namespace HttpServerLite
                     }
 
                     await handler(ctx).ConfigureAwait(false);
+                    ctx.Timestamp.End = DateTime.UtcNow;
+                    _Routes.PostRouting?.Invoke(ctx);
                     return;
                 }
 
@@ -699,7 +709,6 @@ namespace HttpServerLite
                 if (_Routes.Default != null)
                 {
                     await _Routes.Default(ctx).ConfigureAwait(false);
-                    return;
                 }
                 else
                 {
@@ -707,6 +716,10 @@ namespace HttpServerLite
                     ctx.Response.ContentType = _Pages.Default404Page.ContentType;
                     await ctx.Response.SendAsync(_Pages.Default404Page.Content, _Token).ConfigureAwait(false);
                 }
+
+                ctx.Timestamp.End = DateTime.UtcNow;
+                _Routes.PostRouting?.Invoke(ctx);
+                return;
 
                 #endregion  
             }
@@ -756,20 +769,6 @@ namespace HttpServerLite
 
         }
         
-        private double TotalMsFrom(DateTime startTime)
-        {
-            try
-            {
-                DateTime endTime = DateTime.Now;
-                TimeSpan totalTime = (endTime - startTime);
-                return totalTime.TotalMilliseconds;
-            }
-            catch (Exception)
-            {
-                return 0;
-            }
-        }
-
         #endregion
     }
 }

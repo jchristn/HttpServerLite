@@ -5,6 +5,7 @@
 v2.1.x
 
 - ```HostBuilder``` feature to quickly build servers, thank you @sapurtcomputer30!
+- Bugfix for ```HttpContext.HttpRequest.Data``` not ending, thank you @ChZhongPengCheng33
 
 ## Previous Versions
 
