@@ -729,14 +729,15 @@ namespace HttpServerLite
                 {
                     ctx.Response.StatusCode = 500;
                     ctx.Response.ContentType = _Pages.Default500Page.ContentType;
+
                     try
                     {
                         await ctx.Response.SendAsync(_Pages.Default500Page.Content, _Token).ConfigureAwait(false);
                     }
                     catch
                     {
-                        // ignored
-                        //Exception here it's due to client already disconnected, so we can't send the error page and we just ignore it to avoid a crash
+                        // ignored, exception here is due to disconnected client
+                        // this we cannot send the error page
                     }
 
                     _Events.HandleException(this, new ExceptionEventArgs(ctx, e));

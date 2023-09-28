@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.1;netcoreapp3.1;net461;net48;net6.0;net7.0</TargetFrameworks>
-		<Version>2.1.4</Version>
+		<Version>2.1.5</Version>
 		<Authors>Joel Christner</Authors>
 		<Company>Joel Christner</Company>
 		<Product>HttpServerLite</Product>
@@ -17,7 +17,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageIcon>icon.png</PackageIcon>
 		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>C:\Code\Misc\HttpServerLite\httpserverlite.snk</AssemblyOriginatorKeyFile>
+		<AssemblyOriginatorKeyFile>..\..\httpserverlite.snk</AssemblyOriginatorKeyFile>
 		<Copyright>(c)2023 Joel Christner</Copyright>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
