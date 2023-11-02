@@ -1,3 +1,14 @@
+# OBSOLETE
+
+HttpServerLite has been merged with the .NET Foundation project [WatsonWebserver](https://github.com/dotnet/WatsonWebserver) as a subproject called ```Watson.Lite```.  
+
+This repository has been moved to public archive as a result.  
+
+We are thankful to the community that has contributed to this work and welcome you to continue efforts on the new repository!
+
+
+
+
 ![alt tag](https://raw.githubusercontent.com/jchristn/HttpServerLite/master/Assets/icon.ico)
 
 # HttpServerLite

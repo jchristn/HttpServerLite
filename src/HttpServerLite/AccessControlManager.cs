@@ -18,23 +18,48 @@ namespace HttpServerLite
         /// <summary>
         /// Matcher to match denied addresses.
         /// </summary>
-        public Matcher DenyList;
+        public Matcher DenyList
+        {
+            get
+            {
+                return _DenyList;
+            }
+            set
+            {
+                if (value == null) _DenyList = new Matcher();
+                else _DenyList = value;
+            }
+        }
 
         /// <summary>
         /// Matcher to match permitted addresses.
         /// </summary>
-        public Matcher PermitList;
+        public Matcher PermitList
+        {
+            get
+            {
+                return _PermitList;
+            }
+            set
+            {
+                if (value == null) _PermitList = new Matcher();
+                else _PermitList = value;
+            }
+        }
 
         /// <summary>
         /// Access control mode, either DefaultPermit or DefaultDeny.
         /// DefaultPermit: allow everything, except for those explicitly denied.
         /// DefaultDeny: deny everything, except for those explicitly permitted.
         /// </summary>
-        public AccessControlMode Mode;
+        public AccessControlMode Mode { get; set; } = AccessControlMode.DefaultPermit;
 
         #endregion
 
         #region Private-Members
+
+        private Matcher _DenyList { get; set; } = new Matcher();
+        private Matcher _PermitList { get; set; } = new Matcher();
 
         #endregion
 
@@ -44,7 +69,7 @@ namespace HttpServerLite
         /// Instantiate the object.
         /// </summary> 
         /// <param name="mode">Access control mode.</param>
-        public AccessControlManager(AccessControlMode mode)
+        public AccessControlManager(AccessControlMode mode = AccessControlMode.DefaultPermit)
         {
             DenyList = new Matcher();
             PermitList = new Matcher();
@@ -62,7 +87,7 @@ namespace HttpServerLite
         /// </summary>
         /// <param name="ip">The IP address to evaluate.</param>
         /// <returns>True if permitted.</returns>
-        public bool Permit(string ip)
+        public bool CheckIfPermitted(string ip)
         {
             if (String.IsNullOrEmpty(ip)) throw new ArgumentNullException(nameof(ip));
 

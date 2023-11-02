@@ -275,7 +275,7 @@ namespace HttpServerLite
 
             if (chunk.Length > 0)
             {
-                chunk.IsFinalChunk = false;
+                chunk.IsFinal = false;
                 using (MemoryStream ms = new MemoryStream())
                 {
                     while (true)
@@ -300,7 +300,7 @@ namespace HttpServerLite
             }
             else
             {
-                chunk.IsFinalChunk = true;
+                chunk.IsFinal = true;
             }
 
             #endregion

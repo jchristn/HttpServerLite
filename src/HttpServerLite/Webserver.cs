@@ -555,7 +555,7 @@ namespace HttpServerLite
 
                 #region Check-Access-Control
 
-                if (!_Settings.AccessControl.Permit(ctx.Request.Source.IpAddress))
+                if (!_Settings.AccessControl.CheckIfPermitted(ctx.Request.Source.IpAddress))
                 {
                     _Events.HandleRequestDenied(this, new RequestEventArgs(ctx));
 
